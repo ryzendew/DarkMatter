@@ -14,7 +14,7 @@ Item {
 
     property var monitors: []
     property var monitorCapabilities: ({})
-    property var rawMonitorData: [] // Store complete JSON from hyprctl
+    property var rawMonitorData: []
     property bool loading: true
     property bool hasUnsavedChanges: false
     property string originalContent: ""
@@ -33,7 +33,6 @@ Item {
             var line = lines[i].trim()
             if (line === '' || line.startsWith('#')) continue
             
-            // Parse monitorv2 block
             if (line.startsWith('monitorv2') && line.includes('{')) {
                 inMonitorV2Block = true
                 if (currentMonitor) {
@@ -76,11 +75,10 @@ Item {
                     continue
                 }
                 
-                // Parse monitorv2 key = value pairs
                 var keyValue = line.split('=')
                 if (keyValue.length === 2) {
                     var key = keyValue[0].trim()
-                    var value = keyValue[1].trim().replace(/^["']|["']$/g, '') // Remove quotes
+                    var value = keyValue[1].trim().replace(/^["']|["']$/g, '')
                     
                     if (key === 'output') {
                         currentMonitor.name = value
@@ -133,7 +131,6 @@ Item {
                 continue
             }
             
-            // Parse old monitor= syntax
             if (line.startsWith('monitor=')) {
                 if (currentMonitor) {
                     monitors.push(currentMonitor)
@@ -168,7 +165,6 @@ Item {
                     monitorValue = monitorValue.slice(1, -1)
                 }
                 
-                // Check for disable
                 if (monitorValue === 'disable') {
                     currentMonitor.disabled = true
                     continue
@@ -207,7 +203,6 @@ Item {
                         currentMonitor.transform = parts[5].trim()
                     }
                     
-                    // Parse extra args
                     for (var j = 6; j < parts.length; j += 2) {
                         if (j + 1 < parts.length) {
                             var argName = parts[j].trim()
@@ -233,7 +228,6 @@ Item {
                     }
                 }
             } 
-            // Parse monitor: lines for additional settings (old syntax)
             else if (currentMonitor && line.startsWith('monitor:')) {
                 var keyValue = line.substring(8).trim().split('=')
                 if (keyValue.length === 2) {
@@ -265,31 +259,48 @@ Item {
 
     function loadMonitorCapabilities() {
         loadCapabilitiesProcess.running = true
+        checkEdidHdrSupport()
+    }
+    
+    function checkEdidHdrSupport() {
+        for (var i = 0; i < monitors.length; i++) {
+            var monitor = monitors[i]
+            if (!monitor || monitor.disabled) continue
+            
+            var caps = displayConfigTab.monitorCapabilities[monitor.name]
+            if (caps && caps.hdr === true) {
+                continue
+            }
+            
+            checkEdidForMonitor(monitor.name, i)
+        }
+    }
+    
+    function checkEdidForMonitor(monitorName, index) {
+        edidCheckProcess.command = ["sh", "-c", "for card in /sys/class/drm/card*/" + monitorName + "/edid; do if [ -r \"$card\" ] 2>/dev/null; then output=$(cat \"$card\" 2>/dev/null | edid-decode 2>&1); echo \"$output\" | grep -qiE '(hdr.*static.*metadata|hdr.*metadata.*block|hdr.*static|bt\\.2020|rec\\.2020)' && echo 'HDR' && break; fi; done"]
+        edidCheckProcess.monitorName = monitorName
+        edidCheckProcess.monitorIndex = index
+        edidCheckProcess.running = true
     }
 
     function saveMonitorsConf() {
         var lines = []
-        var content = originalContent
-        var contentLines = content.split('\n')
+        var content = originalContent || ""
+        var contentLines = content ? content.split('\n') : []
         
-        // Rebuild the file, replacing monitor entries
         var i = 0
         while (i < contentLines.length) {
             var line = contentLines[i]
             var trimmed = line.trim()
             
-            // Skip existing monitor= or monitorv2 blocks - we'll add them back
             if (trimmed.startsWith('monitor=') || trimmed.startsWith('monitorv2')) {
-                // Skip monitor= line
                 if (trimmed.startsWith('monitor=')) {
                     i++
-                    // Skip any following monitor: lines
                     while (i < contentLines.length && contentLines[i].trim().startsWith('monitor:')) {
                         i++
                     }
                     continue
                 }
-                // Skip monitorv2 block
                 if (trimmed.startsWith('monitorv2')) {
                     i++
                     var braceCount = 1
@@ -303,18 +314,15 @@ Item {
                 }
             }
             
-            // Keep comments, blank lines, and other content
             lines.push(line)
             i++
         }
         
-        // Add all monitors back
         for (var j = 0; j < monitors.length; j++) {
             var monitor = monitors[j]
+            monitor.isV2 = true
             
-            if (monitor.isV2) {
-                // Write monitorv2 block
-                lines.push("monitorv2 {")
+            lines.push("monitorv2 {")
                 lines.push("  output = " + (monitor.name.includes(" ") ? '"' + monitor.name + '"' : monitor.name))
                 
                 if (monitor.disabled) {
@@ -351,7 +359,6 @@ Item {
                     if (monitor.sdr_eotf && monitor.sdr_eotf !== "0" && monitor.sdr_eotf !== 0) {
                         lines.push("  sdr_eotf = " + monitor.sdr_eotf)
                     }
-                    // Always write VRR value (0, 1, or 2)
                     if (monitor.vrr !== undefined && monitor.vrr !== null && monitor.vrr !== "") {
                         lines.push("  vrr = " + monitor.vrr)
                     }
@@ -381,52 +388,15 @@ Item {
                     }
                 }
                 lines.push("}")
-            } else {
-                // Write old monitor= syntax
-                var monitorLine = "monitor="
-                if (monitor.disabled) {
-                    monitorLine += monitor.name + ",disable"
-                } else {
-                    if (monitor.name.includes(",") || monitor.name.includes(" ")) {
-                        monitorLine += '"' + monitor.name + '"'
-                    } else {
-                        monitorLine += monitor.name
-                    }
-                    
-                    if (monitor.resolution) {
-                        if (monitor.refreshRate) {
-                            monitorLine += "," + monitor.resolution + "@" + monitor.refreshRate
-                        } else {
-                            monitorLine += "," + monitor.resolution
-                        }
-                    }
-                    if (monitor.position) monitorLine += "," + monitor.position
-                    if (monitor.scale && monitor.scale !== "1") monitorLine += "," + monitor.scale
-                    if (monitor.transform && monitor.transform !== "0") monitorLine += ",transform," + monitor.transform
-                    if (monitor.bitdepth) monitorLine += ",bitdepth," + monitor.bitdepth
-                    if (monitor.cm) monitorLine += ",cm," + monitor.cm
-                    if (monitor.sdrbrightness && monitor.sdrbrightness !== "1.0" && monitor.sdrbrightness !== 1.0) monitorLine += ",sdrbrightness," + monitor.sdrbrightness
-                    if (monitor.sdrsaturation && monitor.sdrsaturation !== "1.0" && monitor.sdrsaturation !== 1.0) monitorLine += ",sdrsaturation," + monitor.sdrsaturation
-                    if (monitor.sdr_eotf && monitor.sdr_eotf !== "0" && monitor.sdr_eotf !== 0) monitorLine += ",sdr_eotf," + monitor.sdr_eotf
-                    // Always write VRR value (0, 1, or 2) if it's set
-                    if (monitor.vrr !== undefined && monitor.vrr !== null && monitor.vrr !== "") {
-                        monitorLine += ",vrr," + monitor.vrr
-                    }
-                    if (monitor.mirror) monitorLine += ",mirror," + monitor.mirror
-                }
-                lines.push(monitorLine)
-            }
-            lines.push("") // Add blank line between monitors
+            lines.push("")
         }
         
-        // Remove trailing blank lines
         while (lines.length > 0 && lines[lines.length - 1].trim().length === 0) {
             lines.pop()
         }
         
         var newContent = lines.join('\n')
         
-        // Ensure directory exists
         var dirPath = monitorsConfPath.substring(0, monitorsConfPath.lastIndexOf('/'))
         ensureDirProcess.command = ["mkdir", "-p", dirPath]
         ensureDirProcess.running = true
@@ -439,11 +409,9 @@ Item {
         var monitor = monitors.find(function(m) { return m.name === monitorName })
         if (!monitor) return
         
-        // Update the monitor object
         monitor[setting] = value
         hasUnsavedChanges = true
         
-        // Save to file instead of using hyprctl
         saveMonitorsConf()
     }
     
@@ -458,11 +426,12 @@ Item {
     Component.onCompleted: {
         loadMonitorsConf()
         loadMonitorCapabilitiesFromCache()
-        loadMonitorCapabilities()
+        Qt.callLater(() => {
+            loadMonitorCapabilities()
+        })
     }
     
     onTabActivated: {
-        // Refresh capabilities when tab is activated
         loadMonitorCapabilities()
     }
     
@@ -472,10 +441,9 @@ Item {
     }
     
     function saveMonitorCapabilitiesToCache() {
-        // Store the complete raw JSON data from hyprctl
         var cacheData = {
-            rawData: rawMonitorData, // Complete JSON from hyprctl -j monitors
-            processedData: monitorCapabilities, // Processed data for UI
+            rawData: rawMonitorData,
+            processedData: monitorCapabilities,
             timestamp: new Date().toISOString()
         }
         var capabilitiesJson = JSON.stringify(cacheData, null, 2)
@@ -500,17 +468,20 @@ Item {
             displayConfigTab.originalContent = content
             var parsedMonitors = displayConfigTab.parseMonitorsConf(content)
             if (parsedMonitors.length === 0) {
-                // If no monitors found in config, try to get them from hyprctl
                 loadMonitorsFromHyprctl()
             } else {
                 displayConfigTab.monitors = parsedMonitors
                 displayConfigTab.loading = false
                 displayConfigTab.hasUnsavedChanges = false
+                if (Object.keys(displayConfigTab.monitorCapabilities).length === 0) {
+                    Qt.callLater(() => {
+                        loadMonitorCapabilities()
+                    })
+                }
             }
         }
         
         onLoadFailed: {
-            // File doesn't exist or can't be read, try hyprctl
             loadMonitorsFromHyprctl()
         }
     }
@@ -553,11 +524,14 @@ Item {
                             min_luminance: 0.0,
                             max_luminance: 0,
                             max_avg_luminance: 0,
-                            isV2: false
+                            isV2: true
                         }
                         monitors.push(monitorObj)
                     }
                     displayConfigTab.monitors = monitors
+                    displayConfigTab.originalContent = ""
+                    displayConfigTab.loading = false
+                    displayConfigTab.hasUnsavedChanges = false
                 } catch(e) {
                     displayConfigTab.monitors = []
                 }
@@ -577,23 +551,18 @@ Item {
             if (exitCode === 0) {
                 try {
                     var json = JSON.parse(stdout.text)
-                    // Store the complete raw data
                     displayConfigTab.rawMonitorData = json
                     
-                    // Process for UI use
                     var caps = {}
                     for (var i = 0; i < json.length; i++) {
                         var monitor = json[i]
                         var refreshRates = []
                         var resolutions = []
-                        var resolutionRefreshMap = {} // Map resolution to available refresh rates
+                        var resolutionRefreshMap = {}
                         
-                        // Gather all available modes with their refresh rates and resolutions
-                        // availableModes is an array of strings like "1920x1080@60.10Hz"
                         if (monitor.availableModes && Array.isArray(monitor.availableModes)) {
                             for (var j = 0; j < monitor.availableModes.length; j++) {
                                 var modeStr = monitor.availableModes[j]
-                                // Parse string like "1920x1080@60.10Hz"
                                 var match = modeStr.match(/^(\d+)x(\d+)@([\d.]+)Hz$/)
                                 if (match) {
                                     var width = parseInt(match[1])
@@ -601,17 +570,14 @@ Item {
                                     var refresh = parseFloat(match[3])
                                     var res = width + "x" + height
                                     
-                                    // Add to refresh rates list
                                     if (!refreshRates.includes(refresh)) {
                                         refreshRates.push(refresh)
                                     }
                                     
-                                    // Add to resolutions list
                                     if (!resolutions.includes(res)) {
                                         resolutions.push(res)
                                     }
                                     
-                                    // Map resolution to its available refresh rates
                                     if (!resolutionRefreshMap[res]) {
                                         resolutionRefreshMap[res] = []
                                     }
@@ -622,7 +588,6 @@ Item {
                             }
                         }
                         
-                        // Remove duplicates and sort
                         refreshRates = refreshRates.filter(function(value, index, self) {
                             return self.indexOf(value) === index
                         }).sort(function(a, b) { return b - a })
@@ -630,7 +595,6 @@ Item {
                         resolutions = resolutions.filter(function(value, index, self) {
                             return self.indexOf(value) === index
                         }).sort(function(a, b) {
-                            // Sort by total pixels (width * height), descending
                             var aParts = a.split('x')
                             var bParts = b.split('x')
                             var aPixels = parseInt(aParts[0]) * parseInt(aParts[1])
@@ -638,19 +602,29 @@ Item {
                             return bPixels - aPixels
                         })
                         
-                        // Sort refresh rates for each resolution
                         for (var res in resolutionRefreshMap) {
                             resolutionRefreshMap[res].sort(function(a, b) { return b - a })
                         }
                         
-                        // Store processed data for UI - include all important fields
+                        var hdrFromHyprctl = monitor.hdr === true
+                        var hdrFromConfig = false
+                        for (var k = 0; k < displayConfigTab.monitors.length; k++) {
+                            var configMonitor = displayConfigTab.monitors[k]
+                            if (configMonitor.name === monitor.name) {
+                                var cm = (configMonitor.cm || "").toLowerCase()
+                                hdrFromConfig = (cm === "hdr" || cm === "hdredid") || configMonitor.supports_hdr === true
+                                break
+                            }
+                        }
+                        
                         caps[monitor.name] = {
                             refreshRates: refreshRates,
                             resolutions: resolutions,
-                            resolutionRefreshMap: resolutionRefreshMap, // Map of resolution -> [refresh rates]
-                            availableModes: monitor.availableModes || [], // Store original availableModes array
+                            resolutionRefreshMap: resolutionRefreshMap,
+                            availableModes: monitor.availableModes || [],
                             vrr: monitor.vrr !== undefined ? monitor.vrr : false,
-                            hdr: monitor.hdr || false,
+                            hdr: hdrFromHyprctl || hdrFromConfig,
+                            hdrFromEdid: false,
                             currentMode: monitor.activeWorkspace ? monitor.activeWorkspace : null,
                             width: monitor.width || 0,
                             height: monitor.height || 0,
@@ -673,8 +647,10 @@ Item {
                         }
                     }
                     displayConfigTab.monitorCapabilities = caps
-                    // Save complete raw data to cache
                     saveMonitorCapabilitiesToCache()
+                    Qt.callLater(() => {
+                        checkEdidHdrSupport()
+                    })
                 } catch(e) {
                     displayConfigTab.monitorCapabilities = {}
                     displayConfigTab.rawMonitorData = []
@@ -682,6 +658,43 @@ Item {
             } else {
                 displayConfigTab.monitorCapabilities = {}
                 displayConfigTab.rawMonitorData = []
+            }
+        }
+    }
+    
+    Process {
+        id: edidCheckProcess
+        property string monitorName: ""
+        property int monitorIndex: -1
+        running: false
+        stdout: StdioCollector {}
+        onExited: function(exitCode) {
+            if (!monitorName) return
+            
+            var output = stdout.text.trim().toUpperCase()
+            if (output.includes("HDR")) {
+                var caps = Object.assign({}, displayConfigTab.monitorCapabilities)
+                if (caps[monitorName]) {
+                    caps[monitorName].hdr = true
+                    caps[monitorName].hdrFromEdid = true
+                    displayConfigTab.monitorCapabilities = caps
+                    Qt.callLater(() => {
+                        saveMonitorCapabilitiesToCache()
+                    })
+                } else {
+                    caps[monitorName] = {
+                        hdr: true,
+                        hdrFromEdid: true,
+                        refreshRates: [],
+                        resolutions: [],
+                        resolutionRefreshMap: {},
+                        vrr: false
+                    }
+                    displayConfigTab.monitorCapabilities = caps
+                    Qt.callLater(() => {
+                        saveMonitorCapabilitiesToCache()
+                    })
+                }
             }
         }
     }
@@ -698,27 +711,22 @@ Item {
             try {
                 var cached = JSON.parse(text())
                 if (cached && typeof cached === 'object') {
-                    // Load raw data if available
                     if (cached.rawData) {
                         displayConfigTab.rawMonitorData = cached.rawData
                     }
-                    // Load processed data for UI
                     if (cached.processedData) {
                         displayConfigTab.monitorCapabilities = cached.processedData
                     } else if (cached.refreshRates || cached.resolutions) {
-                        // Legacy format - single monitor object
                         displayConfigTab.monitorCapabilities = cached
                     }
                 }
             } catch(e) {
-                // Cache invalid or empty, will be refreshed from hyprctl
                 displayConfigTab.monitorCapabilities = {}
                 displayConfigTab.rawMonitorData = []
             }
         }
         
         onLoadFailed: {
-            // Cache doesn't exist yet, will be created after hyprctl loads
             displayConfigTab.monitorCapabilities = {}
             displayConfigTab.rawMonitorData = []
         }
@@ -778,7 +786,6 @@ Item {
         
         onExited: exitCode => {
             if (pendingSaveContent !== "") {
-                // Ensure file exists first
                 touchFileProcess.command = ["touch", monitorsConfPath]
                 touchFileProcess.running = true
             }
@@ -792,7 +799,6 @@ Item {
         
         onExited: exitCode => {
             if (pendingSaveContent !== "") {
-                // Use FileView for saving
                 saveMonitorsFile.path = ""
                 Qt.callLater(() => {
                     saveMonitorsFile.path = monitorsConfPath
@@ -816,11 +822,9 @@ Item {
             if (typeof ToastService !== "undefined") {
                 ToastService.showSuccess("Monitor configuration saved successfully")
             }
-            // Reload the file to reflect changes
             Qt.callLater(() => {
                 monitorsFile.reload()
             })
-            // Reload Hyprland configuration to apply changes
             reloadHyprlandProcess.running = true
             pendingSaveContent = ""
         }
@@ -843,7 +847,6 @@ Item {
                 if (typeof ToastService !== "undefined") {
                     ToastService.showSuccess("Hyprland configuration reloaded")
                 }
-                // Reload monitor capabilities after reload
                 loadMonitorCapabilities()
             } else {
                 if (typeof ToastService !== "undefined") {
@@ -920,7 +923,6 @@ Item {
                         color: Theme.surfaceText
                     }
 
-                    // Per-Monitor VRR Settings
                     Repeater {
                         model: displayConfigTab.monitors
 
@@ -949,7 +951,7 @@ Item {
                             }
                             onValueChanged: (value) => {
                                 if (!modelData) return
-                                var newValue = "0" // Default to disabled
+                                var newValue = "0"
                                 if (value === "Enabled Globally (1)") newValue = "1"
                                 else if (value === "Fullscreen Only (2)") newValue = "2"
                                 

@@ -12,7 +12,38 @@ StyledRect {
     signal settingChanged(string setting, var value)
     
     // Check if monitor supports HDR and VRR
-    readonly property bool supportsHDR: monitorCapabilities && monitorCapabilities.hdr === true
+    // HDR support can come from:
+    // 1. hyprctl detection (monitorCapabilities.hdr === true)
+    // 2. EDID detection (monitorCapabilities.hdrFromEdid === true)
+    // 3. Config file (monitorData.cm === "hdr" or "hdredid", or monitorData.supports_hdr === true)
+    // 4. Monitor capabilities description/model (known HDR-capable monitors)
+    readonly property bool supportsHDR: {
+        // Check capabilities first (from hyprctl or EDID)
+        if (monitorCapabilities && monitorCapabilities.hdr === true) {
+            return true
+        }
+        // Check config file for HDR settings
+        if (monitorData) {
+            var cm = (monitorData.cm || "").toLowerCase()
+            if (cm === "hdr" || cm === "hdredid") {
+                return true
+            }
+            if (monitorData.supports_hdr === true || monitorData.supports_hdr === "1") {
+                return true
+            }
+        }
+        // Check if monitor description/model suggests HDR capability
+        // Some monitors like KTC H27S17 are known to support HDR
+        if (monitorCapabilities) {
+            var desc = (monitorCapabilities.description || "").toLowerCase()
+            var model = (monitorCapabilities.model || "").toLowerCase()
+            // Check for known HDR-capable monitor models/descriptions
+            if (desc.includes("h27s17") || model.includes("h27s17")) {
+                return true
+            }
+        }
+        return false
+    }
     readonly property bool supportsVRR: monitorCapabilities && monitorCapabilities.vrr !== undefined && monitorCapabilities.vrr !== null
 
     height: contentColumn.implicitHeight + Theme.spacingL * 2
