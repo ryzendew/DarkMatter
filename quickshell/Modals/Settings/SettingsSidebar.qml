@@ -36,8 +36,8 @@ Rectangle {
         "text": "Default Apps",
         "icon": "apps"
     }, {
-        "text": "Displays",
-        "icon": "monitor"
+        "text": "Display Config",
+        "icon": "settings"
     }, {
         "text": "Sound",
         "icon": "volume_up"

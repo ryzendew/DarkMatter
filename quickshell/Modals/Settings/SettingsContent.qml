@@ -7,6 +7,17 @@ Item {
 
     property int currentIndex: 0
     property var parentModal: null
+    
+    onCurrentIndexChanged: {
+        // Trigger capability refresh when Display Config tab is activated
+        if (currentIndex === 9 && displayConfigLoader.item) {
+            Qt.callLater(() => {
+                if (displayConfigLoader.item && typeof displayConfigLoader.item.loadMonitorCapabilities === 'function') {
+                    displayConfigLoader.item.loadMonitorCapabilities()
+                }
+            })
+        }
+    }
 
     Component.onCompleted: {
         
@@ -197,14 +208,30 @@ Item {
         }
 
         Loader {
-            id: displaysLoader
+            id: displayConfigLoader
 
             anchors.fill: parent
             active: root.currentIndex === 9
             visible: active
             asynchronous: true
 
-            sourceComponent: DisplaysTab {
+            sourceComponent: DisplayConfigTab {
+            }
+            
+            onLoaded: {
+                if (item && typeof item.tabActivated !== 'undefined') {
+                    item.tabActivated()
+                }
+            }
+            
+            onActiveChanged: {
+                if (active && item && typeof item.tabActivated !== 'undefined') {
+                    Qt.callLater(() => {
+                        if (item) {
+                            item.tabActivated()
+                        }
+                    })
+                }
             }
 
         }

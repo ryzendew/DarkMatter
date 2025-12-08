@@ -17,6 +17,8 @@ WidgetTweaksTab 1.0 WidgetTweaksTab.qml
 WindowSizingTab 1.0 WindowSizingTab.qml
 SoundTab 1.0 SoundTab.qml
 DefaultAppsTab 1.0 DefaultAppsTab.qml
+DisplayConfigTab 1.0 DisplayConfigTab.qml
+MonitorConfigWidget 1.0 MonitorConfigWidget.qml
 KeyboardLangTab 1.0 KeyboardLangTab.qml
 NetworkTab 1.0 NetworkTab.qml
 BluetoothTab 1.0 BluetoothTab.qml
