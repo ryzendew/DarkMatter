@@ -68,17 +68,25 @@ Item {
         "icon": "keyboard"
     }]
 
-    width: getSidebarWidth() + 16
-    height: parent.height
-
-    function getSidebarWidth() {
+    width: {
         const screenWidth = Screen.width
-        if (screenWidth >= 3840) return 300
-        if (screenWidth >= 2560) return 280
-        if (screenWidth >= 1920) return 260
-        if (screenWidth >= 1280) return 240
-        return Math.max(200, Math.min(240, screenWidth * 0.25))
+        let baseWidth
+        if (screenWidth >= 3840) baseWidth = 300
+        else if (screenWidth >= 2560) baseWidth = 280
+        else if (screenWidth >= 1920) baseWidth = 260
+        else if (screenWidth >= 1280) baseWidth = 240
+        else baseWidth = Math.max(200, Math.min(240, screenWidth * 0.25))
+        
+        // Apply UI scale factor - explicitly reference SettingsData.settingsUiScale for reactivity
+        const uiScale = typeof Theme !== "undefined" && typeof Theme.getSettingsUiScale === "function" 
+            ? Theme.getSettingsUiScale() 
+            : (typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                ? SettingsData.settingsUiScale 
+                : 1.0)
+        
+        return (baseWidth * uiScale) + 16
     }
+    height: parent.height
 
     Rectangle {
         id: sidebarBackground
@@ -88,7 +96,24 @@ Item {
         anchors.bottomMargin: 8
         anchors.left: parent.left
         anchors.leftMargin: 16
-        width: getSidebarWidth()
+        width: {
+            const screenWidth = Screen.width
+            let baseWidth
+            if (screenWidth >= 3840) baseWidth = 300
+            else if (screenWidth >= 2560) baseWidth = 280
+            else if (screenWidth >= 1920) baseWidth = 260
+            else if (screenWidth >= 1280) baseWidth = 240
+            else baseWidth = Math.max(200, Math.min(240, screenWidth * 0.25))
+            
+            // Apply UI scale factor - explicitly reference SettingsData.settingsUiScale for reactivity
+            const uiScale = typeof Theme !== "undefined" && typeof Theme.getSettingsUiScale === "function" 
+                ? Theme.getSettingsUiScale() 
+                : (typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                    ? SettingsData.settingsUiScale 
+                    : 1.0)
+            
+            return baseWidth * uiScale
+        }
         color: Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.6)
         radius: cornerRadius
         clip: true
@@ -123,7 +148,16 @@ Item {
 
             Item {
                 width: parent.width
-                height: 16
+                height: {
+                    const baseHeight = 16
+                    const uiScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                        ? SettingsData.settingsUiScale 
+                        : 1.0
+                    const controlScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiAdvancedScaling && SettingsData.settingsUiControlScale !== undefined
+                        ? SettingsData.settingsUiControlScale
+                        : 1.0
+                    return baseHeight * uiScale * controlScale
+                }
             }
 
             Repeater {
@@ -136,7 +170,16 @@ Item {
                     property bool isActive: sidebarContainer.currentIndex === index
 
                     width: parent.width
-                    height: 40
+                    height: {
+                        const baseHeight = 40
+                        const uiScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                            ? SettingsData.settingsUiScale 
+                            : 1.0
+                        const controlScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiAdvancedScaling && SettingsData.settingsUiControlScale !== undefined
+                            ? SettingsData.settingsUiControlScale
+                            : 1.0
+                        return baseHeight * uiScale * controlScale
+                    }
 
                     // Active indicator - left border
                     Rectangle {
@@ -176,13 +219,22 @@ Item {
                     // Content row
                     Row {
                         anchors.left: parent.left
-                        anchors.leftMargin: 20
+                        anchors.leftMargin: {
+                            const baseMargin = 20
+                            const uiScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                                ? SettingsData.settingsUiScale 
+                                : 1.0
+                            const controlScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiAdvancedScaling && SettingsData.settingsUiControlScale !== undefined
+                                ? SettingsData.settingsUiControlScale
+                                : 1.0
+                            return baseMargin * uiScale * controlScale
+                        }
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 12
+                        spacing: Theme.spacingM
 
                         DarkIcon {
                             name: modelData.icon || ""
-                            size: 20
+                            size: Theme.iconSize
                             color: {
                                 if (navItem.isActive) {
                                     return Theme.primary
@@ -197,7 +249,7 @@ Item {
 
                         StyledText {
                             text: modelData.text || ""
-                            font.pixelSize: 14
+                            font.pixelSize: Theme.fontSizeMedium
                             color: {
                                 if (navItem.isActive) {
                                     return Theme.primary
@@ -210,7 +262,18 @@ Item {
                             font.weight: navItem.isActive ? Font.Medium : Font.Normal
                             anchors.verticalCenter: parent.verticalCenter
                             elide: Text.ElideRight
-                            width: Math.max(0, navItem.width - 20 - 12 - 20 - 20)
+                            width: {
+                                const uiScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                                    ? SettingsData.settingsUiScale 
+                                    : 1.0
+                                const controlScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiAdvancedScaling && SettingsData.settingsUiControlScale !== undefined
+                                    ? SettingsData.settingsUiControlScale
+                                    : 1.0
+                                const margin = 20 * uiScale * controlScale
+                                const spacing = Theme.spacingM
+                                const iconSize = Theme.iconSize
+                                return Math.max(0, navItem.width - margin - spacing - iconSize - margin)
+                            }
                         }
                     }
 
@@ -229,7 +292,16 @@ Item {
 
             Item {
                 width: parent.width
-                height: 12
+                height: {
+                    const baseHeight = 12
+                    const uiScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                        ? SettingsData.settingsUiScale 
+                        : 1.0
+                    const controlScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiAdvancedScaling && SettingsData.settingsUiControlScale !== undefined
+                        ? SettingsData.settingsUiControlScale
+                        : 1.0
+                    return baseHeight * uiScale * controlScale
+                }
             }
         }
         }

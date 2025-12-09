@@ -176,7 +176,16 @@ DarkModal {
                 // Header bar with clean design
                 Rectangle {
                     width: parent.width
-                    height: 56
+                    height: {
+                        const baseHeight = 56
+                        const uiScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                            ? SettingsData.settingsUiScale 
+                            : 1.0
+                        const controlScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiAdvancedScaling && SettingsData.settingsUiControlScale !== undefined
+                            ? SettingsData.settingsUiControlScale
+                            : 1.0
+                        return baseHeight * uiScale * controlScale
+                    }
                     color: "transparent"
                     Rectangle {
                         anchors.bottom: parent.bottom
@@ -187,20 +196,20 @@ DarkModal {
 
                     Row {
                         anchors.left: parent.left
-                        anchors.leftMargin: 24
+                        anchors.leftMargin: Theme.spacingL * 1.5
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: 12
+                        spacing: Theme.spacingM
 
                         DarkIcon {
                             name: "settings"
-                            size: 20
+                            size: Theme.iconSize
                             color: Theme.surfaceText
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
                         StyledText {
                             text: "Settings"
-                            font.pixelSize: 17
+                            font.pixelSize: Theme.fontSizeLarge
                             color: Theme.surfaceText
                             font.weight: Font.DemiBold
                             anchors.verticalCenter: parent.verticalCenter
@@ -209,11 +218,11 @@ DarkModal {
 
                     DarkActionButton {
                         anchors.right: parent.right
-                        anchors.rightMargin: 16
+                        anchors.rightMargin: Theme.spacingL
                         anchors.verticalCenter: parent.verticalCenter
                         circular: false
                         iconName: "close"
-                        iconSize: 18
+                        iconSize: Theme.iconSizeSmall
                         iconColor: Qt.rgba(Theme.surfaceText.r, Theme.surfaceText.g, Theme.surfaceText.b, 0.7)
                         onClicked: () => {
                             return settingsModal.hide();
@@ -224,7 +233,16 @@ DarkModal {
                 // Main content area
                 Row {
                     width: parent.width
-                    height: parent.height - 56
+                    height: {
+                        const baseHeaderHeight = 56
+                        const uiScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
+                            ? SettingsData.settingsUiScale 
+                            : 1.0
+                        const controlScale = typeof SettingsData !== "undefined" && SettingsData.settingsUiAdvancedScaling && SettingsData.settingsUiControlScale !== undefined
+                            ? SettingsData.settingsUiControlScale
+                            : 1.0
+                        return parent.height - (baseHeaderHeight * uiScale * controlScale)
+                    }
                     spacing: 0
                     clip: false
 
