@@ -118,8 +118,7 @@ Singleton {
     FileView {
         id: settingsFile
 
-        path: StandardPaths.writableLocation(
-                  StandardPaths.GenericStateLocation) + "/DarkMaterialShell/appusage.json"
+        path: `${StandardPaths.writableLocation(StandardPaths.GenericStateLocation)}/DarkMaterialShell/appusage.json`
         blockLoading: true
         blockWrites: true
         watchChanges: true

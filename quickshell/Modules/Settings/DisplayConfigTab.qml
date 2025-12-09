@@ -19,8 +19,8 @@ Item {
     property bool hasUnsavedChanges: false
     property string originalContent: ""
     property string selectedMonitor: ""
-    readonly property string monitorsConfPath: (Quickshell.env("HOME") || StandardPaths.writableLocation(StandardPaths.HomeLocation)) + "/.config/hypr/monitors.conf"
-    readonly property string capabilitiesCachePath: StandardPaths.writableLocation(StandardPaths.GenericConfigLocation) + "/DarkMaterialShell/monitor-capabilities.json"
+    readonly property string monitorsConfPath: (Quickshell.env("HOME") || Paths.stringify(StandardPaths.writableLocation(StandardPaths.HomeLocation))) + "/.config/hypr/monitors.conf"
+    readonly property string capabilitiesCachePath: Paths.stringify(`${StandardPaths.writableLocation(StandardPaths.GenericConfigLocation)}/DarkMaterialShell/monitor-capabilities.json`)
     
     signal tabActivated()
     

@@ -163,17 +163,31 @@ Item {
 
 
                                 Rectangle {
-                                    width: 80
-                                    height: 28
+                                    // TextMetrics to calculate button size
+                                    TextMetrics {
+                                        id: wifiDisconnectTextMetrics
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        text: "Disconnect"
+                                    }
+                                    
+                                    implicitWidth: wifiDisconnectTextMetrics.width + Theme.spacingS * 2
+                                    implicitHeight: Math.max(wifiDisconnectTextMetrics.height, 28) + Theme.spacingS * 2
+                                    width: implicitWidth
+                                    height: implicitHeight
                                     radius: Theme.cornerRadius * 0.5
                                     color: Theme.errorContainer
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     StyledText {
-                                        anchors.centerIn: parent
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.leftMargin: Theme.spacingS
+                                        anchors.rightMargin: Theme.spacingS
                                         text: "Disconnect"
                                         font.pixelSize: Theme.fontSizeSmall
                                         color: Theme.onErrorContainer
+                                        horizontalAlignment: Text.AlignHCenter
                                     }
 
                                     MouseArea {
@@ -309,17 +323,33 @@ Item {
 
 
                                         Rectangle {
-                                            width: 70
-                                            height: 28
+                                            property string buttonText: modelData.ssid === NetworkService.currentWifiSSID ? "Connected" : "Connect"
+                                            
+                                            // TextMetrics to calculate button size
+                                            TextMetrics {
+                                                id: wifiConnectTextMetrics
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                text: buttonText
+                                            }
+                                            
+                                            implicitWidth: wifiConnectTextMetrics.width + Theme.spacingS * 2
+                                            implicitHeight: Math.max(wifiConnectTextMetrics.height, 28) + Theme.spacingS * 2
+                                            width: implicitWidth
+                                            height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
                                             color: modelData.ssid === NetworkService.currentWifiSSID ? Theme.primaryContainer : Theme.primary
                                             anchors.verticalCenter: parent.verticalCenter
 
                                             StyledText {
-                                                anchors.centerIn: parent
-                                                text: modelData.ssid === NetworkService.currentWifiSSID ? "Connected" : "Connect"
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: Theme.spacingS
+                                                anchors.rightMargin: Theme.spacingS
+                                                text: buttonText
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 color: modelData.ssid === NetworkService.currentWifiSSID ? Theme.onPrimaryContainer : Theme.onPrimary
+                                                horizontalAlignment: Text.AlignHCenter
                                             }
 
                                             MouseArea {
@@ -441,17 +471,31 @@ Item {
                                         Item { width: 1; height: 1 }
 
                                         Rectangle {
-                                            width: 50
-                                            height: 24
+                                            // TextMetrics to calculate button size
+                                            TextMetrics {
+                                                id: savedWifiEditTextMetrics
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                text: "Edit"
+                                            }
+                                            
+                                            implicitWidth: savedWifiEditTextMetrics.width + Theme.spacingS * 2
+                                            implicitHeight: Math.max(savedWifiEditTextMetrics.height, 24) + Theme.spacingS * 2
+                                            width: implicitWidth
+                                            height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
                                             color: Theme.primaryContainer
                                             anchors.verticalCenter: parent.verticalCenter
 
                                             StyledText {
-                                                anchors.centerIn: parent
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: Theme.spacingS
+                                                anchors.rightMargin: Theme.spacingS
                                                 text: "Edit"
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 color: Theme.onPrimaryContainer
+                                                horizontalAlignment: Text.AlignHCenter
                                             }
 
                                             MouseArea {
@@ -587,17 +631,31 @@ Item {
                                 Item { width: 1; height: 1 }
 
                                 Rectangle {
-                                    width: 50
-                                    height: 28
+                                    // TextMetrics to calculate button size
+                                    TextMetrics {
+                                        id: ethernetEditTextMetrics
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        text: "Edit"
+                                    }
+                                    
+                                    implicitWidth: ethernetEditTextMetrics.width + Theme.spacingS * 2
+                                    implicitHeight: Math.max(ethernetEditTextMetrics.height, 28) + Theme.spacingS * 2
+                                    width: implicitWidth
+                                    height: implicitHeight
                                     radius: Theme.cornerRadius * 0.5
                                     color: Theme.primaryContainer
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     StyledText {
-                                        anchors.centerIn: parent
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.leftMargin: Theme.spacingS
+                                        anchors.rightMargin: Theme.spacingS
                                         text: "Edit"
                                         font.pixelSize: Theme.fontSizeSmall
                                         color: Theme.onPrimaryContainer
+                                        horizontalAlignment: Text.AlignHCenter
                                     }
 
                                     MouseArea {
@@ -614,17 +672,31 @@ Item {
                                 }
 
                                 Rectangle {
-                                    width: 80
-                                    height: 28
+                                    // TextMetrics to calculate button size
+                                    TextMetrics {
+                                        id: ethernetDisconnectTextMetrics
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        text: "Disconnect"
+                                    }
+                                    
+                                    implicitWidth: ethernetDisconnectTextMetrics.width + Theme.spacingS * 2
+                                    implicitHeight: Math.max(ethernetDisconnectTextMetrics.height, 28) + Theme.spacingS * 2
+                                    width: implicitWidth
+                                    height: implicitHeight
                                     radius: Theme.cornerRadius * 0.5
                                     color: Theme.errorContainer
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     StyledText {
-                                        anchors.centerIn: parent
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.leftMargin: Theme.spacingS
+                                        anchors.rightMargin: Theme.spacingS
                                         text: "Disconnect"
                                         font.pixelSize: Theme.fontSizeSmall
                                         color: Theme.onErrorContainer
+                                        horizontalAlignment: Text.AlignHCenter
                                     }
 
                                     MouseArea {
@@ -777,17 +849,33 @@ Item {
 
 
                                     Rectangle {
-                                        width: 80
-                                        height: 28
+                                        property bool isHovered: disconnectVpnMouseArea.containsMouse
+                                        
+                                        // TextMetrics to calculate button size
+                                        TextMetrics {
+                                            id: vpnDisconnectTextMetrics
+                                            font.pixelSize: Theme.fontSizeSmall
+                                            text: "Disconnect"
+                                        }
+                                        
+                                        implicitWidth: vpnDisconnectTextMetrics.width + Theme.spacingS * 2
+                                        implicitHeight: Math.max(vpnDisconnectTextMetrics.height, 28) + Theme.spacingS * 2
+                                        width: implicitWidth
+                                        height: implicitHeight
                                         radius: Theme.cornerRadius * 0.5
-                                        color: disconnectVpnMouseArea.containsMouse ? Theme.errorContainer : Theme.error
+                                        color: isHovered ? Theme.errorContainer : Theme.error
                                         anchors.verticalCenter: parent.verticalCenter
 
                                         StyledText {
-                                            anchors.centerIn: parent
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            anchors.leftMargin: Theme.spacingS
+                                            anchors.rightMargin: Theme.spacingS
                                             text: "Disconnect"
                                             font.pixelSize: Theme.fontSizeSmall
                                             color: Theme.onError
+                                            horizontalAlignment: Text.AlignHCenter
                                         }
 
                                         MouseArea {
@@ -878,17 +966,31 @@ Item {
                                         Item { width: 1; height: 1 }
 
                                         Rectangle {
-                                            width: 50
-                                            height: 28
+                                            // TextMetrics to calculate button size
+                                            TextMetrics {
+                                                id: vpnEditTextMetrics
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                text: "Edit"
+                                            }
+                                            
+                                            implicitWidth: vpnEditTextMetrics.width + Theme.spacingS * 2
+                                            implicitHeight: Math.max(vpnEditTextMetrics.height, 28) + Theme.spacingS * 2
+                                            width: implicitWidth
+                                            height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
                                             color: Theme.primaryContainer
                                             anchors.verticalCenter: parent.verticalCenter
 
                                             StyledText {
-                                                anchors.centerIn: parent
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: Theme.spacingS
+                                                anchors.rightMargin: Theme.spacingS
                                                 text: "Edit"
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 color: Theme.onPrimaryContainer
+                                                horizontalAlignment: Text.AlignHCenter
                                             }
 
                                             MouseArea {
@@ -904,17 +1006,33 @@ Item {
                                         }
 
                                         Rectangle {
-                                            width: 70
-                                            height: 28
+                                            property string buttonText: VpnService && VpnService.isActiveUuid(modelData.uuid) ? "Connected" : "Connect"
+                                            
+                                            // TextMetrics to calculate button size
+                                            TextMetrics {
+                                                id: vpnConnectTextMetrics
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                text: buttonText
+                                            }
+                                            
+                                            implicitWidth: vpnConnectTextMetrics.width + Theme.spacingS * 2
+                                            implicitHeight: Math.max(vpnConnectTextMetrics.height, 28) + Theme.spacingS * 2
+                                            width: implicitWidth
+                                            height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
                                             color: VpnService && VpnService.isActiveUuid(modelData.uuid) ? Theme.primaryContainer : Theme.primary
                                             anchors.verticalCenter: parent.verticalCenter
 
                                             StyledText {
-                                                anchors.centerIn: parent
-                                                text: VpnService && VpnService.isActiveUuid(modelData.uuid) ? "Connected" : "Connect"
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: Theme.spacingS
+                                                anchors.rightMargin: Theme.spacingS
+                                                text: buttonText
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 color: VpnService && VpnService.isActiveUuid(modelData.uuid) ? Theme.onPrimaryContainer : Theme.onPrimary
+                                                horizontalAlignment: Text.AlignHCenter
                                             }
 
                                             MouseArea {
@@ -996,56 +1114,58 @@ Item {
                         }
 
                         Rectangle {
-                            width: 200
-                            height: 32
+                            id: dnsMethodButtonContainer
+                            implicitWidth: dnsMethodButtonRow.implicitWidth + Theme.spacingXS * 2
+                            implicitHeight: dnsMethodButtonRow.implicitHeight + Theme.spacingXS * 2
+                            width: implicitWidth
+                            height: implicitHeight
                             radius: Theme.cornerRadius * 0.5
                             color: Theme.surfaceContainer
                             anchors.verticalCenter: parent.verticalCenter
 
                             Row {
-                                anchors.fill: parent
-                                anchors.margins: 2
+                                id: dnsMethodButtonRow
+                                anchors.centerIn: parent
+                                spacing: Theme.spacingXS
 
-                                Rectangle {
-                                    width: parent.width / 2
-                                    height: parent.height
-                                    radius: Theme.cornerRadius * 0.5
-                                    color: networkTab.dnsMethodAuto ? Theme.primary : "transparent"
+                                Repeater {
+                                    model: ["Automatic", "Manual"]
 
-                                    StyledText {
-                                        anchors.centerIn: parent
-                                        text: "Automatic"
-                                        font.pixelSize: Theme.fontSizeSmall
-                                        color: networkTab.dnsMethodAuto ? Theme.onPrimary : Theme.surfaceText
-                                    }
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            networkTab.dnsMethodAuto = true
+                                    Rectangle {
+                                        property bool isSelected: (index === 0 && networkTab.dnsMethodAuto) || (index === 1 && !networkTab.dnsMethodAuto)
+                                        
+                                        // TextMetrics to calculate button size
+                                        TextMetrics {
+                                            id: dnsButtonTextMetrics
+                                            font.pixelSize: Theme.fontSizeSmall
+                                            text: modelData
                                         }
-                                    }
-                                }
+                                        
+                                        implicitWidth: dnsButtonTextMetrics.width + Theme.spacingS * 2
+                                        implicitHeight: Math.max(dnsButtonTextMetrics.height, 32) + Theme.spacingS * 2
+                                        width: implicitWidth
+                                        height: implicitHeight
+                                        radius: Theme.cornerRadius * 0.5
+                                        color: isSelected ? Theme.primary : "transparent"
 
-                                Rectangle {
-                                    width: parent.width / 2
-                                    height: parent.height
-                                    radius: Theme.cornerRadius * 0.5
-                                    color: !networkTab.dnsMethodAuto ? Theme.primary : "transparent"
+                                        StyledText {
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            anchors.leftMargin: Theme.spacingS
+                                            anchors.rightMargin: Theme.spacingS
+                                            text: modelData
+                                            font.pixelSize: Theme.fontSizeSmall
+                                            color: isSelected ? Theme.onPrimary : Theme.surfaceText
+                                            horizontalAlignment: Text.AlignHCenter
+                                        }
 
-                                    StyledText {
-                                        anchors.centerIn: parent
-                                        text: "Manual"
-                                        font.pixelSize: Theme.fontSizeSmall
-                                        color: !networkTab.dnsMethodAuto ? Theme.onPrimary : Theme.surfaceText
-                                    }
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            networkTab.dnsMethodAuto = false
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                networkTab.dnsMethodAuto = (index === 0)
+                                            }
                                         }
                                     }
                                 }
@@ -1155,17 +1275,32 @@ Item {
                                 ]
 
                                 Rectangle {
-                                    width: 80
-                                    height: 28
+                                    property bool isHovered: dnsPresetMouseArea.containsMouse
+                                    
+                                    // TextMetrics to calculate button size
+                                    TextMetrics {
+                                        id: dnsPresetTextMetrics
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        text: modelData.name
+                                    }
+                                    
+                                    implicitWidth: dnsPresetTextMetrics.width + Theme.spacingS * 2
+                                    implicitHeight: Math.max(dnsPresetTextMetrics.height, 28) + Theme.spacingS * 2
+                                    width: implicitWidth
+                                    height: implicitHeight
                                     radius: Theme.cornerRadius * 0.5
-                                    color: dnsPresetMouseArea.containsMouse ? Theme.primaryContainer : Theme.surfaceContainer
+                                    color: isHovered ? Theme.primaryContainer : Theme.surfaceContainer
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     StyledText {
-                                        anchors.centerIn: parent
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.leftMargin: Theme.spacingS
+                                        anchors.rightMargin: Theme.spacingS
                                         text: modelData.name
                                         font.pixelSize: Theme.fontSizeSmall
-                                        
+                                        horizontalAlignment: Text.AlignHCenter
                                     }
 
                                     MouseArea {
@@ -1183,17 +1318,31 @@ Item {
                         }
 
                         Rectangle {
-                            width: 100
-                            height: 32
+                            // TextMetrics to calculate button size
+                            TextMetrics {
+                                id: applyDnsTextMetrics
+                                font.pixelSize: Theme.fontSizeSmall
+                                text: "Apply"
+                            }
+                            
+                            implicitWidth: applyDnsTextMetrics.width + Theme.spacingS * 2
+                            implicitHeight: Math.max(applyDnsTextMetrics.height, 32) + Theme.spacingS * 2
+                            width: implicitWidth
+                            height: implicitHeight
                             radius: Theme.cornerRadius * 0.5
                             color: applyDnsMouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
                             anchors.right: parent.right
 
                             StyledText {
-                                anchors.centerIn: parent
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: Theme.spacingS
+                                anchors.rightMargin: Theme.spacingS
                                 text: "Apply"
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.onPrimary
+                                horizontalAlignment: Text.AlignHCenter
                             }
 
                             MouseArea {
@@ -1277,34 +1426,68 @@ Item {
                             }
 
                             Rectangle {
-                                width: 200
-                                height: 32
-                                radius: Theme.cornerRadius * 0.5
+                                id: ipv4ButtonContainer
+                                implicitWidth: ipv4ButtonRow.implicitWidth + Theme.spacingXS * 2
+                                implicitHeight: ipv4ButtonRow.implicitHeight + Theme.spacingXS * 2
+                                width: implicitWidth
+                                height: implicitHeight
+                                radius: Theme.cornerRadius
                                 color: Theme.surfaceContainer
+                                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                border.width: 1
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 2
+                                    id: ipv4ButtonRow
+                                    anchors.centerIn: parent
+                                    spacing: Theme.spacingXS
 
                                     Repeater {
                                         model: ["Automatic", "Manual", "Link-Local"]
 
                                         Rectangle {
-                                            width: parent.width / 3
-                                            height: parent.height
-                                            radius: Theme.cornerRadius * 0.5
-                                            color: networkTab.ipv4MethodIndex === index ? Theme.primary : "transparent"
+                                            property bool isSelected: networkTab.ipv4MethodIndex === index
+                                            property bool isHovered: buttonMouseArea.containsMouse
+                                            
+                                            // TextMetrics to calculate button size
+                                            TextMetrics {
+                                                id: buttonTextMetrics
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                font.weight: isSelected ? Font.Medium : Font.Normal
+                                                text: modelData
+                                            }
+                                            
+                                            implicitWidth: buttonTextMetrics.width + Theme.spacingS * 2
+                                            implicitHeight: Math.max(buttonTextMetrics.height, 32) + Theme.spacingS * 2
+                                            width: implicitWidth
+                                            height: implicitHeight
+                                            radius: Theme.cornerRadius * 0.75
+                                            color: isSelected ? Theme.primary : (isHovered ? Theme.primaryHoverLight : "transparent")
+
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: Theme.shorterDuration
+                                                    easing.type: Theme.standardEasing
+                                                }
+                                            }
 
                                             StyledText {
-                                                anchors.centerIn: parent
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: Theme.spacingS
+                                                anchors.rightMargin: Theme.spacingS
                                                 text: modelData
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: networkTab.ipv4MethodIndex === index ? Theme.onPrimary : Theme.surfaceText
+                                                font.weight: isSelected ? Font.Medium : Font.Normal
+                                                color: isSelected ? Theme.onPrimary : Theme.surfaceText
+                                                horizontalAlignment: Text.AlignHCenter
                                             }
 
                                             MouseArea {
+                                                id: buttonMouseArea
                                                 anchors.fill: parent
+                                                hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
                                                     networkTab.ipv4MethodIndex = index
@@ -1393,17 +1576,31 @@ Item {
                             }
 
                             Rectangle {
-                                width: 100
-                                height: 32
+                                // TextMetrics to calculate button size
+                                TextMetrics {
+                                    id: applyIpv4TextMetrics
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    text: "Apply"
+                                }
+                                
+                                implicitWidth: applyIpv4TextMetrics.width + Theme.spacingS * 2
+                                implicitHeight: Math.max(applyIpv4TextMetrics.height, 32) + Theme.spacingS * 2
+                                width: implicitWidth
+                                height: implicitHeight
                                 radius: Theme.cornerRadius * 0.5
                                 color: applyIpv4MouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
                                 anchors.right: parent.right
 
                                 StyledText {
-                                    anchors.centerIn: parent
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.leftMargin: Theme.spacingS
+                                    anchors.rightMargin: Theme.spacingS
                                     text: "Apply"
                                     font.pixelSize: Theme.fontSizeSmall
                                     color: Theme.onPrimary
+                                    horizontalAlignment: Text.AlignHCenter
                                 }
 
                                 MouseArea {
@@ -1452,34 +1649,68 @@ Item {
                             }
 
                             Rectangle {
-                                width: 200
-                                height: 32
-                                radius: Theme.cornerRadius * 0.5
+                                id: ipv6ButtonContainer
+                                implicitWidth: ipv6ButtonRow.implicitWidth + Theme.spacingXS * 2
+                                implicitHeight: ipv6ButtonRow.implicitHeight + Theme.spacingXS * 2
+                                width: implicitWidth
+                                height: implicitHeight
+                                radius: Theme.cornerRadius
                                 color: Theme.surfaceContainer
+                                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                border.width: 1
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 2
+                                    id: ipv6ButtonRow
+                                    anchors.centerIn: parent
+                                    spacing: Theme.spacingXS
 
                                     Repeater {
                                         model: ["Automatic", "Manual", "Ignore"]
 
                                         Rectangle {
-                                            width: parent.width / 3
-                                            height: parent.height
-                                            radius: Theme.cornerRadius * 0.5
-                                            color: networkTab.ipv6MethodIndex === index ? Theme.primary : "transparent"
+                                            property bool isSelected: networkTab.ipv6MethodIndex === index
+                                            property bool isHovered: buttonMouseArea.containsMouse
+                                            
+                                            // TextMetrics to calculate button size
+                                            TextMetrics {
+                                                id: buttonTextMetrics
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                font.weight: isSelected ? Font.Medium : Font.Normal
+                                                text: modelData
+                                            }
+                                            
+                                            implicitWidth: buttonTextMetrics.width + Theme.spacingS * 2
+                                            implicitHeight: Math.max(buttonTextMetrics.height, 32) + Theme.spacingS * 2
+                                            width: implicitWidth
+                                            height: implicitHeight
+                                            radius: Theme.cornerRadius * 0.75
+                                            color: isSelected ? Theme.primary : (isHovered ? Theme.primaryHoverLight : "transparent")
+
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: Theme.shorterDuration
+                                                    easing.type: Theme.standardEasing
+                                                }
+                                            }
 
                                             StyledText {
-                                                anchors.centerIn: parent
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: Theme.spacingS
+                                                anchors.rightMargin: Theme.spacingS
                                                 text: modelData
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: networkTab.ipv6MethodIndex === index ? Theme.onPrimary : Theme.surfaceText
+                                                font.weight: isSelected ? Font.Medium : Font.Normal
+                                                color: isSelected ? Theme.onPrimary : Theme.surfaceText
+                                                horizontalAlignment: Text.AlignHCenter
                                             }
 
                                             MouseArea {
+                                                id: buttonMouseArea
                                                 anchors.fill: parent
+                                                hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
                                                     networkTab.ipv6MethodIndex = index
@@ -1569,17 +1800,31 @@ Item {
                             }
 
                             Rectangle {
-                                width: 100
-                                height: 32
+                                // TextMetrics to calculate button size
+                                TextMetrics {
+                                    id: applyIpv6TextMetrics
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    text: "Apply"
+                                }
+                                
+                                implicitWidth: applyIpv6TextMetrics.width + Theme.spacingS * 2
+                                implicitHeight: Math.max(applyIpv6TextMetrics.height, 32) + Theme.spacingS * 2
+                                width: implicitWidth
+                                height: implicitHeight
                                 radius: Theme.cornerRadius * 0.5
                                 color: applyIpv6MouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
                                 anchors.right: parent.right
 
                                 StyledText {
-                                    anchors.centerIn: parent
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.leftMargin: Theme.spacingS
+                                    anchors.rightMargin: Theme.spacingS
                                     text: "Apply"
                                     font.pixelSize: Theme.fontSizeSmall
                                     color: Theme.onPrimary
+                                    horizontalAlignment: Text.AlignHCenter
                                 }
 
                                 MouseArea {
@@ -1647,43 +1892,63 @@ Item {
                         }
 
                         Rectangle {
-                            width: 250
-                            height: 32
+                            id: proxyMethodButtonContainer
+                            implicitWidth: proxyMethodButtonRow.implicitWidth + Theme.spacingXS * 2
+                            implicitHeight: proxyMethodButtonRow.implicitHeight + Theme.spacingXS * 2
+                            width: implicitWidth
+                            height: implicitHeight
                             radius: Theme.cornerRadius * 0.5
                             color: Theme.surfaceContainer
                             anchors.verticalCenter: parent.verticalCenter
 
                             Row {
-                                anchors.fill: parent
-                                anchors.margins: 2
+                                id: proxyMethodButtonRow
+                                anchors.centerIn: parent
+                                spacing: Theme.spacingXS
 
                                 Repeater {
                                     model: ["None", "Manual", "Automatic"]
 
                                     Rectangle {
-                                        width: parent.width / 3
-                                        height: parent.height
+                                        property bool isSelected: networkTab.proxyMethodIndex === index
+                                        
+                                        // TextMetrics to calculate button size
+                                        TextMetrics {
+                                            id: proxyButtonTextMetrics
+                                            font.pixelSize: Theme.fontSizeSmall
+                                            text: modelData
+                                        }
+                                        
+                                        implicitWidth: proxyButtonTextMetrics.width + Theme.spacingS * 2
+                                        implicitHeight: Math.max(proxyButtonTextMetrics.height, 32) + Theme.spacingS * 2
+                                        width: implicitWidth
+                                        height: implicitHeight
                                         radius: Theme.cornerRadius * 0.5
-                                            color: networkTab.proxyMethodIndex === index ? Theme.primary : "transparent"
+                                        color: isSelected ? Theme.primary : "transparent"
 
-                                            StyledText {
-                                                anchors.centerIn: parent
-                                                text: modelData
-                                                font.pixelSize: Theme.fontSizeSmall
-                                                color: networkTab.proxyMethodIndex === index ? Theme.onPrimary : Theme.surfaceText
+                                        StyledText {
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            anchors.leftMargin: Theme.spacingS
+                                            anchors.rightMargin: Theme.spacingS
+                                            text: modelData
+                                            font.pixelSize: Theme.fontSizeSmall
+                                            color: isSelected ? Theme.onPrimary : Theme.surfaceText
+                                            horizontalAlignment: Text.AlignHCenter
                                         }
 
-                                            MouseArea {
-                                                anchors.fill: parent
-                                                cursorShape: Qt.PointingHandCursor
-                                                onClicked: {
-                                                    networkTab.proxyMethodIndex = index
-                                                }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                networkTab.proxyMethodIndex = index
                                             }
                                         }
                                     }
                                 }
                             }
+                        }
 
                             Item { width: 1; height: 1 }
                         }
@@ -1920,17 +2185,31 @@ Item {
                         }
 
                         Rectangle {
-                            width: 100
-                            height: 32
+                            // TextMetrics to calculate button size
+                            TextMetrics {
+                                id: applyProxyTextMetrics
+                                font.pixelSize: Theme.fontSizeSmall
+                                text: "Apply"
+                            }
+                            
+                            implicitWidth: applyProxyTextMetrics.width + Theme.spacingS * 2
+                            implicitHeight: Math.max(applyProxyTextMetrics.height, 32) + Theme.spacingS * 2
+                            width: implicitWidth
+                            height: implicitHeight
                             radius: Theme.cornerRadius * 0.5
                             color: applyProxyMouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
                             anchors.right: parent.right
 
                             StyledText {
-                                anchors.centerIn: parent
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: Theme.spacingS
+                                anchors.rightMargin: Theme.spacingS
                                 text: "Apply"
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.onPrimary
+                                horizontalAlignment: Text.AlignHCenter
                             }
 
                             MouseArea {
@@ -2010,8 +2289,8 @@ Item {
                             }
 
                             Rectangle {
-                                width: 120
-                                height: 32
+                                width: 200
+                                height: 65
                                 radius: Theme.cornerRadius * 0.5
                                 color: Theme.surfaceContainer
                                 border.width: 1
@@ -2041,17 +2320,31 @@ Item {
                         }
 
                         Rectangle {
-                            width: 100
-                            height: 32
+                            // TextMetrics to calculate button size
+                            TextMetrics {
+                                id: applyMtuTextMetrics
+                                font.pixelSize: Theme.fontSizeSmall
+                                text: "Apply"
+                            }
+                            
+                            implicitWidth: applyMtuTextMetrics.width + Theme.spacingS * 2
+                            implicitHeight: Math.max(applyMtuTextMetrics.height, 32) + Theme.spacingS * 2
+                            width: implicitWidth
+                            height: implicitHeight
                             radius: Theme.cornerRadius * 0.5
                             color: applyMtuMouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
                             anchors.right: parent.right
 
                             StyledText {
-                                anchors.centerIn: parent
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: Theme.spacingS
+                                anchors.rightMargin: Theme.spacingS
                                 text: "Apply"
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.onPrimary
+                                horizontalAlignment: Text.AlignHCenter
                             }
 
                             MouseArea {
@@ -2095,30 +2388,50 @@ Item {
                             }
 
                             Rectangle {
-                                width: 200
-                                height: 32
+                                id: macAddressButtonContainer
+                                implicitWidth: macAddressButtonRow.implicitWidth + Theme.spacingXS * 2
+                                implicitHeight: macAddressButtonRow.implicitHeight + Theme.spacingXS * 2
+                                width: implicitWidth
+                                height: implicitHeight
                                 radius: Theme.cornerRadius * 0.5
                                 color: Theme.surfaceContainer
                                 anchors.verticalCenter: parent.verticalCenter
 
                                 Row {
-                                    anchors.fill: parent
-                                    anchors.margins: 2
+                                    id: macAddressButtonRow
+                                    anchors.centerIn: parent
+                                    spacing: Theme.spacingXS
 
                                     Repeater {
                                         model: ["Default", "Cloned"]
 
                                         Rectangle {
-                                            width: parent.width / 2
-                                            height: parent.height
+                                            property bool isSelected: networkTab.macAddressIndex === index
+                                            
+                                            // TextMetrics to calculate button size
+                                            TextMetrics {
+                                                id: macButtonTextMetrics
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                text: modelData
+                                            }
+                                            
+                                            implicitWidth: macButtonTextMetrics.width + Theme.spacingS * 2
+                                            implicitHeight: Math.max(macButtonTextMetrics.height, 32) + Theme.spacingS * 2
+                                            width: implicitWidth
+                                            height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
-                                            color: networkTab.macAddressIndex === index ? Theme.primary : "transparent"
+                                            color: isSelected ? Theme.primary : "transparent"
 
                                             StyledText {
-                                                anchors.centerIn: parent
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: Theme.spacingS
+                                                anchors.rightMargin: Theme.spacingS
                                                 text: modelData
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: networkTab.macAddressIndex === index ? Theme.onPrimary : Theme.surfaceText
+                                                color: isSelected ? Theme.onPrimary : Theme.surfaceText
+                                                horizontalAlignment: Text.AlignHCenter
                                             }
 
                                             MouseArea {
@@ -2173,17 +2486,31 @@ Item {
                         }
 
                         Rectangle {
-                            width: 100
-                            height: 32
+                            // TextMetrics to calculate button size
+                            TextMetrics {
+                                id: applyMacTextMetrics
+                                font.pixelSize: Theme.fontSizeSmall
+                                text: "Apply"
+                            }
+                            
+                            implicitWidth: applyMacTextMetrics.width + Theme.spacingS * 2
+                            implicitHeight: Math.max(applyMacTextMetrics.height, 32) + Theme.spacingS * 2
+                            width: implicitWidth
+                            height: implicitHeight
                             radius: Theme.cornerRadius * 0.5
                             color: applyMacMouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
                             anchors.right: parent.right
 
                             StyledText {
-                                anchors.centerIn: parent
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.leftMargin: Theme.spacingS
+                                anchors.rightMargin: Theme.spacingS
                                 text: "Apply"
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.onPrimary
+                                horizontalAlignment: Text.AlignHCenter
                             }
 
                             MouseArea {

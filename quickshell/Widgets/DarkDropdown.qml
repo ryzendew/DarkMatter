@@ -41,9 +41,15 @@ Rectangle {
     signal valueChanged(string value)
 
     width: parent.width
-    height: Math.max(68, controlHeight + Theme.spacingXL * 2)
+    height: Math.max(68, dropdown.height + Theme.spacingXL * 2)
     radius: Math.max(Theme.cornerRadius, 16)
     color: "transparent"
+    
+    // Padding constants for better spacing
+    readonly property int horizontalPadding: Theme.spacingL
+    readonly property int verticalPadding: Theme.spacingM
+    readonly property int dropdownHorizontalPadding: Theme.spacingL + Theme.spacingS
+    readonly property int dropdownVerticalPadding: Theme.spacingM
     Component.onCompleted: forceRecreateTimer.start()
     Component.onDestruction: {
         const popup = popupLoader.item
@@ -72,9 +78,9 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: dropdown.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Theme.spacingL
+        anchors.leftMargin: root.horizontalPadding
         anchors.rightMargin: Theme.spacingL
-        spacing: 4
+        spacing: Theme.spacingXS
 
         StyledText {
             text: root.text
@@ -96,20 +102,79 @@ Rectangle {
         }
     }
 
+    // TextMetrics to calculate text width and height for auto-expanding dropdown
+    TextMetrics {
+        id: textMetrics
+        font.pixelSize: Theme.fontSizeMedium
+        font.weight: (root.currentValue && root.currentValue !== "") ? Font.Normal : Font.Medium
+        text: {
+            if (root.currentValue && root.currentValue !== "") {
+                return root.currentValue
+            }
+            return root.text || "Select..."
+        }
+    }
+    
+    // Force recalculation when text changes
+    onCurrentValueChanged: {
+        Qt.callLater(() => {
+            textMetrics.text = root.currentValue && root.currentValue !== "" ? root.currentValue : (root.text || "Select...")
+        })
+    }
+    
+    onTextChanged: {
+        if (!root.currentValue || root.currentValue === "") {
+            Qt.callLater(() => {
+                textMetrics.text = root.text || "Select..."
+            })
+        }
+    }
+
     Rectangle {
         id: dropdown
 
-        width: root.width <= 60 ? root.width : 200
-        height: root.controlHeight
+        // Auto-expand width based on content with min/max constraints
+        width: {
+            const minWidth = 120
+            const maxWidth = Math.min(600, root.width * 0.8)
+            const hasIcon = root.currentValue && root.currentValue !== "" && root.optionIcons.length > 0 && root.options.indexOf(root.currentValue) >= 0 && root.optionIcons[root.options.indexOf(root.currentValue)] !== ""
+            const iconWidth = hasIcon ? 20 + Theme.spacingM : 0
+            const expandIconWidth = 20 // Fixed width for expand icon
+            const textWidth = textMetrics.width
+            const horizontalPadding = root.dropdownHorizontalPadding * 2
+            const spacing = Theme.spacingM // Space between icon and text, and between text and expand icon
+            const contentWidth = textWidth + iconWidth + horizontalPadding + expandIconWidth + spacing
+            return Math.max(minWidth, Math.min(maxWidth, contentWidth))
+        }
+        
+        // Auto-expand height based on content with min/max constraints
+        height: {
+            const minHeight = root.controlHeight // Minimum height (48px default)
+            const maxHeight = 200 // Maximum height to prevent excessive expansion
+            // Use boundingRect.height for accurate text height measurement
+            const textHeight = textMetrics.boundingRect.height || textMetrics.height || Theme.fontSizeMedium * 1.5
+            const iconHeight = 20 // Icon height (if present)
+            const verticalPadding = root.dropdownVerticalPadding * 2
+            const contentHeight = Math.max(textHeight, iconHeight) + verticalPadding
+            return Math.max(minHeight, Math.min(maxHeight, contentHeight))
+        }
         anchors.right: parent.right
-        anchors.rightMargin: Theme.spacingL
+        anchors.rightMargin: root.horizontalPadding
         anchors.verticalCenter: parent.verticalCenter
         radius: Theme.cornerRadius
         color: dropdownArea.containsMouse ? Theme.primaryHover : Theme.contentBackground()
-        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, dropdownArea.containsMouse ? 0.2 : 0.12)
         border.width: 1
+        
 
         Behavior on color {
+            ColorAnimation {
+                duration: Theme.shortDuration
+                easing.type: Theme.standardEasing
+            }
+        }
+        
+        Behavior on border.color {
             ColorAnimation {
                 duration: Theme.shortDuration
                 easing.type: Theme.standardEasing
@@ -146,7 +211,7 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: expandIcon.left
             anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: Theme.spacingL
+            anchors.leftMargin: root.dropdownHorizontalPadding
             anchors.rightMargin: Theme.spacingM
             spacing: Theme.spacingM
 
@@ -178,6 +243,8 @@ Rectangle {
             }
 
             StyledText {
+                id: dropdownText
+                
                 text: {
                     if (root.currentValue && root.currentValue !== "") {
                         return root.currentValue
@@ -199,11 +266,11 @@ Rectangle {
             height: 20
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: Theme.spacingL
+            anchors.rightMargin: root.dropdownHorizontalPadding
             name: "expand_more"
             size: 20
             color: Theme.surfaceText
-            opacity: dropdownArea.containsMouse ? 1.0 : 0.7
+            opacity: dropdownArea.containsMouse ? 1.0 : 0.6
             
             Behavior on opacity {
                 NumberAnimation {
@@ -284,7 +351,7 @@ Rectangle {
 
                 parent: Overlay.overlay
                 width: dropdown.width + root.popupWidthOffset
-                height: Math.min(root.maxPopupHeight, (root.enableFuzzySearch ? 48 : 0) + Math.min(filteredOptions.length, 10) * 40 + 16)
+                height: Math.min(root.maxPopupHeight, (root.enableFuzzySearch ? 44 + Theme.spacingS : 0) + Math.min(filteredOptions.length, 10) * 44 + Theme.spacingS * 2)
                 padding: 0
                 modal: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
@@ -302,7 +369,7 @@ Rectangle {
 
                 contentItem: Rectangle {
                     color: Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 1)
-                    border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                    border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.15)
                     border.width: 1
                     radius: Theme.cornerRadius
                     layer.enabled: true
@@ -310,17 +377,17 @@ Rectangle {
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: Theme.spacingXS
+                        anchors.margins: Theme.spacingS
 
                         Rectangle {
                             id: searchContainer
 
                             width: parent.width
-                            height: 40
+                            height: 44
                             visible: root.enableFuzzySearch
                             radius: Theme.cornerRadius
                             color: Theme.surfaceVariantAlpha
-                            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.15)
                             border.width: 1
 
                             DarkTextField {
@@ -345,7 +412,7 @@ Rectangle {
 
                         Item {
                             width: 1
-                            height: root.enableFuzzySearch ? Theme.spacingXS : 0
+                            height: root.enableFuzzySearch ? Theme.spacingS : 0
                         }
 
                         DarkListView {
@@ -354,7 +421,7 @@ Rectangle {
                             property var popupRef: dropdownMenu
 
                             width: parent.width
-                            height: parent.height - (root.enableFuzzySearch ? searchContainer.height + Theme.spacingXS : 0)
+                            height: parent.height - (root.enableFuzzySearch ? searchContainer.height + Theme.spacingS : 0)
                             clip: true
                             model: filteredOptions
                             spacing: 2
@@ -373,14 +440,28 @@ Rectangle {
                                 property int optionIndex: root.options.indexOf(modelData)
 
                                 width: ListView.view.width
-                                height: 40
+                                height: 44
                                 radius: Theme.cornerRadius
                                 color: isSelected ? Theme.primaryHover : optionArea.containsMouse ? Theme.primaryHoverLight : "transparent"
-                                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
-                                border.width: 1
+                                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, (isSelected || optionArea.containsMouse) ? 0.2 : 0.08)
+                                border.width: (isSelected || optionArea.containsMouse) ? 1 : 0
 
                                 Behavior on color {
                                     ColorAnimation {
+                                        duration: Theme.shorterDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+                                
+                                Behavior on border.color {
+                                    ColorAnimation {
+                                        duration: Theme.shorterDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+                                
+                                Behavior on border.width {
+                                    NumberAnimation {
                                         duration: Theme.shorterDuration
                                         easing.type: Theme.standardEasing
                                     }
@@ -389,8 +470,8 @@ Rectangle {
                                 Row {
                                     anchors.left: parent.left
                                     anchors.verticalCenter: parent.verticalCenter
-                                    anchors.leftMargin: Theme.spacingL
-                                    anchors.rightMargin: Theme.spacingL
+                                    anchors.leftMargin: Theme.spacingL + Theme.spacingS
+                                    anchors.rightMargin: Theme.spacingL + Theme.spacingS
                                     spacing: Theme.spacingM
 
                                     Item {
@@ -423,7 +504,7 @@ Rectangle {
                                         font.pixelSize: Theme.fontSizeMedium
                                         font.weight: isCurrentValue ? Font.Medium : Font.Normal
                                         color: isCurrentValue ? Theme.primary : Theme.surfaceText
-                                        width: parent.parent.width - parent.x - Theme.spacingL
+                                        width: parent.parent.width - parent.x - (Theme.spacingL + Theme.spacingS)
                                         elide: Text.ElideRight
                                     }
                                 }

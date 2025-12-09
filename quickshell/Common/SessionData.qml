@@ -576,7 +576,7 @@ Singleton {
     FileView {
         id: settingsFile
 
-        path: StandardPaths.writableLocation(StandardPaths.GenericStateLocation) + "/DarkMaterialShell/session.json"
+        path: `${StandardPaths.writableLocation(StandardPaths.GenericStateLocation)}/DarkMaterialShell/session.json`
         blockLoading: true
         blockWrites: true
         watchChanges: true
@@ -624,7 +624,7 @@ Singleton {
                 return "ERROR: No path provided"
             }
 
-            var absolutePath = path.startsWith("/") ? path : StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/" + path
+            var absolutePath = path.startsWith("/") ? path : Paths.stringify(StandardPaths.writableLocation(StandardPaths.HomeLocation)) + "/" + path
 
             try {
                 root.setWallpaper(absolutePath)
@@ -692,7 +692,7 @@ Singleton {
                 return "ERROR: No path provided"
             }
 
-            var absolutePath = path.startsWith("/") ? path : StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/" + path
+            var absolutePath = path.startsWith("/") ? path : Paths.stringify(StandardPaths.writableLocation(StandardPaths.HomeLocation)) + "/" + path
 
             try {
                 if (!root.perMonitorWallpaper) {

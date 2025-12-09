@@ -84,7 +84,7 @@ StyledRect {
         Flickable {
             id: arrangementFlickable
             width: parent.width
-            height: Math.max(300, Math.min(500, arrangementArea.bounds.height * arrangementArea.scaleFactor + 40))
+            height: Math.max(300, Math.min(800, arrangementArea.bounds.height * arrangementArea.scaleFactor + 40))
             clip: true
             flickableDirection: Flickable.HorizontalAndVerticalFlick
             boundsBehavior: Flickable.StopAtBounds
@@ -106,11 +106,11 @@ StyledRect {
                 var heightScale = (height - 40) / Math.max(bounds.height, 1080)
                 return Math.min(widthScale, heightScale, 0.2)
             }
-            property real zoomLevel: 1.0
+            property real zoomLevel: 0.8  // Start 1.5x zoomed out (1/1.5 = 0.67)
             property real scaleFactor: baseScaleFactor * zoomLevel
             
-            contentWidth: Math.max(width * 2, bounds.width * scaleFactor + 40)
-            contentHeight: Math.max(height * 2, bounds.height * scaleFactor + 40)
+            contentWidth: Math.max(width * 5, bounds.width * scaleFactor + 1000)
+            contentHeight: Math.max(height * 5, bounds.height * scaleFactor + 1000)
             
             MouseArea {
                 anchors.fill: parent
@@ -120,7 +120,7 @@ StyledRect {
                     var delta = wheel.angleDelta.y
                     var oldZoom = arrangementFlickable.zoomLevel
                     var zoomFactor = delta > 0 ? 1.1 : 0.9
-                    arrangementFlickable.zoomLevel = Math.max(0.3, Math.min(3.0, arrangementFlickable.zoomLevel * zoomFactor))
+                    arrangementFlickable.zoomLevel = Math.max(0.1, Math.min(3.0, arrangementFlickable.zoomLevel * zoomFactor))
                     
                     if (oldZoom !== arrangementFlickable.zoomLevel) {
                         var zoomRatio = arrangementFlickable.zoomLevel / oldZoom
@@ -142,8 +142,8 @@ StyledRect {
             
             Item {
                 id: arrangementArea
-                width: Math.max(arrangementFlickable.contentWidth, parent.width * 3)
-                height: Math.max(arrangementFlickable.contentHeight, parent.height * 3)
+                width: Math.max(arrangementFlickable.contentWidth, parent.width * 5)
+                height: Math.max(arrangementFlickable.contentHeight, parent.height * 5)
                 
                 property var bounds: arrangementFlickable.bounds
                 property real scaleFactor: arrangementFlickable.scaleFactor
@@ -268,10 +268,10 @@ StyledRect {
                         drag.target: parent
                         drag.axis: Drag.XAndYAxis
                         drag.threshold: 0
-                        drag.minimumX: -10000
-                        drag.maximumX: 10000
-                        drag.minimumY: -10000
-                        drag.maximumY: 10000
+                        drag.minimumX: -50000
+                        drag.maximumX: 50000
+                        drag.minimumY: -50000
+                        drag.maximumY: 50000
                         
                         property real lastValidX: monitorDelegate.x
                         property real lastValidY: monitorDelegate.y
@@ -301,24 +301,23 @@ StyledRect {
                                 
                                 lastValidX = newX
                                 lastValidY = newY
-                                
-                                Qt.callLater(() => {
-                                    var actualX = ((monitorDelegate.x - 20) / arrangementArea.scaleFactor) + arrangementArea.bounds.minX
-                                    var actualY = ((monitorDelegate.y - 20) / arrangementArea.scaleFactor) + arrangementArea.bounds.minY
-                                    
-                                    actualX = Math.round(actualX / 10) * 10
-                                    actualY = Math.round(actualY / 10) * 10
-                                    
-                                    var newPosition = actualX + "x" + actualY
-                                    if (newPosition !== monitor.position) {
-                                        root.positionChanged(monitor.name, newPosition)
-                                    }
-                                })
                             }
                         }
                         
                         onReleased: {
                             isDragging = false
+                            
+                            // Only send position change when drag is complete
+                            var actualX = ((monitorDelegate.x - 20) / arrangementArea.scaleFactor) + arrangementArea.bounds.minX
+                            var actualY = ((monitorDelegate.y - 20) / arrangementArea.scaleFactor) + arrangementArea.bounds.minY
+                            
+                            actualX = Math.round(actualX / 10) * 10
+                            actualY = Math.round(actualY / 10) * 10
+                            
+                            var newPosition = actualX + "x" + actualY
+                            if (newPosition !== monitor.position) {
+                                root.positionChanged(monitor.name, newPosition)
+                            }
                         }
                     }
                 }

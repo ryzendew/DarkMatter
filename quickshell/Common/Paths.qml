@@ -23,7 +23,7 @@ Singleton {
     readonly property url imagecache: `${cache}/imagecache`
 
     function stringify(path: url): string {
-        return path.toString().replace(/%20/g, " ")
+        return path.toString().replace(/%20/g, " ").replace(/^file:\/\//, "")
     }
 
     function expandTilde(path: string): string {

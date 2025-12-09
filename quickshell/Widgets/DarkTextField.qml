@@ -59,12 +59,18 @@ StyledRect {
     property real cornerRadius: Theme.cornerRadius
     readonly property real leftPadding: Theme.spacingL + (leftIconName ? leftIconSize + Theme.spacingM : 0)
     readonly property real rightPadding: Theme.spacingL + (showClearButton && text.length > 0 ? 24 + Theme.spacingM : 0)
-    property real topPadding: Theme.spacingL
-    property real bottomPadding: Theme.spacingL
+    property real topPadding: Theme.spacingS
+    property real bottomPadding: Theme.spacingS
     property bool ignoreLeftRightKeys: false
     property var keyForwardTargets: []
     property Item keyNavigationTab: null
     property Item keyNavigationBacktab: null
+    property bool autoExpandWidth: true
+    property bool autoExpandHeight: true
+    property real minWidth: 120
+    property real maxWidth: 600
+    property real minHeight: 48
+    property real maxHeight: 200
 
     signal textEdited
     signal editingFinished
@@ -90,8 +96,34 @@ StyledRect {
         textInput.insert(textInput.cursorPosition, str)
     }
 
-    width: 200
-    height: 48
+    // TextMetrics to calculate text dimensions
+    TextMetrics {
+        id: textMetrics
+        font.pixelSize: textInput.font.pixelSize
+        font.family: root.notoSansFamily
+        font.weight: textInput.font.weight
+        text: textInput.text.length > 0 ? textInput.text : root.placeholderText
+    }
+
+    width: {
+        if (!autoExpandWidth) return 200
+        const minW = minWidth
+        const maxW = Math.min(maxWidth, parent ? parent.width * 0.8 : 600)
+        const textWidth = textMetrics.width
+        const horizontalPadding = leftPadding + rightPadding
+        const contentWidth = textWidth + horizontalPadding
+        return Math.max(minW, Math.min(maxW, contentWidth))
+    }
+    
+    height: {
+        if (!autoExpandHeight) return 48
+        const minH = minHeight
+        const maxH = maxHeight
+        const textHeight = textMetrics.boundingRect.height
+        const verticalPadding = topPadding + bottomPadding
+        const contentHeight = textHeight + verticalPadding
+        return Math.max(minH, Math.min(maxH, contentHeight))
+    }
     radius: cornerRadius
     color: backgroundColor
     border.color: textInput.activeFocus ? focusedBorderColor : Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)

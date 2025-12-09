@@ -11,7 +11,7 @@ import qs.Modals.FileBrowser
 Item {
     id: keybindsTab
 
-    readonly property string defaultKeybindsPath: (Quickshell.env("HOME") || StandardPaths.writableLocation(StandardPaths.HomeLocation)) + "/.config/hypr/hyprland/keybinds.conf"
+    readonly property string defaultKeybindsPath: (Quickshell.env("HOME") || Paths.stringify(StandardPaths.writableLocation(StandardPaths.HomeLocation))) + "/.config/hypr/hyprland/keybinds.conf"
     
     property string keybindsPath: (SettingsData.keybindsPath && SettingsData.keybindsPath !== "") ? SettingsData.keybindsPath : defaultKeybindsPath
     

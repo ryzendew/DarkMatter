@@ -2949,7 +2949,7 @@ Singleton {
     FileView {
         id: settingsFile
 
-        path: StandardPaths.writableLocation(StandardPaths.ConfigLocation) + "/DarkMaterialShell/settings.json"
+        path: `${StandardPaths.writableLocation(StandardPaths.ConfigLocation)}/DarkMaterialShell/settings.json`
         blockLoading: true
         blockWrites: true
         atomicWrites: true

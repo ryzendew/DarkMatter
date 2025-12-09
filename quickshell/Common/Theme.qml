@@ -73,7 +73,7 @@ Singleton {
     readonly property real vibranceTrigger: typeof SettingsData !== "undefined" ? SettingsData.colorVibrance : 1.0
     property var customThemeData: null
 
-    readonly property string stateDir: Paths.strip(StandardPaths.writableLocation(StandardPaths.CacheLocation).toString()) + "/darkshell"
+    readonly property string stateDir: Paths.strip(`${StandardPaths.writableLocation(StandardPaths.CacheLocation)}/darkshell`)
 
     Component.onCompleted: {
         Quickshell.execDetached(["mkdir", "-p", stateDir])

@@ -717,8 +717,8 @@ DarkPopout {
                         showClearButton: true
                         font.pixelSize: Theme.fontSizeMedium
                         textColor: Theme.surfaceText
-                        topPadding: Theme.spacingM
-                        bottomPadding: Theme.spacingM
+                        topPadding: Theme.spacingS
+                        bottomPadding: Theme.spacingS
                         enabled: appDrawerPopout.shouldBeVisible
                         ignoreLeftRightKeys: true
                         keyForwardTargets: [keyHandler]

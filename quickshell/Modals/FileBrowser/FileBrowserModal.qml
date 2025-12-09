@@ -134,10 +134,10 @@ DarkModal {
     }
     
     property var steamPaths: [
-        StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/.steam/steam/steamapps/workshop/content/431960",
-        StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/.local/share/Steam/steamapps/workshop/content/431960",
-        StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/workshop/content/431960",
-        StandardPaths.writableLocation(StandardPaths.HomeLocation) + "/snap/steam/common/.local/share/Steam/steamapps/workshop/content/431960"
+        Paths.stringify(`${StandardPaths.writableLocation(StandardPaths.HomeLocation)}/.steam/steam/steamapps/workshop/content/431960`),
+        Paths.stringify(`${StandardPaths.writableLocation(StandardPaths.HomeLocation)}/.local/share/Steam/steamapps/workshop/content/431960`),
+        Paths.stringify(`${StandardPaths.writableLocation(StandardPaths.HomeLocation)}/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/workshop/content/431960`),
+        Paths.stringify(`${StandardPaths.writableLocation(StandardPaths.HomeLocation)}/snap/steam/common/.local/share/Steam/steamapps/workshop/content/431960`)
     ]
     property int currentPathIndex: 0
     

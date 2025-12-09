@@ -99,13 +99,22 @@ StyledRect {
             }
         }
 
-        Row {
+        GridLayout {
             width: parent.width
-            spacing: Theme.spacingM
-            visible: !monitorData || !monitorData.disabled
-            
+            columns: 2
+            columnSpacing: Theme.spacingM
+            rowSpacing: Theme.spacingXS
+
+            StyledText {
+                text: "Disabled"
+                font.pixelSize: Theme.fontSizeSmall
+                font.weight: Font.Medium
+                color: Theme.surfaceText
+                Layout.fillWidth: true
+            }
+
             DarkToggle {
-                width: (parent.width - parent.spacing) / 2
+                Layout.fillWidth: true
                 text: "Disabled"
                 description: "Disable this monitor"
                 checked: monitorData ? monitorData.disabled : false
@@ -116,14 +125,6 @@ StyledRect {
                     }
                 }
             }
-        }
-
-        GridLayout {
-            width: parent.width
-            columns: 2
-            columnSpacing: Theme.spacingM
-            rowSpacing: Theme.spacingXS
-            visible: !monitorData || !monitorData.disabled
 
             StyledText {
                 text: "Resolution"
