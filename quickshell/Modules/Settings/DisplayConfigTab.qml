@@ -18,10 +18,18 @@ Item {
     property bool loading: true
     property bool hasUnsavedChanges: false
     property string originalContent: ""
+    property string selectedMonitor: ""
     readonly property string monitorsConfPath: (Quickshell.env("HOME") || StandardPaths.writableLocation(StandardPaths.HomeLocation)) + "/.config/hypr/monitors.conf"
     readonly property string capabilitiesCachePath: StandardPaths.writableLocation(StandardPaths.GenericConfigLocation) + "/DarkMaterialShell/monitor-capabilities.json"
     
     signal tabActivated()
+    
+    function getFilteredMonitors() {
+        if (selectedMonitor === "") {
+            return monitors
+        }
+        return monitors.filter(function(m) { return m.name === selectedMonitor })
+    }
 
     function parseMonitorsConf(content) {
         var monitors = []
@@ -505,7 +513,7 @@ Item {
                         var monitorObj = {
                             name: monitor.name || "Unknown",
                             resolution: monitor.width + "x" + monitor.height,
-                            position: "",
+                            position: (monitor.x !== undefined && monitor.y !== undefined) ? (monitor.x + "x" + monitor.y) : "",
                             scale: monitor.scale ? monitor.scale.toString() : "1",
                             refreshRate: monitor.refresh ? monitor.refresh.toString() : "",
                             transform: "",
@@ -820,7 +828,7 @@ Item {
         onSaved: {
             hasUnsavedChanges = false
             if (typeof ToastService !== "undefined") {
-                ToastService.showSuccess("Monitor configuration saved successfully")
+                ToastService.showInfo("Monitor configuration saved successfully")
             }
             Qt.callLater(() => {
                 monitorsFile.reload()
@@ -845,7 +853,7 @@ Item {
         onExited: exitCode => {
             if (exitCode === 0) {
                 if (typeof ToastService !== "undefined") {
-                    ToastService.showSuccess("Hyprland configuration reloaded")
+                    ToastService.showInfo("Hyprland configuration reloaded")
                 }
                 loadMonitorCapabilities()
             } else {
@@ -858,7 +866,7 @@ Item {
 
     DarkFlickable {
         anchors.fill: parent
-        anchors.topMargin: Theme.spacingL
+        anchors.topMargin: Theme.spacingM
         anchors.bottomMargin: Theme.spacingS
         clip: true
         contentHeight: mainColumn.height
@@ -867,7 +875,22 @@ Item {
         Column {
             id: mainColumn
             width: parent.width
-            spacing: Theme.spacingL
+            spacing: Theme.spacingM
+
+            MonitorArrangementWidget {
+                id: arrangementWidget
+                width: parent.width
+                monitors: displayConfigTab.monitors
+                monitorCapabilities: displayConfigTab.monitorCapabilities
+                selectedMonitor: displayConfigTab.selectedMonitor
+                visible: displayConfigTab.monitors.length > 0 && !displayConfigTab.loading
+                onMonitorSelected: function(monitorName) {
+                    displayConfigTab.selectedMonitor = monitorName
+                }
+                onPositionChanged: function(monitorName, newPosition) {
+                    displayConfigTab.applyMonitorSetting(monitorName, "position", newPosition)
+                }
+            }
 
             StyledText {
                 text: "Loading monitors..."
@@ -888,8 +911,39 @@ Item {
                 wrapMode: Text.WordWrap
             }
 
+            Row {
+                width: parent.width
+                spacing: Theme.spacingM
+                visible: displayConfigTab.monitors.length > 0 && !displayConfigTab.loading && displayConfigTab.selectedMonitor !== ""
+                
+                StyledRect {
+                    height: 40
+                    width: showAllButtonText.implicitWidth + Theme.spacingL * 2
+                    radius: Theme.cornerRadius
+                    color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.1)
+                    border.color: Theme.primary
+                    border.width: 1
+                    
+                    StyledText {
+                        id: showAllButtonText
+                        anchors.centerIn: parent
+                        text: "Show All Monitors"
+                        font.pixelSize: Theme.fontSizeMedium
+                        color: Theme.primary
+                    }
+                    
+                    StateLayer {
+                        stateColor: Theme.primary
+                        cornerRadius: parent.radius
+                        onClicked: {
+                            displayConfigTab.selectedMonitor = ""
+                        }
+                    }
+                }
+            }
+
             Repeater {
-                model: displayConfigTab.monitors
+                model: displayConfigTab.getFilteredMonitors()
 
                 delegate: MonitorConfigWidget {
                     width: parent.width
@@ -901,30 +955,40 @@ Item {
                 }
             }
 
-            // Global VRR Settings
+            StyledText {
+                text: "VRR Settings"
+                font.pixelSize: Theme.fontSizeMedium
+                font.weight: Font.Medium
+                color: Theme.primary
+                visible: displayConfigTab.monitors.length > 0 && !displayConfigTab.loading
+                width: parent.width
+            }
+
             StyledRect {
                 width: parent.width
-                height: vrrSettingsColumn.implicitHeight + Theme.spacingL * 2
+                height: vrrSettingsColumn.implicitHeight + Theme.spacingM * 2
                 radius: Theme.cornerRadius
                 color: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g, Theme.surfaceVariant.b, 0.20)
                 border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                 border.width: 1
+                visible: displayConfigTab.monitors.length > 0 && !displayConfigTab.loading
 
                 Column {
                     id: vrrSettingsColumn
                     anchors.fill: parent
-                    anchors.margins: Theme.spacingL
-                    spacing: Theme.spacingM
+                    anchors.margins: Theme.spacingM
+                    spacing: Theme.spacingXS
 
                     StyledText {
                         text: "VRR Settings"
-                        font.pixelSize: Theme.fontSizeLarge
+                        font.pixelSize: Theme.fontSizeMedium
                         font.weight: Font.Medium
                         color: Theme.surfaceText
+                        visible: false
                     }
 
                     Repeater {
-                        model: displayConfigTab.monitors
+                        model: displayConfigTab.getFilteredMonitors()
 
                         delegate: DarkDropdown {
                             width: parent.width

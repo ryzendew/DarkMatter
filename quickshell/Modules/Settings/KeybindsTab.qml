@@ -301,7 +301,7 @@ Item {
         onSaved: {
             hasUnsavedChanges = false
             if (typeof ToastService !== "undefined") {
-                ToastService.showSuccess("Keybinds saved successfully")
+                ToastService.showInfo("Keybinds saved successfully")
             }
             // Reload the file to reflect changes
             Qt.callLater(() => {
@@ -328,7 +328,7 @@ Item {
         onExited: exitCode => {
             if (exitCode === 0) {
                 if (typeof ToastService !== "undefined") {
-                    ToastService.showSuccess("Hyprland configuration reloaded")
+                    ToastService.showInfo("Hyprland configuration reloaded")
                 }
             } else {
                 if (typeof ToastService !== "undefined") {

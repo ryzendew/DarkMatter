@@ -65,24 +65,25 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        anchors.leftMargin: getContentMargin()
-        anchors.rightMargin: getContentMargin()
-        anchors.bottomMargin: getContentMargin()
+        anchors.leftMargin: 0
+        anchors.rightMargin: 0
+        anchors.bottomMargin: 0
         anchors.topMargin: 0
         color: "transparent"
         clip: true
         
-        function getContentMargin() {
-            const screenWidth = Screen.width
-            if (screenWidth >= 1920) return Theme.spacingXL
-            if (screenWidth >= 1280) return Theme.spacingL
-            return Theme.spacingM
-        }
-
-        Loader {
-            id: personalizationLoader
-
+        // Content padding wrapper
+        Item {
             anchors.fill: parent
+            anchors.leftMargin: 24
+            anchors.rightMargin: 24
+            anchors.topMargin: 24
+            anchors.bottomMargin: 24
+
+            Loader {
+                id: personalizationLoader
+
+                anchors.fill: parent
             active: root.currentIndex === 0
             visible: active
             asynchronous: true
@@ -215,7 +216,9 @@ Item {
             visible: active
             asynchronous: true
 
-            sourceComponent: DisplayConfigTab {
+            sourceComponent: Component {
+                DisplayConfigTab {
+                }
             }
             
             onLoaded: {
@@ -351,8 +354,8 @@ Item {
 
             source: "../../Modules/Settings/KeybindsTab.qml"
 
+            }
         }
-
     }
 
 }

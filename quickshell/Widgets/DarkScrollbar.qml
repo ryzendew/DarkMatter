@@ -7,10 +7,10 @@ ScrollBar {
 
     property bool _scrollBarActive: false
     property alias hideTimer: hideScrollBarTimer
-    property bool _isParentMoving: parent && (parent.moving || parent.flicking || parent.isMomentumActive)
+    property bool _isParentMoving: parent && ((parent.moving !== undefined && parent.moving) || (parent.flicking !== undefined && parent.flicking) || (parent.isMomentumActive !== undefined && parent.isMomentumActive))
     property bool _shouldShow: pressed || hovered || active || _isParentMoving || _scrollBarActive
 
-    policy: (parent && parent.contentHeight > parent.height) ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+    policy: (parent && parent.contentHeight !== undefined && parent.height !== undefined && parent.contentHeight > parent.height) ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
     minimumSize: 0.08
     implicitWidth: 8
     interactive: true

@@ -94,14 +94,14 @@ StyledRect {
     height: 48
     radius: cornerRadius
     color: backgroundColor
-    border.color: textInput.activeFocus ? focusedBorderColor : normalBorderColor
+    border.color: textInput.activeFocus ? focusedBorderColor : Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
     border.width: textInput.activeFocus ? focusedBorderWidth : borderWidth
 
     DarkIcon {
         id: leftIcon
 
         anchors.left: parent.left
-        anchors.leftMargin: Theme.spacingM
+        anchors.leftMargin: Theme.spacingL
         anchors.verticalCenter: parent.verticalCenter
         name: leftIconName
         size: leftIconSize
@@ -171,10 +171,19 @@ StyledRect {
         height: 24
         radius: 12
         color: clearArea.containsMouse ? Theme.outlineStrong : "transparent"
+        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+        border.width: 1
         anchors.right: parent.right
-        anchors.rightMargin: Theme.spacingM
+        anchors.rightMargin: Theme.spacingL
         anchors.verticalCenter: parent.verticalCenter
         visible: showClearButton && text.length > 0
+
+        Behavior on color {
+            ColorAnimation {
+                duration: Theme.shortDuration
+                easing.type: Theme.standardEasing
+            }
+        }
 
         DarkIcon {
             anchors.centerIn: parent

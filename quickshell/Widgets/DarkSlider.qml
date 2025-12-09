@@ -40,12 +40,12 @@ Item {
         Row {
         anchors.centerIn: parent
         width: parent.width
-        spacing: Theme.spacingL
+        spacing: Theme.spacingM
 
         DarkIcon {
             name: slider.leftIcon
             size: Theme.iconSize
-            color: slider.enabled ? Theme.onSurface : Theme.onSurface_38
+            color: slider.enabled ? Theme.surfaceText : Theme.surfaceVariantText
             anchors.verticalCenter: parent.verticalCenter
             visible: slider.leftIcon.length > 0
         }
@@ -56,10 +56,12 @@ Item {
             property int leftIconWidth: slider.leftIcon.length > 0 ? Theme.iconSize : 0
             property int rightIconWidth: slider.rightIcon.length > 0 ? Theme.iconSize : 0
 
-            width: parent.width - (leftIconWidth + rightIconWidth + (slider.leftIcon.length > 0 ? Theme.spacingL : 0) + (slider.rightIcon.length > 0 ? Theme.spacingL : 0))
-            height: 14
-            radius: Math.max(Theme.cornerRadius, 7)
+            width: parent.width - (leftIconWidth + rightIconWidth + (slider.leftIcon.length > 0 ? Theme.spacingM : 0) + (slider.rightIcon.length > 0 ? Theme.spacingM : 0))
+            height: 12
+            radius: 6
             color: slider.trackColor
+            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+            border.width: 1
             anchors.verticalCenter: parent.verticalCenter
             clip: false
 
@@ -82,9 +84,9 @@ Item {
 
                 property bool active: sliderMouseArea.containsMouse || sliderMouseArea.pressed || slider.isDragging
 
-                width: 10
-                height: 28
-                radius: Math.max(Theme.cornerRadius, 5)
+                width: 20
+                height: 20
+                radius: 10
                 x: {
                     const ratio = (slider.value - slider.minimum) / (slider.maximum - slider.minimum)
                     const travel = sliderTrack.width - width
@@ -92,7 +94,7 @@ Item {
                 }
                 anchors.verticalCenter: parent.verticalCenter
                 color: slider.enabled ? Theme.primary : withAlpha(Theme.onSurface, 0.12)
-                border.width: 3
+                border.width: 2
                 border.color: slider.thumbOutlineColor
 
 
@@ -231,17 +233,19 @@ Item {
             StyledRect {
                 id: valueTooltip
 
-                width: tooltipText.contentWidth + Theme.spacingS * 2
-                height: tooltipText.contentHeight + Theme.spacingXS * 2
+                width: tooltipText.contentWidth + Theme.spacingL
+                height: tooltipText.contentHeight + Theme.spacingS
                 radius: Theme.cornerRadius
                 color: Theme.surfaceContainer
-                border.color: Theme.outline
+                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                 border.width: 1
                 anchors.bottom: parent.top
                 anchors.bottomMargin: Theme.spacingM
                 x: Math.max(0, Math.min(parent.width - width, sliderHandle.x + sliderHandle.width/2 - width/2))
                 visible: (sliderMouseArea.containsMouse && slider.showValue) || (slider.isDragging && slider.showValue)
                 opacity: visible ? 1 : 0
+                layer.enabled: true
+                layer.smooth: true
 
                 StyledText {
                     id: tooltipText
@@ -266,7 +270,7 @@ Item {
         DarkIcon {
             name: slider.rightIcon
             size: Theme.iconSize
-            color: slider.enabled ? Theme.onSurface : Theme.onSurface_38
+            color: slider.enabled ? Theme.surfaceText : Theme.surfaceVariantText
             anchors.verticalCenter: parent.verticalCenter
             visible: slider.rightIcon.length > 0
         }

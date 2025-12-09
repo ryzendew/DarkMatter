@@ -51,25 +51,25 @@ Item {
         anchors.left: parent.left
         anchors.right: toggleTrack.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: Theme.spacingM
-        anchors.rightMargin: Theme.spacingM
-        spacing: Theme.spacingXS
+        anchors.leftMargin: Theme.spacingL
+        anchors.rightMargin: Theme.spacingL
+        spacing: 4
         visible: showText
 
         Column {
             anchors.verticalCenter: parent.verticalCenter
-            spacing: Theme.spacingXS
+            spacing: 4
 
             StyledText {
                 text: toggle.text
-                font.pixelSize: Appearance.fontSize.normal
+                font.pixelSize: Theme.fontSizeMedium
                 font.weight: Font.Medium
                 opacity: toggle.enabled ? 1 : 0.4
             }
 
             StyledText {
                 text: toggle.description
-                font.pixelSize: Appearance.fontSize.small
+                font.pixelSize: Theme.fontSizeSmall
                 color: Theme.surfaceVariantText
                 wrapMode: Text.WordWrap
                 width: Math.min(implicitWidth, toggle.width - 120)
@@ -84,14 +84,22 @@ Item {
         width: showText ? trackWidth : Math.max(parent.width, trackWidth)
         height: showText ? trackHeight : Math.max(parent.height, trackHeight)
         anchors.right: parent.right
-        anchors.rightMargin: showText ? Theme.spacingM : 0
+        anchors.rightMargin: showText ? Theme.spacingL : 0
         anchors.verticalCenter: parent.verticalCenter
         radius: Theme.cornerRadius
 
         color: (checked && enabled) ? Theme.primary : Theme.surfaceVariantAlpha
         opacity: toggling ? 0.6 : (enabled ? 1 : 0.4)
 
-        border.color: (!checked || !enabled) ? Theme.outline : "transparent"
+        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+        border.width: 1
+
+        Behavior on color {
+            ColorAnimation {
+                duration: Theme.shortDuration
+                easing.type: Theme.standardEasing
+            }
+        }
 
         readonly property int pad: Math.round((height - thumb.width) / 2)
         readonly property int edgeLeft: pad

@@ -298,7 +298,8 @@ Singleton {
         } else {
         }
         
-        const uniqueColors = [...new Set(colors)].slice(0, 16)
+        // Remove duplicates and return all unique colors (matugen extracts up to 11 color keys)
+        const uniqueColors = [...new Set(colors)]
         
         return uniqueColors
     }

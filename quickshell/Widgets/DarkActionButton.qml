@@ -19,6 +19,22 @@ StyledRect {
     height: buttonSize
     radius: circular ? buttonSize / 2 : Theme.cornerRadius
     color: backgroundColor
+    border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+    border.width: 1
+
+    Behavior on color {
+        ColorAnimation {
+            duration: Theme.shortDuration
+            easing.type: Theme.standardEasing
+        }
+    }
+
+    Behavior on border.color {
+        ColorAnimation {
+            duration: Theme.shortDuration
+            easing.type: Theme.standardEasing
+        }
+    }
 
     DarkIcon {
         anchors.centerIn: parent

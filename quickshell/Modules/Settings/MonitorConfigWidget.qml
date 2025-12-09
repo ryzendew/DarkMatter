@@ -46,7 +46,7 @@ StyledRect {
     }
     readonly property bool supportsVRR: monitorCapabilities && monitorCapabilities.vrr !== undefined && monitorCapabilities.vrr !== null
 
-    height: contentColumn.implicitHeight + Theme.spacingL * 2
+    height: contentColumn.implicitHeight + Theme.spacingM * 2
     radius: Theme.cornerRadius
     color: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g, Theme.surfaceVariant.b, 0.20)
     border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
@@ -55,8 +55,8 @@ StyledRect {
     Column {
         id: contentColumn
         anchors.fill: parent
-        anchors.margins: Theme.spacingL
-        spacing: Theme.spacingS
+        anchors.margins: Theme.spacingM
+        spacing: Theme.spacingXS
 
         Row {
             width: parent.width
@@ -99,51 +99,43 @@ StyledRect {
             }
         }
 
-        Rectangle {
+        Row {
             width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-        }
-
-        // Disabled Toggle
-        DarkToggle {
-            width: parent.width
-            text: "Disabled"
-            description: "Disable this monitor"
-            checked: monitorData ? monitorData.disabled : false
-            onToggled: (checked) => {
-                if (monitorData) {
-                    monitorData.disabled = checked
-                    settingChanged("disabled", checked ? "true" : "false")
+            spacing: Theme.spacingM
+            visible: !monitorData || !monitorData.disabled
+            
+            DarkToggle {
+                width: (parent.width - parent.spacing) / 2
+                text: "Disabled"
+                description: "Disable this monitor"
+                checked: monitorData ? monitorData.disabled : false
+                onToggled: (checked) => {
+                    if (monitorData) {
+                        monitorData.disabled = checked
+                        settingChanged("disabled", checked ? "true" : "false")
+                    }
                 }
             }
         }
 
-        Rectangle {
+        GridLayout {
             width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
-        }
-
-        // Resolution Dropdown
-        Column {
-            width: parent.width
-            spacing: Theme.spacingS
+            columns: 2
+            columnSpacing: Theme.spacingM
+            rowSpacing: Theme.spacingXS
             visible: !monitorData || !monitorData.disabled
 
             StyledText {
                 text: "Resolution"
-                font.pixelSize: Theme.fontSizeMedium
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
+                Layout.fillWidth: true
             }
 
             DarkDropdown {
                 id: resolutionDropdown
-                width: parent.width
+                Layout.fillWidth: true
                 text: "Resolution"
                 options: {
                     if (!monitorCapabilities || !monitorCapabilities.resolutions || monitorCapabilities.resolutions.length === 0) {
@@ -168,32 +160,18 @@ StyledRect {
                     }
                 }
             }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
-        }
-
-        // Refresh Rate Dropdown
-        Column {
-            width: parent.width
-            spacing: Theme.spacingS
-            visible: !monitorData || !monitorData.disabled
 
             StyledText {
                 text: "Refresh Rate"
-                font.pixelSize: Theme.fontSizeMedium
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
+                Layout.fillWidth: true
             }
 
             DarkDropdown {
                 id: refreshRateDropdown
-                width: parent.width
+                Layout.fillWidth: true
                 text: "Refresh Rate"
                 
                 property string selectedResolution: monitorData ? (monitorData.resolution || "") : ""
@@ -297,32 +275,18 @@ StyledRect {
                     }
                 }
             }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
-        }
-
-        // Scale Slider
-        Column {
-            width: parent.width
-            spacing: Theme.spacingS
-            visible: !monitorData || !monitorData.disabled
 
             StyledText {
                 text: "Scale"
-                font.pixelSize: Theme.fontSizeMedium
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
+                Layout.fillWidth: true
             }
 
             Row {
-                width: parent.width
-                spacing: Theme.spacingM
+                Layout.fillWidth: true
+                spacing: Theme.spacingS
 
                 DarkSlider {
                     id: scaleSlider
@@ -332,13 +296,11 @@ StyledRect {
                     value: {
                         if (!monitorData) return 10
                         var scale = parseFloat(monitorData.scale) || 1.0
-                        // Clamp to 1.0-2.0 range (10-20 in slider units)
                         scale = Math.max(1.0, Math.min(2.0, scale))
                         return Math.round(scale * 10)
                     }
                     onSliderDragFinished: (finalValue) => {
                         if (monitorData) {
-                            // Convert slider value (10-20) to scale (1.0-2.0)
                             var scale = (finalValue / 10.0).toFixed(1)
                             monitorData.scale = scale
                             settingChanged("scale", scale)
@@ -351,40 +313,25 @@ StyledRect {
                     text: {
                         if (!monitorData) return "1.0x"
                         var scale = parseFloat(monitorData.scale) || 1.0
-                        // Clamp to 1.0-2.0 range
                         scale = Math.max(1.0, Math.min(2.0, scale))
                         return scale.toFixed(1) + "x"
                     }
-                    font.pixelSize: Theme.fontSizeMedium
+                    font.pixelSize: Theme.fontSizeSmall
                     color: Theme.surfaceText
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
-        }
-
-        // Transform Dropdown
-        Column {
-            width: parent.width
-            spacing: Theme.spacingS
-            visible: !monitorData || !monitorData.disabled
 
             StyledText {
-                text: "Transform (Rotation)"
-                font.pixelSize: Theme.fontSizeMedium
+                text: "Transform"
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
+                Layout.fillWidth: true
             }
 
             DarkDropdown {
-                width: parent.width
+                Layout.fillWidth: true
                 text: "Transform"
                 options: ["Normal (0°)", "90°", "180°", "270°", "Flipped", "Flipped + 90°", "Flipped + 180°", "Flipped + 270°"]
                 currentValue: {
@@ -404,31 +351,17 @@ StyledRect {
                     }
                 }
             }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
-        }
-
-        // Bit Depth
-        Column {
-            width: parent.width
-            spacing: Theme.spacingS
-            visible: !monitorData || !monitorData.disabled
 
             StyledText {
                 text: "Bit Depth"
-                font.pixelSize: Theme.fontSizeMedium
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
+                Layout.fillWidth: true
             }
 
             DarkDropdown {
-                width: parent.width
+                Layout.fillWidth: true
                 text: "Bit Depth"
                 options: ["Default (8-bit)", "10-bit"]
                 currentValue: {
@@ -445,23 +378,23 @@ StyledRect {
             }
         }
 
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
+        StyledText {
+            text: "Color Settings"
+            font.pixelSize: Theme.fontSizeMedium
+            font.weight: Font.Medium
+            color: Theme.primary
             visible: !monitorData || !monitorData.disabled
+            width: parent.width
         }
 
-        // Color Management
         Column {
             width: parent.width
-            spacing: Theme.spacingS
+            spacing: Theme.spacingXS
             visible: !monitorData || !monitorData.disabled
 
             StyledText {
                 text: "Color Management"
-                font.pixelSize: Theme.fontSizeMedium
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
             }
@@ -517,31 +450,33 @@ StyledRect {
             }
         }
 
-        Rectangle {
+        StyledText {
+            text: "HDR Settings"
+            font.pixelSize: Theme.fontSizeMedium
+            font.weight: Font.Medium
+            color: Theme.primary
+            visible: (!monitorData || !monitorData.disabled) && supportsHDR
             width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
         }
 
-
-        // SDR Brightness (for HDR mode)
-        Column {
+        GridLayout {
             width: parent.width
-            spacing: Theme.spacingS
+            columns: 2
+            columnSpacing: Theme.spacingM
+            rowSpacing: Theme.spacingXS
             visible: (!monitorData || !monitorData.disabled) && supportsHDR
 
             StyledText {
                 text: "SDR Brightness"
-                font.pixelSize: Theme.fontSizeMedium
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
+                Layout.fillWidth: true
             }
 
             Row {
-                width: parent.width
-                spacing: Theme.spacingM
+                Layout.fillWidth: true
+                spacing: Theme.spacingS
 
                 DarkSlider {
                     id: sdrBrightnessSlider
@@ -551,7 +486,7 @@ StyledRect {
                     value: {
                         if (!monitorData) return 100
                         var brightness = parseFloat(monitorData.sdrbrightness) || 1.0
-                        return Math.round(brightness * 100) // Convert 1.0-2.0 to 100-200
+                        return Math.round(brightness * 100)
                     }
                     onSliderValueChanged: (newValue) => {
                         if (monitorData) {
@@ -569,43 +504,23 @@ StyledRect {
                         var brightness = parseFloat(monitorData.sdrbrightness) || 1.0
                         return brightness.toFixed(2)
                     }
-                    font.pixelSize: Theme.fontSizeMedium
+                    font.pixelSize: Theme.fontSizeSmall
                     color: Theme.surfaceText
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
 
             StyledText {
-                text: "Typical range: 1.0 - 2.0 (default: 1.0)"
-                font.pixelSize: Theme.fontSizeSmall
-                color: Theme.surfaceVariantText
-            }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
-        }
-
-        // SDR Saturation
-        Column {
-            width: parent.width
-            spacing: Theme.spacingS
-            visible: (!monitorData || !monitorData.disabled) && supportsHDR
-
-            StyledText {
                 text: "SDR Saturation"
-                font.pixelSize: Theme.fontSizeMedium
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
+                Layout.fillWidth: true
             }
 
             Row {
-                width: parent.width
-                spacing: Theme.spacingM
+                Layout.fillWidth: true
+                spacing: Theme.spacingS
 
                 DarkSlider {
                     id: sdrSaturationSlider
@@ -638,31 +553,17 @@ StyledRect {
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.2
-            visible: (!monitorData || !monitorData.disabled) && supportsHDR
-        }
-
-        // SDR EOTF
-        Column {
-            width: parent.width
-            spacing: Theme.spacingS
-            visible: (!monitorData || !monitorData.disabled) && supportsHDR
 
             StyledText {
-                text: "SDR EOTF (Transfer Function)"
-                font.pixelSize: Theme.fontSizeMedium
+                text: "SDR EOTF"
+                font.pixelSize: Theme.fontSizeSmall
                 font.weight: Font.Medium
                 color: Theme.surfaceText
+                Layout.fillWidth: true
             }
 
             DarkDropdown {
-                width: parent.width
+                Layout.fillWidth: true
                 text: "SDR EOTF"
                 options: ["Follow render:cm_sdr_eotf (0)", "Piecewise sRGB (1)", "Gamma 2.2 (2)"]
                 currentValue: {
@@ -682,61 +583,34 @@ StyledRect {
                     }
                 }
             }
-        }
 
-        // HDR Settings Section (only show if HDR is supported)
-        StyledText {
-            text: "HDR Settings"
-            font.pixelSize: Theme.fontSizeLarge
-            font.weight: Font.Medium
-            color: Theme.primary
-            visible: (!monitorData || !monitorData.disabled) && supportsHDR
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.2
-            visible: (!monitorData || !monitorData.disabled) && supportsHDR
-        }
-
-        // Supports Wide Color
-        DarkToggle {
-            width: parent.width
-            text: "Supports Wide Color"
-            description: "Force wide color gamut support"
-            checked: monitorData ? monitorData.supports_wide_color : false
-            visible: (!monitorData || !monitorData.disabled) && supportsHDR
-            onToggled: (checked) => {
-                if (monitorData) {
-                    monitorData.supports_wide_color = checked
-                    settingChanged("supports_wide_color", checked ? "1" : "0")
+            DarkToggle {
+                Layout.columnSpan: 2
+                Layout.fillWidth: true
+                text: "Supports Wide Color"
+                description: "Force wide color gamut support"
+                checked: monitorData ? monitorData.supports_wide_color : false
+                onToggled: (checked) => {
+                    if (monitorData) {
+                        monitorData.supports_wide_color = checked
+                        settingChanged("supports_wide_color", checked ? "1" : "0")
+                    }
                 }
             }
-        }
 
-        // Supports HDR
-        DarkToggle {
-            width: parent.width
-            text: "Supports HDR"
-            description: "Force HDR support (requires wide color gamut)"
-            checked: monitorData ? monitorData.supports_hdr : false
-            visible: (!monitorData || !monitorData.disabled) && supportsHDR
-            onToggled: (checked) => {
-                if (monitorData) {
-                    monitorData.supports_hdr = checked
-                    settingChanged("supports_hdr", checked ? "1" : "0")
+            DarkToggle {
+                Layout.columnSpan: 2
+                Layout.fillWidth: true
+                text: "Supports HDR"
+                description: "Force HDR support (requires wide color gamut)"
+                checked: monitorData ? monitorData.supports_hdr : false
+                onToggled: (checked) => {
+                    if (monitorData) {
+                        monitorData.supports_hdr = checked
+                        settingChanged("supports_hdr", checked ? "1" : "0")
+                    }
                 }
             }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
         }
 
         // SDR Min Luminance
@@ -848,14 +722,6 @@ StyledRect {
             }
         }
 
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
-        }
-
         // Min Luminance
         Column {
             width: parent.width
@@ -902,14 +768,6 @@ StyledRect {
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
-        }
-
-        Rectangle {
-            width: parent.width
-            height: 1
-            color: Theme.outline
-            opacity: 0.12
-            visible: !monitorData || !monitorData.disabled
         }
 
         // Max Luminance

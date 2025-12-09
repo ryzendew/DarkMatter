@@ -444,6 +444,23 @@ Item {
                                         candidates = [app].concat(candidates)
                                     }
                                 }
+                                
+                                // Also ensure currentDisplayName is in optionNames for dropdown matching
+                                if (currentDisplayName && currentDisplayName !== "") {
+                                    var nameFound = false
+                                    for (var j = 0; j < optionNames.length; j++) {
+                                        if (optionNames[j] === currentDisplayName) {
+                                            nameFound = true
+                                            break
+                                        }
+                                    }
+                                    if (!nameFound && currentName) {
+                                        // Force update of optionNames to include current name
+                                        Qt.callLater(function() {
+                                            ensureCurrentAppInCandidates()
+                                        })
+                                    }
+                                }
                             }
                             property var optionNames: (candidates || []).map(a => ((modelData.isTerminal || modelData.isAurHelper) ? a.name : root.displayName(a)))
                             property var optionIcons: (candidates || []).map(a => (modelData.isTerminal ? "terminal" : (modelData.isAurHelper ? "" : (a.icon || "application-x-executable"))))
@@ -566,11 +583,11 @@ Item {
                             DarkDropdown {
                                 id: dropdown
                                     width: Math.min(300, parent.width * 0.5)
-                                text: "Select application"
+                                text: ""
                                 description: ""
                                     options: appSelector.optionNames || []
                                     optionIcons: appSelector.optionIcons || []
-                                    currentValue: appSelector.currentDisplayName || ""
+                                    currentValue: (appSelector.currentDisplayName && appSelector.currentDisplayName !== "") ? appSelector.currentDisplayName : ""
                                 onValueChanged: (value) => {
                                         var desktopId = appSelector.nameToDesktopId[value] || ""
                                     if (!desktopId) return

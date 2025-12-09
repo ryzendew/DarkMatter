@@ -74,21 +74,21 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         anchors.leftMargin: Theme.spacingL
         anchors.rightMargin: Theme.spacingL
-        spacing: Theme.spacingS
+        spacing: 4
 
-        Text {
+        StyledText {
             text: root.text
             font.pixelSize: Theme.fontSizeMedium
-            font.family: root.notoSansFamily
-            color: Theme.surfaceText
             font.weight: Font.Medium
-            visible: (root.description && root.description.length > 0) && (!root.currentValue || root.currentValue === "")
+            color: Theme.surfaceText
+            visible: root.text.length > 0 && (!root.currentValue || root.currentValue === "")
+            width: parent.width
+            elide: Text.ElideRight
         }
 
-        Text {
+        StyledText {
             text: root.description
             font.pixelSize: Theme.fontSizeSmall
-            font.family: root.notoSansFamily
             color: Theme.surfaceVariantText
             visible: description.length > 0
             wrapMode: Text.WordWrap
@@ -104,10 +104,17 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: Theme.spacingL
         anchors.verticalCenter: parent.verticalCenter
-        radius: Math.max(Theme.cornerRadius, 12)
+        radius: Theme.cornerRadius
         color: dropdownArea.containsMouse ? Theme.primaryHover : Theme.contentBackground()
-        border.color: Theme.surfaceVariantAlpha
+        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
         border.width: 1
+
+        Behavior on color {
+            ColorAnimation {
+                duration: Theme.shortDuration
+                easing.type: Theme.standardEasing
+            }
+        }
 
         MouseArea {
             id: dropdownArea
@@ -139,60 +146,70 @@ Rectangle {
             anchors.left: parent.left
             anchors.right: expandIcon.left
             anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: (root.currentValue && root.currentValue !== "") ? Theme.spacingL : 0
-            anchors.rightMargin: Theme.spacingS
+            anchors.leftMargin: Theme.spacingL
+            anchors.rightMargin: Theme.spacingM
             spacing: Theme.spacingM
 
             Item {
-                width: root.currentValue ? 18 : 0
-                height: 18
-                visible: {
-                    if (!root.currentValue || root.currentValue === "") return false
+                width: {
+                    if (!root.currentValue || root.currentValue === "") return 0
                     const currentIndex = root.options.indexOf(root.currentValue)
-                    return currentIndex >= 0 && root.optionIcons.length > currentIndex && root.optionIcons[currentIndex] !== "" && root.width > 60
+                    if (currentIndex >= 0 && root.optionIcons.length > currentIndex && root.optionIcons[currentIndex] !== "" && root.width > 60) {
+                        return 20
+                    }
+                    return 0
                 }
+                height: 20
+                visible: width > 0
                 
                 Image {
                     anchors.centerIn: parent
-                    width: 18
-                    height: 18
+                    width: 20
+                    height: 20
                     source: {
                         const currentIndex = root.options.indexOf(root.currentValue)
                         const iconName = currentIndex >= 0 && root.optionIcons.length > currentIndex ? root.optionIcons[currentIndex] : ""
                         return iconName && iconName !== "" ? "image://icon/" + iconName : ""
                     }
-                    sourceSize.width: 18
-                    sourceSize.height: 18
+                    sourceSize.width: 20
+                    sourceSize.height: 20
                     fillMode: Image.PreserveAspectFit
                 }
             }
 
-            Text {
-                text: root.currentValue || root.text
+            StyledText {
+                text: {
+                    if (root.currentValue && root.currentValue !== "") {
+                        return root.currentValue
+                    }
+                    return root.text
+                }
                 font.pixelSize: Theme.fontSizeMedium
-                font.family: root.notoSansFamily
-                font.weight: root.currentValue ? Font.Normal : Font.Medium
-                color: root.currentValue ? Theme.surfaceText : Theme.surfaceVariantText
+                font.weight: (root.currentValue && root.currentValue !== "") ? Font.Normal : Font.Medium
+                color: (root.currentValue && root.currentValue !== "") ? Theme.surfaceText : Theme.surfaceVariantText
                 width: parent.width
-                elide: root.width <= 60 ? Text.ElideNone : Text.ElideRight
-                horizontalAlignment: (root.currentValue && root.currentValue !== "") ? Text.AlignLeft : Text.AlignHCenter
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignLeft
             }
         }
 
-        Item {
+        DarkIcon {
             id: expandIcon
-            width: root.currentValue ? 0 : 20
+            width: 20
             height: 20
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            anchors.rightMargin: Theme.spacingS
-            visible: !root.currentValue || root.currentValue === ""
+            anchors.rightMargin: Theme.spacingL
+            name: "expand_more"
+            size: 20
+            color: Theme.surfaceText
+            opacity: dropdownArea.containsMouse ? 1.0 : 0.7
             
-            DarkIcon {
-                anchors.centerIn: parent
-                name: "expand_more"
-                size: 20
-                color: Theme.surfaceText
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Theme.shortDuration
+                    easing.type: Theme.standardEasing
+                }
             }
         }
     }
@@ -267,7 +284,7 @@ Rectangle {
 
                 parent: Overlay.overlay
                 width: dropdown.width + root.popupWidthOffset
-                height: Math.min(root.maxPopupHeight, (root.enableFuzzySearch ? 54 : 0) + Math.min(filteredOptions.length, 10) * 36 + 16)
+                height: Math.min(root.maxPopupHeight, (root.enableFuzzySearch ? 48 : 0) + Math.min(filteredOptions.length, 10) * 40 + 16)
                 padding: 0
                 modal: true
                 closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
@@ -285,22 +302,26 @@ Rectangle {
 
                 contentItem: Rectangle {
                     color: Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 1)
-                    border.color: Theme.primarySelected
+                    border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                     border.width: 1
                     radius: Theme.cornerRadius
+                    layer.enabled: true
+                    layer.smooth: true
 
                     Column {
                         anchors.fill: parent
-                        anchors.margins: Theme.spacingS
+                        anchors.margins: Theme.spacingXS
 
                         Rectangle {
                             id: searchContainer
 
                             width: parent.width
-                            height: 42
+                            height: 40
                             visible: root.enableFuzzySearch
                             radius: Theme.cornerRadius
                             color: Theme.surfaceVariantAlpha
+                            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                            border.width: 1
 
                             DarkTextField {
                                 id: searchField
@@ -324,8 +345,7 @@ Rectangle {
 
                         Item {
                             width: 1
-                            height: Theme.spacingXS
-                            visible: root.enableFuzzySearch
+                            height: root.enableFuzzySearch ? Theme.spacingXS : 0
                         }
 
                         DarkListView {
@@ -353,45 +373,58 @@ Rectangle {
                                 property int optionIndex: root.options.indexOf(modelData)
 
                                 width: ListView.view.width
-                                height: 32
+                                height: 40
                                 radius: Theme.cornerRadius
                                 color: isSelected ? Theme.primaryHover : optionArea.containsMouse ? Theme.primaryHoverLight : "transparent"
+                                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                border.width: 1
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Theme.shorterDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
 
                                 Row {
                                     anchors.left: parent.left
-                                    anchors.leftMargin: Theme.spacingS
                                     anchors.verticalCenter: parent.verticalCenter
-                                    spacing: Theme.spacingS
+                                    anchors.leftMargin: Theme.spacingL
+                                    anchors.rightMargin: Theme.spacingL
+                                    spacing: Theme.spacingM
 
                                     Item {
-                                        width: 18
-                                        height: 18
-                                        visible: optionIndex >= 0 && root.optionIcons.length > optionIndex && root.optionIcons[optionIndex] !== ""
+                                        width: {
+                                            if (optionIndex >= 0 && root.optionIcons.length > optionIndex && root.optionIcons[optionIndex] !== "") {
+                                                return 20
+                                            }
+                                            return 0
+                                        }
+                                        height: 20
+                                        visible: width > 0
                                         
                                         Image {
                                             anchors.centerIn: parent
-                                            width: 18
-                                            height: 18
+                                            width: 20
+                                            height: 20
                                             source: {
                                                 const iconName = optionIndex >= 0 && root.optionIcons.length > optionIndex ? root.optionIcons[optionIndex] : ""
                                                 return iconName && iconName !== "" ? "image://icon/" + iconName : ""
                                             }
-                                            sourceSize.width: 18
-                                            sourceSize.height: 18
+                                            sourceSize.width: 20
+                                            sourceSize.height: 20
                                             fillMode: Image.PreserveAspectFit
                                         }
                                     }
 
-                                    Text {
+                                    StyledText {
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: modelData
                                         font.pixelSize: Theme.fontSizeMedium
-                                        font.family: dropdownMenu.notoSansFamily
                                         font.weight: isCurrentValue ? Font.Medium : Font.Normal
                                         color: isCurrentValue ? Theme.primary : Theme.surfaceText
-                                        width: parent.parent.width - parent.x - Theme.spacingS
+                                        width: parent.parent.width - parent.x - Theme.spacingL
                                         elide: Text.ElideRight
-                                        
                                     }
                                 }
 

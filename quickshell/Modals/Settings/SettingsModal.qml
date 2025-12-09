@@ -166,62 +166,67 @@ DarkModal {
         Item {
             anchors.fill: parent
             focus: false
-            clip: true
+            clip: false
 
             Column {
                 anchors.fill: parent
-                anchors.leftMargin: Theme.spacingXL
-                anchors.rightMargin: Theme.spacingXL
-                anchors.topMargin: Theme.spacingL
-                anchors.bottomMargin: Theme.spacingXL
                 spacing: 0
-                clip: true
+                clip: false
 
-                Item {
+                // Header bar with clean design
+                Rectangle {
                     width: parent.width
-                    height: 48
+                    height: 56
+                    color: "transparent"
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: 1
+                        color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                    }
 
                     Row {
                         anchors.left: parent.left
+                        anchors.leftMargin: 24
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: Theme.spacingL
+                        spacing: 12
 
                         DarkIcon {
                             name: "settings"
-                            size: Theme.iconSize
-                            color: Theme.primary
+                            size: 20
+                            color: Theme.surfaceText
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
                         StyledText {
                             text: "Settings"
-                            font.pixelSize: Theme.fontSizeXLarge
+                            font.pixelSize: 17
                             color: Theme.surfaceText
-                            font.weight: Font.Medium
+                            font.weight: Font.DemiBold
                             anchors.verticalCenter: parent.verticalCenter
                         }
-
                     }
 
                     DarkActionButton {
                         anchors.right: parent.right
+                        anchors.rightMargin: 16
                         anchors.verticalCenter: parent.verticalCenter
                         circular: false
                         iconName: "close"
-                        iconSize: Theme.iconSize - 4
-                        iconColor: Theme.surfaceText
+                        iconSize: 18
+                        iconColor: Qt.rgba(Theme.surfaceText.r, Theme.surfaceText.g, Theme.surfaceText.b, 0.7)
                         onClicked: () => {
                             return settingsModal.hide();
                         }
                     }
-
                 }
 
+                // Main content area
                 Row {
                     width: parent.width
-                    height: parent.height - 48
-                    spacing: Theme.spacingXL
-                    clip: true
+                    height: parent.height - 56
+                    spacing: 0
+                    clip: false
 
                     SettingsSidebar {
                         id: sidebar
@@ -234,9 +239,16 @@ DarkModal {
                         }
                     }
 
+                    // Divider between sidebar and content
+                    Rectangle {
+                        width: 1
+                        height: parent.height
+                        color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                    }
+
                     Loader {
                         id: contentLoader
-                        width: parent.width - sidebar.width - parent.spacing
+                        width: parent.width - sidebar.width - 1
                         height: parent.height
                         source: "SettingsContent.qml"
                         onLoaded: {
@@ -244,13 +256,9 @@ DarkModal {
                             item.currentIndex = sidebar.currentIndex
                         }
                     }
-
                 }
-
             }
-
         }
-
     }
 
 }

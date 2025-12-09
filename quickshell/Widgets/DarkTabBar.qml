@@ -25,36 +25,75 @@ Item {
         Repeater {
             id: tabRepeater
 
-            Item {
+            Rectangle {
                 id: tabItem
                 property bool isAction: modelData && modelData.isAction === true
                 property bool isActive: !isAction && tabBar.currentIndex === index
                 property bool hasIcon: tabBar.showIcons && modelData && modelData.icon && modelData.icon.length > 0
                 property bool hasText: modelData && modelData.text && modelData.text.length > 0
 
-                width: tabBar.equalWidthTabs ? (tabBar.width - tabBar.spacing * Math.max(0, tabRepeater.count - 1)) / Math.max(1, tabRepeater.count) : Math.max(contentCol.implicitWidth + Theme.spacingXL, 64)
+                width: tabBar.equalWidthTabs ? (tabBar.width - tabBar.spacing * Math.max(0, tabRepeater.count - 1)) / Math.max(1, tabRepeater.count) : Math.max(contentCol.implicitWidth + Theme.spacingXL * 2, 80)
                 height: tabBar.tabHeight
+                color: isActive ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.1) : Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.4)
+                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, isActive ? 0.2 : 0.12)
+                border.width: 1
+                radius: Theme.cornerRadius
 
-                Column {
-                    id: contentCol
-                    anchors.centerIn: parent
-                    spacing: Theme.spacingXS
-
-                    DarkIcon {
-                        name: modelData.icon || ""
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        size: Theme.iconSize
-                        color: tabItem.isActive ? Theme.primary : Theme.surfaceText
-                        visible: hasIcon
+                Behavior on color {
+                    ColorAnimation {
+                        duration: Theme.shortDuration
+                        easing.type: Theme.standardEasing
                     }
+                }
 
-                    StyledText {
-                        text: modelData.text || ""
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        font.pixelSize: Theme.fontSizeMedium
-                        color: tabItem.isActive ? Theme.primary : Theme.surfaceText
-                        font.weight: tabItem.isActive ? Font.Medium : Font.Normal
-                        visible: hasText
+                Behavior on border.color {
+                    ColorAnimation {
+                        duration: Theme.shortDuration
+                        easing.type: Theme.standardEasing
+                    }
+                }
+
+                Item {
+                    id: contentContainer
+                    anchors.centerIn: parent
+                    width: contentCol.implicitWidth
+                    height: contentCol.implicitHeight
+
+                    Column {
+                        id: contentCol
+                        anchors.centerIn: parent
+                        spacing: hasIcon && hasText ? 6 : 0
+
+                        DarkIcon {
+                            name: modelData.icon || ""
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            size: hasText ? 20 : 24
+                            color: tabItem.isActive ? Theme.primary : Qt.rgba(Theme.surfaceText.r, Theme.surfaceText.g, Theme.surfaceText.b, 0.8)
+                            visible: hasIcon
+                            
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Theme.shortDuration
+                                    easing.type: Theme.standardEasing
+                                }
+                            }
+                        }
+
+                        StyledText {
+                            text: modelData.text || ""
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            font.pixelSize: Theme.fontSizeMedium
+                            color: tabItem.isActive ? Theme.primary : Qt.rgba(Theme.surfaceText.r, Theme.surfaceText.g, Theme.surfaceText.b, 0.9)
+                            font.weight: tabItem.isActive ? Font.Medium : Font.Normal
+                            visible: hasText
+                            
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Theme.shortDuration
+                                    easing.type: Theme.standardEasing
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -62,10 +101,15 @@ Item {
                     id: stateLayer
                     anchors.fill: parent
                     color: Theme.surfaceTint
-                    opacity: tabArea.pressed ? 0.12 : (tabArea.containsMouse ? 0.08 : 0)
+                    opacity: tabArea.pressed ? 0.16 : (tabArea.containsMouse && !isActive ? 0.08 : 0)
                     visible: opacity > 0
                     radius: Theme.cornerRadius
-                    Behavior on opacity { NumberAnimation { duration: Theme.shortDuration; easing.type: Theme.standardEasing } }
+                    Behavior on opacity { 
+                        NumberAnimation { 
+                            duration: Theme.shortDuration
+                            easing.type: Theme.standardEasing 
+                        } 
+                    }
                 }
 
                 MouseArea {
@@ -82,7 +126,6 @@ Item {
                         }
                     }
                 }
-
             }
         }
     }

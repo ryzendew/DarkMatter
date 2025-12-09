@@ -7,6 +7,7 @@ import Quickshell.Io
 import qs.Common
 import qs.Modals
 import qs.Modals.FileBrowser
+import qs.Modules.Settings
 import qs.Services
 import qs.Widgets
 
@@ -127,6 +128,7 @@ Item {
 
             model: [
                 { icon: "palette", text: "Theme & Colors" },
+                { icon: "wallpaper", text: "Wallpaper" },
                 { icon: "monitor", text: "Displays" }
             ]
 
@@ -156,20 +158,20 @@ Item {
 
             StyledRect {
                 width: parent.width
-                height: themeSection.implicitHeight + Theme.spacingL * 2
+                height: themeSection.implicitHeight + Theme.spacingXL * 2
                 radius: Theme.cornerRadius
-                color: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g,
-                               Theme.surfaceVariant.b, 0.3)
+                color: Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g,
+                               Theme.surfaceContainer.b, 0.6)
                 border.color: Qt.rgba(Theme.outline.r, Theme.outline.g,
-                                      Theme.outline.b, 0.2)
+                                      Theme.outline.b, 0.12)
                 border.width: 1
 
                 Column {
                     id: themeSection
 
                     anchors.fill: parent
-                    anchors.margins: Theme.spacingL
-                    spacing: Theme.spacingM
+                    anchors.margins: Theme.spacingXL
+                    spacing: Theme.spacingXL
 
                     Row {
                         width: parent.width
@@ -182,60 +184,63 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
-                        StyledText {
-                            text: "Theme Color"
-                            font.pixelSize: Theme.fontSizeLarge
-                            font.weight: Font.Medium
-                            color: Theme.surfaceText
+                        Column {
+                            spacing: 4
                             anchors.verticalCenter: parent.verticalCenter
+
+                            StyledText {
+                                text: "Theme Color"
+                                font.pixelSize: Theme.fontSizeLarge
+                                font.weight: Font.Medium
+                                color: Theme.surfaceText
+                            }
+
+                            StyledText {
+                                text: {
+                                    if (Theme.currentTheme === Theme.dynamic) {
+                                        return "Material colors generated from wallpaper"
+                                    }
+                                    if (Theme.currentThemeCategory === "catppuccin") {
+                                        return "Soothing pastel theme based on Catppuccin"
+                                    }
+                                    if (Theme.currentTheme === Theme.custom) {
+                                        return "Custom theme loaded from JSON file"
+                                    }
+                                    return "Material Design inspired color themes"
+                                }
+                                font.pixelSize: Theme.fontSizeSmall
+                                color: Theme.surfaceVariantText
+                                wrapMode: Text.WordWrap
+                                width: parent.parent.width - Theme.iconSize - Theme.spacingM
+                            }
                         }
                     }
 
                     Column {
                         width: parent.width
                         spacing: Theme.spacingS
+                        anchors.horizontalCenter: parent.horizontalCenter
 
                         StyledText {
                             text: {
                                 if (Theme.currentTheme === Theme.dynamic) {
-                                    return "Current Theme: Dynamic"
+                                    return "Dynamic"
                                 } else if (Theme.currentThemeCategory === "catppuccin") {
-                                    return "Current Theme: Catppuccin " + Theme.getThemeColors(Theme.currentThemeName).name
+                                    return "Catppuccin " + Theme.getThemeColors(Theme.currentThemeName).name
                                 } else {
-                                    return "Current Theme: " + Theme.getThemeColors(Theme.currentThemeName).name
+                                    return Theme.getThemeColors(Theme.currentThemeName).name
                                 }
                             }
                             font.pixelSize: Theme.fontSizeMedium
-                            color: Theme.surfaceText
+                            color: Theme.primary
                             font.weight: Font.Medium
                             anchors.horizontalCenter: parent.horizontalCenter
-                        }
-
-                        StyledText {
-                            text: {
-                                if (Theme.currentTheme === Theme.dynamic) {
-                                    return "Material colors generated from wallpaper"
-                                }
-                                if (Theme.currentThemeCategory === "catppuccin") {
-                                    return "Soothing pastel theme based on Catppuccin"
-                                }
-                                if (Theme.currentTheme === Theme.custom) {
-                                    return "Custom theme loaded from JSON file"
-                                }
-                                return "Material Design inspired color themes"
-                            }
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: Theme.surfaceVariantText
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            wrapMode: Text.WordWrap
-                            width: Math.min(parent.width, 400)
-                            horizontalAlignment: Text.AlignHCenter
                         }
                     }
 
                     Column {
-                        spacing: Theme.spacingM
-                        anchors.horizontalCenter: parent.horizontalCenter
+                        spacing: Theme.spacingL
+                        width: parent.width
 
                         DarkButtonGroup {
                             property int currentThemeIndex: {
@@ -272,28 +277,88 @@ Item {
                         }
 
                         Column {
-                            spacing: Theme.spacingS
-                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: Theme.spacingL
+                            width: parent.width
                             visible: Theme.currentThemeCategory === "generic" && Theme.currentTheme !== Theme.dynamic && Theme.currentThemeName !== "custom"
 
                             Rectangle {
-                                width: 140
-                                height: 32
+                                id: extractButton
+                                property bool isEnabled: !ColorPaletteService.isExtracting && Theme.wallpaperPath
+                                property bool isHovered: extractMouseArea.containsMouse
+                                property bool isPressed: extractMouseArea.pressed
+
+                                width: 180
+                                height: 44
                                 radius: Theme.cornerRadius
-                                color: (!ColorPaletteService.isExtracting && Theme.wallpaperPath) ? Theme.primary : Theme.surfaceVariant
-                                opacity: (!ColorPaletteService.isExtracting && Theme.wallpaperPath) ? 1.0 : 0.5
+                                color: isEnabled ? (isPressed ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.16) : (isHovered ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.1))) : Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.3)
+                                opacity: isEnabled ? 1.0 : 0.5
                                 anchors.horizontalCenter: parent.horizontalCenter
+                                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, isEnabled ? (isHovered ? 0.2 : 0.15) : 0.1)
+                                border.width: 1
                                 
-                                StyledText {
-                                    text: ColorPaletteService.isExtracting ? "Extracting..." : "Extract Colors"
-                                    color: (!ColorPaletteService.isExtracting && Theme.wallpaperPath) ? Theme.primaryText : Theme.surfaceVariantText
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Theme.shortDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+
+                                Behavior on border.color {
+                                    ColorAnimation {
+                                        duration: Theme.shortDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+                                
+                                Rectangle {
+                                    id: extractStateLayer
+                                    anchors.fill: parent
+                                    radius: parent.radius
+                                    color: Theme.surfaceTint
+                                    opacity: extractButton.isEnabled && extractButton.isHovered ? 0.08 : 0
+                                    visible: opacity > 0
+
+                                    Behavior on opacity {
+                                        NumberAnimation {
+                                            duration: Theme.shortDuration
+                                            easing.type: Theme.standardEasing
+                                        }
+                                    }
+                                }
+                                
+                                Item {
                                     anchors.centerIn: parent
-                                    font.pixelSize: Theme.fontSizeSmall
+                                    width: extractContentRow.implicitWidth
+                                    height: extractContentRow.implicitHeight
+
+                                    Row {
+                                        id: extractContentRow
+                                        anchors.centerIn: parent
+                                        spacing: Theme.spacingS
+
+                                        DarkIcon {
+                                            name: ColorPaletteService.isExtracting ? "hourglass_empty" : "palette"
+                                            size: 20
+                                            color: extractButton.isEnabled ? Theme.primary : Qt.rgba(Theme.surfaceText.r, Theme.surfaceText.g, Theme.surfaceText.b, 0.6)
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            visible: true
+                                        }
+
+                                        StyledText {
+                                            text: ColorPaletteService.isExtracting ? "Extracting..." : "Extract Colors"
+                                            color: extractButton.isEnabled ? Theme.primary : Qt.rgba(Theme.surfaceText.r, Theme.surfaceText.g, Theme.surfaceText.b, 0.6)
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            font.pixelSize: Theme.fontSizeMedium
+                                            font.weight: Font.Medium
+                                        }
+                                    }
                                 }
                                 
                                 MouseArea {
+                                    id: extractMouseArea
                                     anchors.fill: parent
-                                    enabled: !ColorPaletteService.isExtracting && Theme.wallpaperPath
+                                    enabled: extractButton.isEnabled
+                                    hoverEnabled: true
                                     cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                                     onClicked: {
                                         if (Theme.wallpaperPath && typeof ColorPaletteService !== 'undefined') {
@@ -304,58 +369,72 @@ Item {
                             }
 
                             Column {
-                                spacing: Theme.spacingS
-                                anchors.horizontalCenter: parent.horizontalCenter
+                                spacing: Theme.spacingM
+                                width: parent.width
                                 visible: true // Always show, even when empty
 
                                 StyledText {
                                     text: "Saved Color Themes"
-                                    font.pixelSize: Theme.fontSizeSmall
-                                    color: Theme.surfaceVariantText
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    font.weight: Font.Medium
+                                    color: Theme.surfaceText
                                     anchors.horizontalCenter: parent.horizontalCenter
                                 }
 
                                 Row {
-                                    spacing: Theme.spacingS
+                                    spacing: Theme.spacingM
                                     anchors.horizontalCenter: parent.horizontalCenter
 
                                     Rectangle {
-                                        width: 200
-                                        height: 32
+                                        width: 220
+                                        height: 40
                                         radius: Theme.cornerRadius
-                                        color: Theme.surfaceVariant
-                                        border.color: Theme.outline
+                                        color: Theme.contentBackground()
+                                        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                                         border.width: 1
 
-                                        StyledText {
-                                            id: selectedThemeText
-                                            text: {
-                                                if (SettingsData.currentColorTheme) {
-                                                    return `#${SettingsData.currentColorTheme.toUpperCase()}`
-                                                } else if (ColorPaletteService.availableThemes.length > 0) {
-                                                    return "Select Theme"
-                                                } else {
-                                                    return "No themes saved"
-                                                }
+                                        Behavior on color {
+                                            ColorAnimation {
+                                                duration: Theme.shortDuration
+                                                easing.type: Theme.standardEasing
                                             }
-                                            color: Theme.surfaceVariantText
-                                            anchors.left: parent.left
-                                            anchors.leftMargin: Theme.spacingS
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            font.pixelSize: Theme.fontSizeSmall
                                         }
 
-                                        DarkIcon {
-                                            name: "keyboard_arrow_down"
-                                            size: 16
-                                            color: Theme.surfaceVariantText
-                                            anchors.right: parent.right
-                                            anchors.rightMargin: Theme.spacingS
+                                        Row {
+                                            anchors.left: parent.left
                                             anchors.verticalCenter: parent.verticalCenter
+                                            anchors.leftMargin: Theme.spacingL
+                                            anchors.rightMargin: Theme.spacingL
+                                            spacing: Theme.spacingM
+
+                                            StyledText {
+                                                id: selectedThemeText
+                                                text: {
+                                                    if (SettingsData.currentColorTheme) {
+                                                        return `#${SettingsData.currentColorTheme.toUpperCase()}`
+                                                    } else if (ColorPaletteService.availableThemes.length > 0) {
+                                                        return "Select Theme"
+                                                    } else {
+                                                        return "No themes saved"
+                                                    }
+                                                }
+                                                color: Theme.surfaceText
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                font.pixelSize: Theme.fontSizeMedium
+                                            }
+
+                                            DarkIcon {
+                                                name: "keyboard_arrow_down"
+                                                size: 20
+                                                color: Theme.surfaceText
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                opacity: 0.7
+                                            }
                                         }
 
                                         MouseArea {
                                             anchors.fill: parent
+                                            hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: {
                                                 if (themeDropdown.visible) {
@@ -368,21 +447,31 @@ Item {
                                     }
 
                                     Rectangle {
-                                        width: 32
-                                        height: 32
+                                        width: 40
+                                        height: 40
                                         radius: Theme.cornerRadius
                                         color: Theme.error || "#f44336"
                                         visible: SettingsData.currentColorTheme !== ""
+                                        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                        border.width: 1
+
+                                        Behavior on color {
+                                            ColorAnimation {
+                                                duration: Theme.shortDuration
+                                                easing.type: Theme.standardEasing
+                                            }
+                                        }
 
                                         DarkIcon {
                                             name: "delete"
-                                            size: 16
+                                            size: 18
                                             color: Theme.errorText || "#ffffff"
                                             anchors.centerIn: parent
                                         }
 
                                         MouseArea {
                                             anchors.fill: parent
+                                            hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
                                             onClicked: {
                                                 if (SettingsData.currentColorTheme) {
@@ -395,46 +484,59 @@ Item {
 
                                 Rectangle {
                                     id: themeDropdown
-                                    width: 200
-                                    height: Math.min(200, ColorPaletteService.availableThemes.length * 32)
+                                    width: 220
+                                    height: Math.min(240, ColorPaletteService.availableThemes.length * 40 + 8)
                                     radius: Theme.cornerRadius
                                     color: Theme.surfaceContainer
-                                    border.color: Theme.outline
+                                    border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                                     border.width: 1
                                     visible: false
                                     anchors.horizontalCenter: parent.horizontalCenter
+                                    layer.enabled: true
+                                    layer.smooth: true
 
                                     ListView {
                                         anchors.fill: parent
-                                        anchors.margins: 4
+                                        anchors.margins: Theme.spacingXS
                                         model: ColorPaletteService.availableThemes
                                         clip: true
+                                        spacing: 2
 
                                         delegate: Rectangle {
-                                            width: parent.width
-                                            height: 28
-                                            color: mouseArea.containsMouse ? Theme.surfaceVariant : "transparent"
-                                            radius: 4
+                                            width: ListView.view.width - Theme.spacingXS * 2
+                                            height: 40
+                                            color: mouseArea.containsMouse ? Theme.primaryHoverLight : "transparent"
+                                            radius: Theme.cornerRadius
+                                            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                            border.width: 1
+
+                                            Behavior on color {
+                                                ColorAnimation {
+                                                    duration: Theme.shorterDuration
+                                                    easing.type: Theme.standardEasing
+                                                }
+                                            }
 
                                             Row {
                                                 anchors.left: parent.left
-                                                anchors.leftMargin: Theme.spacingS
                                                 anchors.verticalCenter: parent.verticalCenter
-                                                spacing: Theme.spacingS
+                                                anchors.leftMargin: Theme.spacingL
+                                                spacing: Theme.spacingM
 
                                                 Rectangle {
-                                                    width: 16
-                                                    height: 16
-                                                    radius: 8
+                                                    width: 20
+                                                    height: 20
+                                                    radius: 10
                                                     color: modelData.primaryColor
-                                                    border.color: Theme.outline
+                                                    border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                                                     border.width: 1
+                                                    anchors.verticalCenter: parent.verticalCenter
                                                 }
 
                                                 StyledText {
                                                     text: modelData.displayName
-                                                    color: Theme.surfaceVariantText
-                                                    font.pixelSize: Theme.fontSizeSmall
+                                                    color: Theme.surfaceText
+                                                    font.pixelSize: Theme.fontSizeMedium
                                                     anchors.verticalCenter: parent.verticalCenter
                                                 }
                                             }
@@ -454,158 +556,111 @@ Item {
                                 }
                             }
 
-                            Row {
-                                spacing: Theme.spacingM
-                                anchors.horizontalCenter: parent.horizontalCenter
+                            Column {
+                                spacing: Theme.spacingL
+                                width: parent.width
 
-                                Repeater {
-                                    model: {
-                                        forceUpdate // Trigger update when this changes
-                                        return ColorPaletteService.extractedColors.length > 0 ? 
-                                               ColorPaletteService.extractedColors.slice(0, 8) : // Show first 8 extracted colors
-                                               ["blue", "purple", "green", "orange", "red"] // Fallback to original colors
-                                    }
-
-                                    Rectangle {
-                                        property string colorValue: modelData
-                                        property bool isExtractedColor: ColorPaletteService.extractedColors.length > 0
-                                        width: 32
-                                        height: 32
-                                        radius: 16
-                                        color: isExtractedColor ? colorValue : Theme.getThemeColors(colorValue).primary
-                                        border.color: Theme.outline
-                                        border.width: (isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)) ? 3 : 1
-                                        scale: (isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)) ? 1.1 : 1
-
-                                        Rectangle {
-                                            width: nameText.contentWidth + Theme.spacingS * 2
-                                            height: nameText.contentHeight + Theme.spacingXS * 2
-                                            color: Theme.surfaceContainer
-                                            border.color: Theme.outline
-                                            border.width: 1
-                                            radius: Theme.cornerRadius
-                                            anchors.bottom: parent.top
-                                            anchors.bottomMargin: Theme.spacingXS
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            visible: mouseArea.containsMouse
-
-                                            StyledText {
-                                                id: nameText
-                                                text: isExtractedColor ? colorValue : Theme.getThemeColors(colorValue).name
-                                                font.pixelSize: Theme.fontSizeSmall
-                                                color: Theme.surfaceText
-                                                anchors.centerIn: parent
-                                            }
+                                StyledText {
+                                    text: ColorPaletteService.extractedColors.length > 0 ? "Extracted Colors" : "Theme Colors"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    font.weight: Font.Medium
+                                    color: Theme.surfaceText
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    visible: {
+                                        if (ColorPaletteService.extractedColors.length > 0) {
+                                            return ColorPaletteService.extractedColors.length > 0
                                         }
-
-                                        MouseArea {
-                                            id: mouseArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                if (isExtractedColor) {
-                                                    
-                                                    ColorPaletteService.clearSelection()
-                                                    ColorPaletteService.selectColor(colorValue, true)
-                                                    
-                                                    ColorPaletteService.applySelectedColors()
-                                                } else {
-                                                    Theme.switchTheme(colorValue)
-                                                }
-                                            }
-                                        }
-
-                                        Behavior on scale {
-                                            NumberAnimation {
-                                                duration: Theme.shortDuration
-                                                easing.type: Theme.emphasizedEasing
-                                            }
-                                        }
-
-                                        Behavior on border.width {
-                                            NumberAnimation {
-                                                duration: Theme.shortDuration
-                                                easing.type: Theme.emphasizedEasing
-                                            }
-                                        }
+                                        return ["blue", "purple", "green", "orange", "red", "cyan", "pink", "amber", "coral", "monochrome"].length > 0
                                     }
                                 }
-                            }
 
-                            Row {
-                                spacing: Theme.spacingM
-                                anchors.horizontalCenter: parent.horizontalCenter
-
-                                Repeater {
-                                    model: {
-                                        forceUpdate // Trigger update when this changes
-                                        return ColorPaletteService.extractedColors.length > 8 ? 
-                                               ColorPaletteService.extractedColors.slice(8, 16) : // Show next 8 extracted colors
-                                               ["cyan", "pink", "amber", "coral", "monochrome"] // Fallback to original colors
+                                Grid {
+                                    id: colorGrid
+                                    columns: {
+                                        var colors = ColorPaletteService.extractedColors.length > 0 ? 
+                                                    ColorPaletteService.extractedColors : 
+                                                    ["blue", "purple", "green", "orange", "red", "cyan", "pink", "amber", "coral", "monochrome"]
+                                        var count = colors.length
+                                        if (count <= 4) return count
+                                        if (count <= 8) return 4
+                                        if (count <= 12) return 4
+                                        return 4
                                     }
+                                    rowSpacing: Theme.spacingM
+                                    columnSpacing: Theme.spacingM
+                                    anchors.horizontalCenter: parent.horizontalCenter
 
-                                    Rectangle {
-                                        property string colorValue: modelData
-                                        property bool isExtractedColor: ColorPaletteService.extractedColors.length > 8
-                                        width: 32
-                                        height: 32
-                                        radius: 16
-                                        color: isExtractedColor ? colorValue : Theme.getThemeColors(colorValue).primary
-                                        border.color: Theme.outline
-                                        border.width: (isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)) ? 3 : 1
-                                        scale: (isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)) ? 1.1 : 1
+                                    Repeater {
+                                        model: {
+                                            forceUpdate // Trigger update when this changes
+                                            return ColorPaletteService.extractedColors.length > 0 ? 
+                                                   ColorPaletteService.extractedColors : // Show all extracted colors
+                                                   ["blue", "purple", "green", "orange", "red", "cyan", "pink", "amber", "coral", "monochrome"] // Fallback to original colors
+                                        }
 
                                         Rectangle {
-                                            width: nameText2.contentWidth + Theme.spacingS * 2
-                                            height: nameText2.contentHeight + Theme.spacingXS * 2
-                                            color: Theme.surfaceContainer
-                                            border.color: Theme.outline
-                                            border.width: 1
-                                            radius: Theme.cornerRadius
-                                            anchors.bottom: parent.top
-                                            anchors.bottomMargin: Theme.spacingXS
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            visible: mouseArea2.containsMouse
+                                            property string colorValue: modelData
+                                            property bool isExtractedColor: ColorPaletteService.extractedColors.length > 0
+                                            width: 40
+                                            height: 40
+                                            radius: 20
+                                            color: isExtractedColor ? colorValue : Theme.getThemeColors(colorValue).primary
+                                            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                            border.width: (isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)) ? 3 : 1
+                                            scale: (isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)) ? 1.1 : 1
 
-                                            StyledText {
-                                                id: nameText2
-                                                text: isExtractedColor ? colorValue : Theme.getThemeColors(colorValue).name
-                                                font.pixelSize: Theme.fontSizeSmall
-                                                color: Theme.surfaceText
-                                                anchors.centerIn: parent
-                                            }
-                                        }
+                                            Rectangle {
+                                                width: nameText.contentWidth + Theme.spacingL
+                                                height: nameText.contentHeight + Theme.spacingS
+                                                color: Theme.surfaceContainer
+                                                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                                border.width: 1
+                                                radius: Theme.cornerRadius
+                                                anchors.bottom: parent.top
+                                                anchors.bottomMargin: Theme.spacingS
+                                                anchors.horizontalCenter: parent.horizontalCenter
+                                                visible: mouseArea.containsMouse
+                                                layer.enabled: true
+                                                layer.smooth: true
 
-                                        MouseArea {
-                                            id: mouseArea2
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                if (isExtractedColor) {
-                                                    
-                                                    ColorPaletteService.clearSelection()
-                                                    ColorPaletteService.selectColor(colorValue, true)
-                                                    
-                                                    ColorPaletteService.applySelectedColors()
-                                                } else {
-                                                    Theme.switchTheme(colorValue)
+                                                StyledText {
+                                                    id: nameText
+                                                    text: isExtractedColor ? colorValue : Theme.getThemeColors(colorValue).name
+                                                    font.pixelSize: Theme.fontSizeSmall
+                                                    font.weight: Font.Medium
+                                                    color: Theme.surfaceText
+                                                    anchors.centerIn: parent
                                                 }
                                             }
-                                        }
 
-                                        Behavior on scale {
-                                            NumberAnimation {
-                                                duration: Theme.shortDuration
-                                                easing.type: Theme.emphasizedEasing
+                                            MouseArea {
+                                                id: mouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    if (isExtractedColor) {
+                                                        ColorPaletteService.clearSelection()
+                                                        ColorPaletteService.selectColor(colorValue, true)
+                                                        ColorPaletteService.applySelectedColors()
+                                                    } else {
+                                                        Theme.switchTheme(colorValue)
+                                                    }
+                                                }
                                             }
-                                        }
 
-                                        Behavior on border.width {
-                                            NumberAnimation {
-                                                duration: Theme.shortDuration
-                                                easing.type: Theme.emphasizedEasing
+                                            Behavior on scale {
+                                                NumberAnimation {
+                                                    duration: Theme.shortDuration
+                                                    easing.type: Theme.emphasizedEasing
+                                                }
+                                            }
+
+                                            Behavior on border.width {
+                                                NumberAnimation {
+                                                    duration: Theme.shortDuration
+                                                    easing.type: Theme.emphasizedEasing
+                                                }
                                             }
                                         }
                                     }
@@ -627,30 +682,33 @@ Item {
 
                                     Rectangle {
                                         property string themeName: modelData
-                                        width: 32
-                                        height: 32
-                                        radius: 16
+                                        width: 40
+                                        height: 40
+                                        radius: 20
                                         color: Theme.getCatppuccinColor(themeName)
-                                        border.color: Theme.outline
-                                        border.width: (Theme.currentThemeName === themeName && Theme.currentTheme !== Theme.dynamic) ? 2 : 1
+                                        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                        border.width: (Theme.currentThemeName === themeName && Theme.currentTheme !== Theme.dynamic) ? 3 : 1
                                         scale: (Theme.currentThemeName === themeName && Theme.currentTheme !== Theme.dynamic) ? 1.1 : 1
 
                                         Rectangle {
-                                            width: nameTextCat.contentWidth + Theme.spacingS * 2
-                                            height: nameTextCat.contentHeight + Theme.spacingXS * 2
+                                            width: nameTextCat.contentWidth + Theme.spacingL
+                                            height: nameTextCat.contentHeight + Theme.spacingS
                                             color: Theme.surfaceContainer
-                                            border.color: Theme.outline
+                                            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                                             border.width: 1
                                             radius: Theme.cornerRadius
                                             anchors.bottom: parent.top
-                                            anchors.bottomMargin: Theme.spacingXS
+                                            anchors.bottomMargin: Theme.spacingS
                                             anchors.horizontalCenter: parent.horizontalCenter
                                             visible: mouseAreaCat.containsMouse
+                                            layer.enabled: true
+                                            layer.smooth: true
 
                                             StyledText {
                                                 id: nameTextCat
                                                 text: Theme.getCatppuccinVariantName(themeName)
                                                 font.pixelSize: Theme.fontSizeSmall
+                                                font.weight: Font.Medium
                                                 color: Theme.surfaceText
                                                 anchors.centerIn: parent
                                             }
@@ -692,30 +750,33 @@ Item {
 
                                     Rectangle {
                                         property string themeName: modelData
-                                        width: 32
-                                        height: 32
-                                        radius: 16
+                                        width: 40
+                                        height: 40
+                                        radius: 20
                                         color: Theme.getCatppuccinColor(themeName)
-                                        border.color: Theme.outline
-                                        border.width: (Theme.currentThemeName === themeName && Theme.currentTheme !== Theme.dynamic) ? 2 : 1
+                                        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                                        border.width: (Theme.currentThemeName === themeName && Theme.currentTheme !== Theme.dynamic) ? 3 : 1
                                         scale: (Theme.currentThemeName === themeName && Theme.currentTheme !== Theme.dynamic) ? 1.1 : 1
 
                                         Rectangle {
-                                            width: nameTextCat2.contentWidth + Theme.spacingS * 2
-                                            height: nameTextCat2.contentHeight + Theme.spacingXS * 2
+                                            width: nameTextCat2.contentWidth + Theme.spacingL
+                                            height: nameTextCat2.contentHeight + Theme.spacingS
                                             color: Theme.surfaceContainer
-                                            border.color: Theme.outline
+                                            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                                             border.width: 1
                                             radius: Theme.cornerRadius
                                             anchors.bottom: parent.top
-                                            anchors.bottomMargin: Theme.spacingXS
+                                            anchors.bottomMargin: Theme.spacingS
                                             anchors.horizontalCenter: parent.horizontalCenter
                                             visible: mouseAreaCat2.containsMouse
+                                            layer.enabled: true
+                                            layer.smooth: true
 
                                             StyledText {
                                                 id: nameTextCat2
                                                 text: Theme.getCatppuccinVariantName(themeName)
                                                 font.pixelSize: Theme.fontSizeSmall
+                                                font.weight: Font.Medium
                                                 color: Theme.surfaceText
                                                 anchors.centerIn: parent
                                             }
@@ -2906,6 +2967,11 @@ Item {
                 }
             }
                 }
+            }
+
+            WallpaperTab {
+                id: wallpaperTab
+                parentModal: themeColorsTab.parentModal
             }
 
             DarkFlickable {

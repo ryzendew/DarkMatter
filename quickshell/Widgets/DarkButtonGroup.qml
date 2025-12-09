@@ -59,54 +59,22 @@ Row {
             property bool prevSelected: index > 0 ? root.isSelected(index - 1) : false
             property bool nextSelected: index < repeater.count - 1 ? root.isSelected(index + 1) : false
 
-            width: Math.max(contentItem.implicitWidth + root.buttonPadding * 2, root.minButtonWidth) + (selected ? 4 : 0)
+            width: Math.max(contentItem.implicitWidth + root.buttonPadding * 2, root.minButtonWidth)
             height: root.buttonHeight
 
-            color: selected ? Theme.primaryContainer : Theme.primary
-            border.color: "transparent"
-            border.width: 0
-
-            topLeftRadius: (isFirst || selected) ? Theme.cornerRadius : 4
-            bottomLeftRadius: (isFirst || selected) ? Theme.cornerRadius : 4
-            topRightRadius: (isLast || selected) ? Theme.cornerRadius : 4
-            bottomRightRadius: (isLast || selected) ? Theme.cornerRadius : 4
-
-            Behavior on width {
-                NumberAnimation {
-                    duration: Theme.shortDuration
-                    easing.type: Theme.standardEasing
-                }
-            }
-
-            Behavior on topLeftRadius {
-                NumberAnimation {
-                    duration: Theme.shortDuration
-                    easing.type: Theme.standardEasing
-                }
-            }
-
-            Behavior on topRightRadius {
-                NumberAnimation {
-                    duration: Theme.shortDuration
-                    easing.type: Theme.standardEasing
-                }
-            }
-
-            Behavior on bottomLeftRadius {
-                NumberAnimation {
-                    duration: Theme.shortDuration
-                    easing.type: Theme.standardEasing
-                }
-            }
-
-            Behavior on bottomRightRadius {
-                NumberAnimation {
-                    duration: Theme.shortDuration
-                    easing.type: Theme.standardEasing
-                }
-            }
+            color: selected ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.4)
+            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, selected ? 0.2 : 0.12)
+            border.width: 1
+            radius: Theme.cornerRadius
 
             Behavior on color {
+                ColorAnimation {
+                    duration: Theme.shortDuration
+                    easing.type: Theme.standardEasing
+                }
+            }
+
+            Behavior on border.color {
                 ColorAnimation {
                     duration: Theme.shortDuration
                     easing.type: Theme.standardEasing
@@ -116,19 +84,18 @@ Row {
             Rectangle {
                 id: stateLayer
                 anchors.fill: parent
-                topLeftRadius: parent.topLeftRadius
-                bottomLeftRadius: parent.bottomLeftRadius
-                topRightRadius: parent.topRightRadius
-                bottomRightRadius: parent.bottomRightRadius
-                color: {
-                    if (pressed) return selected ? Theme.primaryPressed : Theme.surfacePressed
-                    if (hovered) return selected ? Theme.primaryHover : Theme.surfaceHover
-                    return "transparent"
+                radius: parent.radius
+                color: Theme.surfaceTint
+                opacity: {
+                    if (pressed) return 0.16
+                    if (hovered && !selected) return 0.08
+                    if (hovered && selected) return 0.12
+                    return 0
                 }
 
-                Behavior on color {
-                    ColorAnimation {
-                        duration: Theme.shorterDuration
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Theme.shortDuration
                         easing.type: Theme.standardEasing
                     }
                 }
@@ -142,13 +109,14 @@ Row {
 
                 Row {
                     id: contentRow
-                    spacing: Theme.spacingS
+                    anchors.centerIn: parent
+                    spacing: root.checkEnabled && segment.selected ? Theme.spacingS : 0
 
                     DarkIcon {
                         id: checkIcon
                         name: "check"
                         size: root.checkIconSize
-                        color: segment.selected ? (Theme.primaryContainerText || Theme.surfaceText) : (Theme.primaryText || Theme.surfaceText)
+                        color: segment.selected ? Theme.primary : Qt.rgba(Theme.surfaceText.r, Theme.surfaceText.g, Theme.surfaceText.b, 0.8)
                         visible: root.checkEnabled && segment.selected
                         opacity: segment.selected ? 1 : 0
                         scale: segment.selected ? 1 : 0.6
@@ -167,6 +135,13 @@ Row {
                                 easing.type: Theme.emphasizedEasing
                             }
                         }
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Theme.shortDuration
+                                easing.type: Theme.standardEasing
+                            }
+                        }
                     }
 
                     StyledText {
@@ -174,8 +149,15 @@ Row {
                         text: typeof modelData === "string" ? modelData : modelData.text || ""
                         font.pixelSize: root.textSize
                         font.weight: segment.selected ? Font.Medium : Font.Normal
-                        color: segment.selected ? (Theme.primaryContainerText || Theme.surfaceText) : (Theme.primaryText || Theme.surfaceText)
+                        color: segment.selected ? Theme.primary : Qt.rgba(Theme.surfaceText.r, Theme.surfaceText.g, Theme.surfaceText.b, 0.9)
                         anchors.verticalCenter: parent.verticalCenter
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Theme.shortDuration
+                                easing.type: Theme.standardEasing
+                            }
+                        }
                     }
                 }
             }

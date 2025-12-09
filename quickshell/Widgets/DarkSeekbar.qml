@@ -101,6 +101,14 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     color: parent.trackColor
                     radius: height / 2
+                    border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
+                    border.width: 1
+                    
+                    Behavior on color {
+                        ColorAnimation {
+                            duration: 80
+                        }
+                    }
                 }
 
                 Rectangle {
