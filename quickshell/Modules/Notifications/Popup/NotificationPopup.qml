@@ -218,6 +218,7 @@ PanelWindow {
                     height: 68
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenterOffset: -20
 
                     imageSource: {
                         if (!notificationData)

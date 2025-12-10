@@ -89,6 +89,7 @@ Singleton {
     
     // Desktop Widget Visual Effects
     property real desktopWidgetDropShadowOpacity: 0.3
+    property real desktopWidgetDropShadowRadius: 12
     property real desktopWidgetBorderOpacity: 0.3
     property real desktopWidgetBorderThickness: 1
     
@@ -527,6 +528,7 @@ Singleton {
         desktopWeatherOpacity = settings.desktopWeatherOpacity !== undefined ? settings.desktopWeatherOpacity : 0.9
         desktopTerminalOpacity = settings.desktopTerminalOpacity !== undefined ? settings.desktopTerminalOpacity : 0.9
         desktopWidgetDropShadowOpacity = settings.desktopWidgetDropShadowOpacity !== undefined ? settings.desktopWidgetDropShadowOpacity : 0.3
+        desktopWidgetDropShadowRadius = settings.desktopWidgetDropShadowRadius !== undefined ? settings.desktopWidgetDropShadowRadius : 12
         desktopWidgetBorderOpacity = settings.desktopWidgetBorderOpacity !== undefined ? settings.desktopWidgetBorderOpacity : 0.3
         desktopWidgetBorderThickness = settings.desktopWidgetBorderThickness !== undefined ? settings.desktopWidgetBorderThickness : 1
         desktopWidgetWidth = settings.desktopWidgetWidth !== undefined ? settings.desktopWidgetWidth : 180
@@ -860,6 +862,7 @@ Singleton {
             "desktopWeatherOpacity": desktopWeatherOpacity,
             "desktopTerminalOpacity": desktopTerminalOpacity,
             "desktopWidgetDropShadowOpacity": desktopWidgetDropShadowOpacity,
+            "desktopWidgetDropShadowRadius": desktopWidgetDropShadowRadius,
             "desktopWidgetBorderOpacity": desktopWidgetBorderOpacity,
             "desktopWidgetBorderThickness": desktopWidgetBorderThickness,
             "desktopWidgetWidth": desktopWidgetWidth,
@@ -1514,6 +1517,10 @@ Singleton {
     }
     function setDesktopWidgetDropShadowOpacity(opacity) {
         desktopWidgetDropShadowOpacity = opacity
+        saveSettings()
+    }
+    function setDesktopWidgetDropShadowRadius(radius) {
+        desktopWidgetDropShadowRadius = radius
         saveSettings()
     }
     function setDesktopWidgetBorderOpacity(opacity) {

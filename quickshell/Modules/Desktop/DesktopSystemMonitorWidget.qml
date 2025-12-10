@@ -370,6 +370,7 @@ PanelWindow {
         border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, SettingsData.desktopWidgetBorderOpacity)
         border.width: SettingsData.desktopWidgetBorderThickness
         opacity: widgetOpacity
+        antialiasing: true
 
         gradient: Gradient {
             GradientStop { position: 0.0; color: Qt.rgba(Theme.surfaceContainerHigh.r, Theme.surfaceContainerHigh.g, Theme.surfaceContainerHigh.b, widgetOpacity - 0.05) }
@@ -377,13 +378,25 @@ PanelWindow {
         }
 
         layer.enabled: SettingsData.desktopWidgetDropShadowOpacity > 0
+        layer.smooth: true
         layer.effect: DropShadow {
+            id: dropShadow
             horizontalOffset: 0
-            verticalOffset: 8
-            radius: 24
-            samples: 32
+            verticalOffset: 0
+            radius: SettingsData.desktopWidgetDropShadowRadius
+            samples: Math.max(128, Math.ceil(SettingsData.desktopWidgetDropShadowRadius * 2.5))
             color: Qt.rgba(0, 0, 0, SettingsData.desktopWidgetDropShadowOpacity)
             transparentBorder: true
+            cached: false
+            spread: 0
+        }
+        
+        Connections {
+            target: SettingsData
+            function onDesktopWidgetDropShadowRadiusChanged() {
+                dropShadow.radius = SettingsData.desktopWidgetDropShadowRadius
+                dropShadow.samples = Math.max(128, Math.ceil(SettingsData.desktopWidgetDropShadowRadius * 2.5))
+            }
         }
 
         Column {

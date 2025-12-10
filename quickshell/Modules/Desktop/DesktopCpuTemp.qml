@@ -53,6 +53,7 @@ DarkOSD {
         color: Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, SettingsData.desktopCpuTempOpacity)
         border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, SettingsData.desktopWidgetBorderOpacity)
         border.width: SettingsData.desktopWidgetBorderThickness
+        antialiasing: true
 
         Component.onCompleted: {
         }
@@ -61,13 +62,23 @@ DarkOSD {
         y: 50
 
         layer.enabled: SettingsData.desktopWidgetDropShadowOpacity > 0
+        layer.smooth: true
         layer.effect: DropShadow {
+            id: dropShadow
             horizontalOffset: 0
             verticalOffset: 4
-            radius: 12
-            samples: 16
+            radius: SettingsData.desktopWidgetDropShadowRadius
+            samples: Math.max(16, SettingsData.desktopWidgetDropShadowRadius * 2)
             color: Qt.rgba(0, 0, 0, SettingsData.desktopWidgetDropShadowOpacity)
             transparentBorder: true
+            cached: false
+        }
+        
+        Connections {
+            target: SettingsData
+            function onDesktopWidgetDropShadowRadiusChanged() {
+                dropShadow.radius = SettingsData.desktopWidgetDropShadowRadius
+            }
         }
 
         Row {

@@ -406,6 +406,33 @@ Item {
                         }
                     }
 
+                    Column {
+                        width: parent.width
+                        spacing: Theme.spacingXS
+                        visible: SettingsData.desktopSystemMonitorEnabled
+                        opacity: visible ? 1 : 0
+
+                        StyledText {
+                            text: "Drop Shadow Opacity: " + Math.round(SettingsData.desktopWidgetDropShadowOpacity * 100) + "%"
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+
+                        DarkSlider {
+                            width: parent.width
+                            height: 32
+                            value: Math.round(SettingsData.desktopWidgetDropShadowOpacity * 100)
+                            minimum: 0
+                            maximum: 100
+                            unit: "%"
+                            showValue: true
+                            wheelEnabled: false
+                            onSliderValueChanged: newValue => {
+                                SettingsData.setDesktopWidgetDropShadowOpacity(newValue / 100)
+                            }
+                        }
+                    }
+
                     Behavior on opacity {
                         NumberAnimation {
                             duration: Theme.mediumDuration
@@ -1452,6 +1479,31 @@ Item {
                             wheelEnabled: false
                             onSliderValueChanged: newValue => {
                                 SettingsData.setDesktopWidgetIconSize(newValue)
+                            }
+                        }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: Theme.spacingXS
+
+                        StyledText {
+                            text: "Drop Shadow Radius: " + SettingsData.desktopWidgetDropShadowRadius + "px"
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+
+                        DarkSlider {
+                            width: parent.width
+                            height: 32
+                            value: SettingsData.desktopWidgetDropShadowRadius
+                            minimum: 0
+                            maximum: 50
+                            unit: "px"
+                            showValue: true
+                            wheelEnabled: false
+                            onSliderValueChanged: newValue => {
+                                SettingsData.setDesktopWidgetDropShadowRadius(newValue)
                             }
                         }
                     }

@@ -216,13 +216,23 @@ DarkOSD {
         anchors.margins: 20
 
         layer.enabled: SettingsData.desktopWidgetDropShadowOpacity > 0
+        layer.smooth: true
         layer.effect: DropShadow {
+            id: dropShadow
             horizontalOffset: 0
             verticalOffset: 4
-            radius: 12
-            samples: 16
+            radius: SettingsData.desktopWidgetDropShadowRadius
+            samples: Math.max(16, SettingsData.desktopWidgetDropShadowRadius * 2)
             color: Qt.rgba(0, 0, 0, SettingsData.desktopWidgetDropShadowOpacity)
             transparentBorder: true
+            cached: false
+        }
+        
+        Connections {
+            target: SettingsData
+            function onDesktopWidgetDropShadowRadiusChanged() {
+                dropShadow.radius = SettingsData.desktopWidgetDropShadowRadius
+            }
         }
 
         Column {

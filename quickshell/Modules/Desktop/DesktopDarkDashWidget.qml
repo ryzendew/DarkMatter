@@ -80,15 +80,28 @@ PanelWindow {
         color: Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, SettingsData.desktopDarkDashContentBackgroundOpacity)
         border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, SettingsData.desktopDarkDashBorderOpacity)
         border.width: SettingsData.desktopDarkDashBorderThickness
+        antialiasing: true
 
         layer.enabled: SettingsData.desktopDarkDashDropShadowOpacity > 0
+        layer.smooth: true
         layer.effect: DropShadow {
+            id: dropShadow
             horizontalOffset: 0
-            verticalOffset: 4
-            radius: 12
-            samples: 16
+            verticalOffset: 0
+            radius: SettingsData.desktopWidgetDropShadowRadius
+            samples: Math.max(128, Math.ceil(SettingsData.desktopWidgetDropShadowRadius * 2.5))
             color: Qt.rgba(0, 0, 0, SettingsData.desktopDarkDashDropShadowOpacity)
             transparentBorder: true
+            cached: false
+            spread: 0
+        }
+        
+        Connections {
+            target: SettingsData
+            function onDesktopWidgetDropShadowRadiusChanged() {
+                dropShadow.radius = SettingsData.desktopWidgetDropShadowRadius
+                dropShadow.samples = Math.max(128, Math.ceil(SettingsData.desktopWidgetDropShadowRadius * 2.5))
+            }
         }
 
         Rectangle {

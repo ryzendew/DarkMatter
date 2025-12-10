@@ -67,18 +67,94 @@ StyledRect {
         return {minX: minX, minY: minY, maxX: maxX, maxY: maxY, width: maxX - minX, height: maxY - minY}
     }
     
+    function alignMonitorsToTop() {
+        // Find the topmost Y position
+        var topmostY = null
+        for (var i = 0; i < monitors.length; i++) {
+            var monitor = monitors[i]
+            if (monitor.disabled) continue
+            var pos
+            if (monitor.position && monitor.position !== "") {
+                pos = parsePosition(monitor.position)
+            } else {
+                pos = calculateAutoPosition(i)
+            }
+            if (topmostY === null || pos.y < topmostY) {
+                topmostY = pos.y
+            }
+        }
+        
+        // If no valid monitors found, return
+        if (topmostY === null) return
+        
+        // Align all monitors to the topmost Y position
+        for (var j = 0; j < monitors.length; j++) {
+            var monitorToAlign = monitors[j]
+            if (monitorToAlign.disabled) continue
+            
+            var currentPos
+            if (monitorToAlign.position && monitorToAlign.position !== "") {
+                currentPos = parsePosition(monitorToAlign.position)
+            } else {
+                currentPos = calculateAutoPosition(j)
+            }
+            
+            // Only update if Y position is different
+            if (currentPos.y !== topmostY) {
+                var newPosition = currentPos.x + "x" + topmostY
+                positionChanged(monitorToAlign.name, newPosition)
+            }
+        }
+    }
+    
     Column {
         id: arrangementColumn
         anchors.fill: parent
         anchors.margins: Theme.spacingL
         spacing: Theme.spacingM
         
-        StyledText {
-            text: "Monitor Arrangement"
-            font.pixelSize: Theme.fontSizeLarge
-            font.weight: Font.Medium
-            color: Theme.surfaceText
+        Item {
             width: parent.width
+            height: Math.max(monitorArrangementText.implicitHeight, alignButton.height)
+            
+            StyledText {
+                id: monitorArrangementText
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                text: "Monitor Arrangement"
+                font.pixelSize: Theme.fontSizeLarge
+                font.weight: Font.Medium
+                color: Theme.surfaceText
+            }
+            
+            StyledRect {
+                id: alignButton
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                height: 32
+                width: alignButtonText.implicitWidth + Theme.spacingM * 2
+                radius: Theme.cornerRadius
+                color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.1)
+                border.color: Theme.primary
+                border.width: 1
+                visible: monitors.length > 0
+                
+                StyledText {
+                    id: alignButtonText
+                    anchors.centerIn: parent
+                    text: "Align Top"
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.primary
+                }
+                
+                StateLayer {
+                    stateColor: Theme.primary
+                    cornerRadius: parent.radius
+                    onClicked: {
+                        root.alignMonitorsToTop()
+                    }
+                }
+            }
         }
         
         Flickable {
@@ -263,6 +339,67 @@ StyledRect {
                         return false
                     }
                     
+                    function findSnapY(newY) {
+                        var snapThreshold = 15 // pixels in scaled coordinates
+                        var currentTop = newY
+                        var currentBottom = newY + scaledHeight
+                        var bestSnapY = newY
+                        var bestDistance = snapThreshold + 1
+                        
+                        for (var i = 0; i < root.monitors.length; i++) {
+                            var otherMonitor = root.monitors[i]
+                            if (otherMonitor.name === monitor.name || otherMonitor.disabled) continue
+                            
+                            var otherCaps = root.monitorCapabilities[otherMonitor.name] || {}
+                            var otherPos
+                            if (otherMonitor.position && otherMonitor.position !== "") {
+                                otherPos = root.parsePosition(otherMonitor.position)
+                            } else {
+                                otherPos = root.calculateAutoPosition(i)
+                            }
+                            var otherHeight = (otherCaps.height || 1080) / parseFloat(otherMonitor.scale || "1.0")
+                            
+                            var otherScaledY = (otherPos.y - arrangementArea.bounds.minY) * arrangementArea.scaleFactor + 20
+                            var otherScaledHeight = otherHeight * arrangementArea.scaleFactor
+                            var otherTop = otherScaledY
+                            var otherBottom = otherScaledY + otherScaledHeight
+                            
+                            // Check top-to-top alignment
+                            var topDiff = Math.abs(currentTop - otherTop)
+                            if (topDiff < bestDistance) {
+                                bestSnapY = otherTop
+                                bestDistance = topDiff
+                            }
+                            
+                            // Check top-to-bottom alignment
+                            var topBottomDiff = Math.abs(currentTop - otherBottom)
+                            if (topBottomDiff < bestDistance) {
+                                bestSnapY = otherBottom
+                                bestDistance = topBottomDiff
+                            }
+                            
+                            // Check bottom-to-top alignment
+                            var bottomTopDiff = Math.abs(currentBottom - otherTop)
+                            if (bottomTopDiff < bestDistance) {
+                                bestSnapY = otherTop - scaledHeight
+                                bestDistance = bottomTopDiff
+                            }
+                            
+                            // Check bottom-to-bottom alignment
+                            var bottomDiff = Math.abs(currentBottom - otherBottom)
+                            if (bottomDiff < bestDistance) {
+                                bestSnapY = otherBottom - scaledHeight
+                                bestDistance = bottomDiff
+                            }
+                        }
+                        
+                        // Only snap if within threshold
+                        if (bestDistance < snapThreshold) {
+                            return bestSnapY
+                        }
+                        return newY
+                    }
+                    
                     MouseArea {
                         anchors.fill: parent
                         drag.target: parent
@@ -293,12 +430,17 @@ StyledRect {
                                 var newX = monitorDelegate.x
                                 var newY = monitorDelegate.y
                                 
+                                // Apply snap-to-align for top and bottom edges
+                                var snappedY = findSnapY(newY)
+                                newY = snappedY
+                                
                                 if (checkCollision(newX, newY)) {
                                     monitorDelegate.x = lastValidX
                                     monitorDelegate.y = lastValidY
                                     return
                                 }
                                 
+                                monitorDelegate.y = newY
                                 lastValidX = newX
                                 lastValidY = newY
                             }
