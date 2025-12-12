@@ -19,6 +19,10 @@ Singleton {
     property var savedColorThemes: [] // Array of saved color themes
     property string currentColorTheme: "" // Currently selected color theme name
     property real colorVibrance: 1.0
+    property int extractedColorTextR: 255 // Red component for extracted color text (0-255)
+    property int extractedColorTextG: 255 // Green component for extracted color text (0-255)
+    property int extractedColorTextB: 255 // Blue component for extracted color text (0-255)
+    property var savedTextColorPresets: [] // Array of saved RGB text color presets
     property real topBarTransparency: 0.75
     property real topBarWidgetTransparency: 0.85
     property real popupTransparency: 0.92
@@ -462,6 +466,10 @@ Singleton {
                 savedColorThemes = settings.savedColorThemes !== undefined ? settings.savedColorThemes : []
                 currentColorTheme = settings.currentColorTheme !== undefined ? settings.currentColorTheme : ""
                 colorVibrance = settings.colorVibrance !== undefined ? settings.colorVibrance : 1.0
+                extractedColorTextR = settings.extractedColorTextR !== undefined ? settings.extractedColorTextR : 255
+                extractedColorTextG = settings.extractedColorTextG !== undefined ? settings.extractedColorTextG : 255
+                extractedColorTextB = settings.extractedColorTextB !== undefined ? settings.extractedColorTextB : 255
+                savedTextColorPresets = settings.savedTextColorPresets !== undefined ? settings.savedTextColorPresets : []
                 topBarTransparency = settings.topBarTransparency !== undefined ? (settings.topBarTransparency > 1 ? settings.topBarTransparency / 100 : settings.topBarTransparency) : 0.75
                 topBarWidgetTransparency = settings.topBarWidgetTransparency !== undefined ? (settings.topBarWidgetTransparency > 1 ? settings.topBarWidgetTransparency / 100 : settings.topBarWidgetTransparency) : 0.85
                 popupTransparency = settings.popupTransparency !== undefined ? (settings.popupTransparency > 1 ? settings.popupTransparency / 100 : settings.popupTransparency) : 0.92
@@ -796,6 +804,10 @@ Singleton {
                                                 "savedColorThemes": savedColorThemes,
                                                 "currentColorTheme": currentColorTheme,
                                                 "colorVibrance": colorVibrance,
+                                                "extractedColorTextR": extractedColorTextR,
+                                                "extractedColorTextG": extractedColorTextG,
+                                                "extractedColorTextB": extractedColorTextB,
+                                                "savedTextColorPresets": savedTextColorPresets,
                                                 "topBarTransparency": topBarTransparency,
                                                 "topBarWidgetTransparency": topBarWidgetTransparency,
                                                 "popupTransparency": popupTransparency,
@@ -1213,6 +1225,80 @@ Singleton {
     function setColorVibrance(vibrance) {
         colorVibrance = vibrance
         saveSettings()
+    }
+    
+    function setExtractedColorTextR(value) {
+        extractedColorTextR = value
+        saveSettings()
+        if (typeof ColorPaletteService !== 'undefined') {
+            ColorPaletteService.textColorAdjustmentChanged()
+            ColorPaletteService.updateCurrentThemeTextColors()
+        }
+    }
+    
+    function setExtractedColorTextG(value) {
+        extractedColorTextG = value
+        saveSettings()
+        if (typeof ColorPaletteService !== 'undefined') {
+            ColorPaletteService.textColorAdjustmentChanged()
+            ColorPaletteService.updateCurrentThemeTextColors()
+        }
+    }
+    
+    function setExtractedColorTextB(value) {
+        extractedColorTextB = value
+        saveSettings()
+        if (typeof ColorPaletteService !== 'undefined') {
+            ColorPaletteService.textColorAdjustmentChanged()
+            ColorPaletteService.updateCurrentThemeTextColors()
+        }
+    }
+    
+    function saveTextColorPreset(presetName) {
+        const name = presetName || currentColorTheme || "Preset " + (savedTextColorPresets.length + 1)
+        const themeName = currentColorTheme || ""
+        
+        // Remove existing preset with same name/theme
+        savedTextColorPresets = savedTextColorPresets.filter(p => !(p.name === name && p.themeName === themeName))
+        
+        const preset = {
+            name: name,
+            r: extractedColorTextR,
+            g: extractedColorTextG,
+            b: extractedColorTextB,
+            themeName: themeName
+        }
+        savedTextColorPresets.push(preset)
+        saveSettings()
+    }
+    
+    function loadTextColorPreset(presetName) {
+        const preset = savedTextColorPresets.find(p => p.name === presetName)
+        if (preset) {
+            setExtractedColorTextR(preset.r)
+            setExtractedColorTextG(preset.g)
+            setExtractedColorTextB(preset.b)
+            return true
+        }
+        return false
+    }
+    
+    function loadTextColorFromTheme(themeName) {
+        // Auto-load RGB values from theme if they exist
+        if (themeName && savedTextColorPresets.length > 0) {
+            const themePreset = savedTextColorPresets.find(p => p.themeName === themeName)
+            if (themePreset) {
+                extractedColorTextR = themePreset.r
+                extractedColorTextG = themePreset.g
+                extractedColorTextB = themePreset.b
+                if (typeof ColorPaletteService !== 'undefined') {
+                    ColorPaletteService.textColorAdjustmentChanged()
+                    ColorPaletteService.updateCurrentThemeTextColors()
+                }
+                return true
+            }
+        }
+        return false
     }
 
     function setSavedColorThemes(themes) {

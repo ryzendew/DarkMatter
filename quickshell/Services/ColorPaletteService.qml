@@ -43,6 +43,7 @@ Singleton {
     signal colorsChanged()
     signal customThemeCreated(var themeData)
     signal themesUpdated()
+    signal textColorAdjustmentChanged()
 
     function extractColorsFromWallpaper(wallpaperPath) {
         if (!wallpaperPath || wallpaperPath === currentWallpaper) {
@@ -74,6 +75,32 @@ Singleton {
         selectedColors = []
         colorsChanged()
     }
+    
+    function getBrightness(color) {
+        let r, g, b
+        if (typeof color === 'string' && color.startsWith('#')) {
+            r = parseInt(color.slice(1, 3), 16) / 255
+            g = parseInt(color.slice(3, 5), 16) / 255
+            b = parseInt(color.slice(5, 7), 16) / 255
+        } else {
+            r = color.r || 0
+            g = color.g || 0
+            b = color.b || 0
+        }
+        return (r * 0.299 + g * 0.587 + b * 0.114)
+    }
+    
+    function getTextColorForBackground(backgroundColor) {
+        // Use the RGB override values from settings
+        if (typeof SettingsData !== 'undefined') {
+            const hexR = Math.max(0, Math.min(255, SettingsData.extractedColorTextR)).toString(16).padStart(2, '0')
+            const hexG = Math.max(0, Math.min(255, SettingsData.extractedColorTextG)).toString(16).padStart(2, '0')
+            const hexB = Math.max(0, Math.min(255, SettingsData.extractedColorTextB)).toString(16).padStart(2, '0')
+            return "#" + hexR + hexG + hexB
+        }
+        // Fallback to white if SettingsData not available
+        return "#ffffff"
+    }
 
     function applySelectedColors() {
         
@@ -96,8 +123,15 @@ Singleton {
         }
         
         const getTextColorForBackground = (backgroundColor, isLightMode) => {
+            // Use RGB override values from settings if available
+            if (typeof SettingsData !== 'undefined') {
+                const hexR = Math.max(0, Math.min(255, SettingsData.extractedColorTextR)).toString(16).padStart(2, '0')
+                const hexG = Math.max(0, Math.min(255, SettingsData.extractedColorTextG)).toString(16).padStart(2, '0')
+                const hexB = Math.max(0, Math.min(255, SettingsData.extractedColorTextB)).toString(16).padStart(2, '0')
+                return "#" + hexR + hexG + hexB
+            }
+            // Fallback to brightness-based calculation
             const brightness = getBrightness(backgroundColor)
-            
             if (isLightMode) {
                 return brightness > 0.5 ? "#000000" : "#ffffff"
             } else {
@@ -240,6 +274,11 @@ Singleton {
         }
 
         saveCustomThemeToFile(customTheme)
+        
+        // Auto-save RGB text color to theme
+        if (typeof SettingsData !== 'undefined' && SettingsData.currentColorTheme) {
+            SettingsData.saveTextColorPreset(SettingsData.currentColorTheme)
+        }
 
         customThemeCreated(customTheme)
     }
@@ -370,6 +409,9 @@ Singleton {
                                 SettingsData.launcherLogoGreen = g
                                 SettingsData.launcherLogoBlue = b
                                 SettingsData.osLogoColorOverride = primaryColor
+                                
+                                // Auto-load RGB text color from theme
+                                SettingsData.loadTextColorFromTheme(currentTheme)
                             }
                         } else {
                         }
@@ -384,6 +426,85 @@ Singleton {
         } catch (e) {
         }
         return null
+    }
+
+    function updateCurrentThemeTextColors() {
+        // Get RGB override color
+        if (typeof SettingsData === 'undefined') return
+        
+        const hexR = Math.max(0, Math.min(255, SettingsData.extractedColorTextR)).toString(16).padStart(2, '0')
+        const hexG = Math.max(0, Math.min(255, SettingsData.extractedColorTextG)).toString(16).padStart(2, '0')
+        const hexB = Math.max(0, Math.min(255, SettingsData.extractedColorTextB)).toString(16).padStart(2, '0')
+        const overrideTextColor = "#" + hexR + hexG + hexB
+        
+        // List of all text color properties to override
+        const textColorProperties = [
+            "primaryText", "primaryContainerText", "secondaryText", "secondaryContainerText",
+            "tertiaryText", "tertiaryContainerText", "surfaceText", "surfaceVariantText",
+            "surfaceContainerText", "surfaceContainerHighText", "surfaceContainerHighestText",
+            "backgroundText", "errorContainerText", "warningContainerText", "infoContainerText",
+            "successContainerText", "onSurface", "onSurfaceVariant", "onPrimary"
+        ]
+        
+        // Update the current saved theme's text colors with RGB overrides
+        if (SettingsData.currentColorTheme) {
+            const currentTheme = SettingsData.currentColorTheme
+            const themes = SettingsData.savedColorThemes || []
+            const theme = themes.find(t => t.name === currentTheme)
+            
+            if (theme && theme.themeData) {
+                // Update themeData (could be a single object or have dark/light variants)
+                if (theme.themeData.dark || theme.themeData.light) {
+                    // Has dark/light variants
+                    if (theme.themeData.dark) {
+                        for (const prop of textColorProperties) {
+                            if (theme.themeData.dark[prop] !== undefined) {
+                                theme.themeData.dark[prop] = overrideTextColor
+                            }
+                        }
+                    }
+                    if (theme.themeData.light) {
+                        for (const prop of textColorProperties) {
+                            if (theme.themeData.light[prop] !== undefined) {
+                                theme.themeData.light[prop] = overrideTextColor
+                            }
+                        }
+                    }
+                } else {
+                    // Single theme object
+                    for (const prop of textColorProperties) {
+                        if (theme.themeData[prop] !== undefined) {
+                            theme.themeData[prop] = overrideTextColor
+                        }
+                    }
+                }
+                
+                // Save the updated theme
+                SettingsData.setSavedColorThemes(themes)
+            }
+        }
+        
+        // Always update Theme.customThemeData directly for real-time updates if custom theme is active
+        if (typeof Theme !== 'undefined' && Theme.currentTheme === "custom" && Theme.customThemeData) {
+            // Update the currently loaded theme data directly
+            const currentThemeData = Theme.customThemeData
+            
+            // Update all text color properties in the current theme
+            for (const prop of textColorProperties) {
+                if (currentThemeData[prop] !== undefined) {
+                    currentThemeData[prop] = overrideTextColor
+                }
+            }
+            
+            // Force update by reassigning
+            Theme.customThemeData = currentThemeData
+            
+            // Regenerate system themes and trigger update
+            Theme.generateSystemThemesFromCurrentTheme()
+            if (Theme.colorUpdateTrigger !== undefined) {
+                Theme.colorUpdateTrigger++
+            }
+        }
     }
 
     function updateAvailableThemes() {
@@ -408,6 +529,8 @@ Singleton {
             
             if (typeof SettingsData !== 'undefined') {
                 SettingsData.setCurrentColorTheme(themeName)
+                // Auto-load RGB text color from theme
+                SettingsData.loadTextColorFromTheme(themeName)
             }
             
             if (typeof Theme !== 'undefined') {

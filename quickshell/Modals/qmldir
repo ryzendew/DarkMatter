@@ -7,3 +7,4 @@ PowerMenuModal 1.0 PowerMenuModal.qml
 ProcessListModal 1.0 ProcessListModal.qml
 WifiPasswordModal 1.0 WifiPasswordModal.qml
 ConnectionEditModal 1.0 ConnectionEditModal.qml
+VpnAddModal 1.0 VpnAddModal.qml

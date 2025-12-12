@@ -601,13 +601,47 @@ Item {
                                         Rectangle {
                                             property string colorValue: modelData
                                             property bool isExtractedColor: ColorPaletteService.extractedColors.length > 0
+                                            property bool isSelected: isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)
+                                            property string textColor: {
+                                                if (isExtractedColor && typeof SettingsData !== 'undefined') {
+                                                    // Direct binding like logo button - updates in real time
+                                                    const hexR = Math.max(0, Math.min(255, SettingsData.extractedColorTextR)).toString(16).padStart(2, '0')
+                                                    const hexG = Math.max(0, Math.min(255, SettingsData.extractedColorTextG)).toString(16).padStart(2, '0')
+                                                    const hexB = Math.max(0, Math.min(255, SettingsData.extractedColorTextB)).toString(16).padStart(2, '0')
+                                                    return "#" + hexR + hexG + hexB
+                                                }
+                                                return Theme.primary
+                                            }
                                             width: 40
                                             height: 40
                                             radius: 20
                                             color: isExtractedColor ? colorValue : Theme.getThemeColors(colorValue).primary
                                             border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
-                                            border.width: (isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)) ? 3 : 1
-                                            scale: (isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)) ? 1.1 : 1
+                                            border.width: isSelected ? 3 : 1
+                                            scale: isSelected ? 1.1 : 1
+
+                                            DarkIcon {
+                                                name: "check"
+                                                size: 20
+                                                color: parent.textColor
+                                                anchors.centerIn: parent
+                                                visible: isSelected
+                                                opacity: isSelected ? 1 : 0
+                                                
+                                                Behavior on opacity {
+                                                    NumberAnimation {
+                                                        duration: Theme.shortDuration
+                                                        easing.type: Theme.standardEasing
+                                                    }
+                                                }
+                                                
+                                                Behavior on color {
+                                                    ColorAnimation {
+                                                        duration: Theme.shortDuration
+                                                        easing.type: Theme.standardEasing
+                                                    }
+                                                }
+                                            }
 
                                             Rectangle {
                                                 width: nameText.contentWidth + Theme.spacingL
@@ -625,11 +659,28 @@ Item {
 
                                                 StyledText {
                                                     id: nameText
+                                                    property string textColorValue: {
+                                                        if (isExtractedColor && typeof SettingsData !== 'undefined') {
+                                                            // Direct binding like logo button - updates in real time
+                                                            const hexR = Math.max(0, Math.min(255, SettingsData.extractedColorTextR)).toString(16).padStart(2, '0')
+                                                            const hexG = Math.max(0, Math.min(255, SettingsData.extractedColorTextG)).toString(16).padStart(2, '0')
+                                                            const hexB = Math.max(0, Math.min(255, SettingsData.extractedColorTextB)).toString(16).padStart(2, '0')
+                                                            return "#" + hexR + hexG + hexB
+                                                        }
+                                                        return Theme.surfaceText
+                                                    }
                                                     text: isExtractedColor ? colorValue : Theme.getThemeColors(colorValue).name
                                                     font.pixelSize: Theme.fontSizeSmall
                                                     font.weight: Font.Medium
-                                                    color: Theme.surfaceText
+                                                    color: textColorValue
                                                     anchors.centerIn: parent
+                                                    
+                                                    Behavior on color {
+                                                        ColorAnimation {
+                                                            duration: Theme.shortDuration
+                                                            easing.type: Theme.standardEasing
+                                                        }
+                                                    }
                                                 }
                                             }
 
@@ -976,6 +1027,306 @@ Item {
                 }
             }
 
+
+            StyledRect {
+                width: parent.width
+                height: textColorAdjustmentSection.implicitHeight + Theme.spacingL * 2
+                radius: Theme.cornerRadius
+                color: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g,
+                               Theme.surfaceVariant.b, 0.3)
+                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g,
+                                      Theme.outline.b, 0.2)
+                border.width: 1
+
+                Column {
+                    id: textColorAdjustmentSection
+
+                    anchors.fill: parent
+                    anchors.margins: Theme.spacingL
+                    spacing: Theme.spacingM
+
+                    Row {
+                        width: parent.width
+                        spacing: Theme.spacingM
+
+                        DarkIcon {
+                            name: "format_color_text"
+                            size: Theme.iconSize
+                            color: Theme.primary
+                            anchors.verticalCenter: parent.verticalCenter
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: Theme.spacingXS
+                            width: parent.width - Theme.iconSize - Theme.spacingM
+
+                            StyledText {
+                                text: "Extracted Color Text Override"
+                                font.pixelSize: Theme.fontSizeLarge
+                                color: Theme.surfaceText
+                                font.weight: Font.Medium
+                            }
+
+                            StyledText {
+                                text: "Override the text color for extracted colors using RGB values"
+                                font.pixelSize: Theme.fontSizeSmall
+                                color: Theme.surfaceVariantText
+                                wrapMode: Text.WordWrap
+                                width: parent.width
+                            }
+                        }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: Theme.spacingXS
+
+                        StyledText {
+                            text: "Red: " + SettingsData.extractedColorTextR
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+
+                        DarkSlider {
+                            width: parent.width
+                            height: 32
+                            value: SettingsData.extractedColorTextR
+                            minimum: 0
+                            maximum: 255
+                            unit: ""
+                            showValue: true
+                            wheelEnabled: false
+                            onSliderValueChanged: newValue => {
+                                // Update property for real-time preview, but don't save yet
+                                SettingsData.extractedColorTextR = newValue
+                            }
+                            onSliderDragFinished: finalValue => {
+                                // Save and apply changes when slider is released
+                                SettingsData.setExtractedColorTextR(finalValue)
+                            }
+                        }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: Theme.spacingXS
+
+                        StyledText {
+                            text: "Green: " + SettingsData.extractedColorTextG
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+
+                        DarkSlider {
+                            width: parent.width
+                            height: 32
+                            value: SettingsData.extractedColorTextG
+                            minimum: 0
+                            maximum: 255
+                            unit: ""
+                            showValue: true
+                            wheelEnabled: false
+                            onSliderValueChanged: newValue => {
+                                // Update property for real-time preview, but don't save yet
+                                SettingsData.extractedColorTextG = newValue
+                            }
+                            onSliderDragFinished: finalValue => {
+                                // Save and apply changes when slider is released
+                                SettingsData.setExtractedColorTextG(finalValue)
+                            }
+                        }
+                    }
+
+                    Column {
+                        width: parent.width
+                        spacing: Theme.spacingXS
+
+                        StyledText {
+                            text: "Blue: " + SettingsData.extractedColorTextB
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+
+                        DarkSlider {
+                            width: parent.width
+                            height: 32
+                            value: SettingsData.extractedColorTextB
+                            minimum: 0
+                            maximum: 255
+                            unit: ""
+                            showValue: true
+                            wheelEnabled: false
+                            onSliderValueChanged: newValue => {
+                                // Update property for real-time preview, but don't save yet
+                                SettingsData.extractedColorTextB = newValue
+                            }
+                            onSliderDragFinished: finalValue => {
+                                // Save and apply changes when slider is released
+                                SettingsData.setExtractedColorTextB(finalValue)
+                            }
+                        }
+                    }
+                    
+                    Row {
+                        width: parent.width
+                        spacing: Theme.spacingM
+                        
+                        StyledRect {
+                            width: (parent.width - Theme.spacingM) / 2
+                            height: 40
+                            radius: Theme.cornerRadius
+                            color: saveButtonMouseArea.containsMouse ? Theme.primary : Theme.primaryContainer
+                            
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: Theme.spacingXS
+                                
+                                DarkIcon {
+                                    name: "save"
+                                    size: 18
+                                    color: Theme.primaryText || Theme.onPrimary || "#ffffff"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                
+                                StyledText {
+                                    text: "Save"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.primaryText || Theme.onPrimary || "#ffffff"
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+                            
+                            MouseArea {
+                                id: saveButtonMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    // Auto-save to current theme
+                                    if (SettingsData.currentColorTheme) {
+                                        SettingsData.saveTextColorPreset(SettingsData.currentColorTheme)
+                                    } else {
+                                        SettingsData.saveTextColorPreset("")
+                                    }
+                                    if (typeof ToastService !== 'undefined') {
+                                        ToastService.showInfo("RGB text color saved")
+                                    }
+                                }
+                            }
+                        }
+                        
+                        StyledRect {
+                            width: (parent.width - Theme.spacingM) / 2
+                            height: 40
+                            radius: Theme.cornerRadius
+                            color: loadButtonMouseArea.containsMouse ? Theme.secondary : (typeof Theme !== 'undefined' && Theme.secondaryContainer ? Theme.secondaryContainer : Theme.surfaceVariant)
+                            
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: Theme.spacingXS
+                                
+                                DarkIcon {
+                                    name: "folder_open"
+                                    size: 18
+                                    color: ColorPaletteService.getTextColorForBackground(loadButtonMouseArea.containsMouse ? Theme.secondary : (typeof Theme !== 'undefined' && Theme.secondaryContainer ? Theme.secondaryContainer : Theme.surfaceVariant))
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                
+                                StyledText {
+                                    text: "Load"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: ColorPaletteService.getTextColorForBackground(loadButtonMouseArea.containsMouse ? Theme.secondary : (typeof Theme !== 'undefined' && Theme.secondaryContainer ? Theme.secondaryContainer : Theme.surfaceVariant))
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                            }
+                            
+                            MouseArea {
+                                id: loadButtonMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    // Auto-load from current theme
+                                    if (SettingsData.currentColorTheme) {
+                                        const loaded = SettingsData.loadTextColorFromTheme(SettingsData.currentColorTheme)
+                                        if (loaded) {
+                                            if (typeof ToastService !== 'undefined') {
+                                                ToastService.showInfo("RGB text color loaded from theme")
+                                            }
+                                        } else {
+                                            if (typeof ToastService !== 'undefined') {
+                                                ToastService.showInfo("No saved RGB values for this theme")
+                                            }
+                                        }
+                                    } else {
+                                        if (typeof ToastService !== 'undefined') {
+                                            ToastService.showInfo("No theme selected")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    Column {
+                        width: parent.width
+                        spacing: Theme.spacingXS
+                        
+                        StyledText {
+                            text: "Preview"
+                            font.pixelSize: Theme.fontSizeSmall
+                            color: Theme.surfaceTextMedium
+                        }
+                        
+                        Rectangle {
+                            width: parent.width
+                            height: 60
+                            radius: Theme.cornerRadius
+                            color: ColorPaletteService.extractedColors.length > 0 && ColorPaletteService.extractedColors[0] ? ColorPaletteService.extractedColors[0] : "#000000"
+                            border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.3)
+                            border.width: 1
+                            
+                            StyledText {
+                                id: previewText
+                                anchors.centerIn: parent
+                                text: "Sample Text"
+                                font.pixelSize: Theme.fontSizeMedium
+                                font.weight: Font.Medium
+                                property string previewColor: ColorPaletteService.extractedColors.length > 0 && ColorPaletteService.extractedColors[0] ? ColorPaletteService.extractedColors[0] : "#000000"
+                                color: ColorPaletteService.getTextColorForBackground(previewColor)
+                                
+                                Connections {
+                                    target: ColorPaletteService
+                                    function onTextColorAdjustmentChanged() {
+                                        previewText.color = ColorPaletteService.getTextColorForBackground(previewText.previewColor)
+                                    }
+                                }
+                                
+                                Connections {
+                                    target: SettingsData
+                                    function onExtractedColorTextRChanged() {
+                                        previewText.color = ColorPaletteService.getTextColorForBackground(previewText.previewColor)
+                                    }
+                                    function onExtractedColorTextGChanged() {
+                                        previewText.color = ColorPaletteService.getTextColorForBackground(previewText.previewColor)
+                                    }
+                                    function onExtractedColorTextBChanged() {
+                                        previewText.color = ColorPaletteService.getTextColorForBackground(previewText.previewColor)
+                                    }
+                                }
+                                
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Theme.shortDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             StyledRect {
                 width: parent.width

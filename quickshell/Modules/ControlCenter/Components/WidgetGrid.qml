@@ -72,15 +72,17 @@ Column {
                         width: {
                             const baseWidth = root.width
                             const spacing = Theme.spacingS
+                            let calculatedWidth
                             if (widgetWidth <= 25) {
-                                return (baseWidth - spacing * 3) / 4
+                                calculatedWidth = (baseWidth - spacing * 3) / 4
                             } else if (widgetWidth <= 50) {
-                                return (baseWidth - spacing) / 2
+                                calculatedWidth = (baseWidth - spacing) / 2
                             } else if (widgetWidth <= 75) {
-                                return (baseWidth - spacing * 2) * 0.75
+                                calculatedWidth = (baseWidth - spacing * 2) * 0.75
                             } else {
-                                return baseWidth
+                                calculatedWidth = baseWidth
                             }
+                            return calculatedWidth * 0.95 // Reduced by 5%
                         }
                         height: 60
 

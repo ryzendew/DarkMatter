@@ -49,7 +49,7 @@ DarkPopout {
 
     readonly property bool isBarVertical: SettingsData.topBarPosition === "left" || SettingsData.topBarPosition === "right"
     
-    readonly property real basePopupWidth: 550
+    readonly property real basePopupWidth: 495 // Reduced by 10% from 550
     popupWidth: basePopupWidth * Theme.getControlScaleFactor()
     popupHeight: Math.min((triggerScreen?.height ?? 1080) - 100, contentLoader.item && contentLoader.item.implicitHeight > 0 ? contentLoader.item.implicitHeight + 20 : 400)
     triggerX: {

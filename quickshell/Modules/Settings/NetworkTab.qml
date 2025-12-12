@@ -26,6 +26,42 @@ Item {
         id: connectionEditModal
     }
 
+    VpnAddModal {
+        id: vpnAddModal
+    }
+
+    function getVpnAddModal() {
+        return vpnAddModal
+    }
+
+    function getConnectionEditModal() {
+        return connectionEditModal
+    }
+
+    function deleteVpnConnection(uuid, name) {
+        deleteVpnProcess.command = ["nmcli", "connection", "delete", "uuid", uuid]
+        deleteVpnProcess.running = true
+        deleteVpnProcess.connectionName = name
+    }
+
+    Process {
+        id: deleteVpnProcess
+        running: false
+        command: []
+        property string connectionName: ""
+
+        onExited: exitCode => {
+            if (exitCode === 0) {
+                ToastService.showInfo("VPN connection '" + connectionName + "' deleted")
+                if (VpnService) {
+                    VpnService.refreshAll()
+                }
+            } else {
+                ToastService.showError("Failed to delete VPN connection")
+            }
+        }
+    }
+
     Component.onCompleted: {
         if (NetworkService) {
             NetworkService.refreshNetworkState()
@@ -69,7 +105,7 @@ Item {
                             name: "wifi"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
@@ -77,7 +113,7 @@ Item {
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
                             
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Item { Layout.fillWidth: true }
@@ -87,7 +123,7 @@ Item {
                             height: 28
                             radius: 14
                             color: NetworkService.wifiEnabled ? Theme.primary : Theme.surfaceVariant
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
 
                             Rectangle {
                                 width: 24
@@ -175,7 +211,7 @@ Item {
                                     width: implicitWidth
                                     height: implicitHeight
                                     radius: Theme.cornerRadius * 0.5
-                                    color: Theme.errorContainer
+                                    color: Theme.error
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     StyledText {
@@ -186,7 +222,7 @@ Item {
                                         anchors.rightMargin: Theme.spacingS
                                         text: "Disconnect"
                                         font.pixelSize: Theme.fontSizeSmall
-                                        color: Theme.onErrorContainer
+                                        color: Theme.onPrimary
                                         horizontalAlignment: Text.AlignHCenter
                                     }
 
@@ -241,7 +277,7 @@ Item {
                                     Rectangle {
                                         anchors.fill: parent
                                         radius: 8
-                                        color: Theme.onPrimaryContainer
+                                        color: Theme.onPrimary
                                         opacity: 0.3
                                     }
                                 }
@@ -249,7 +285,7 @@ Item {
                                 StyledText {
                                     text: "Scanning for networks..."
                                     font.pixelSize: Theme.fontSizeSmall
-                                    color: Theme.onPrimaryContainer
+                                    color: Theme.onPrimary
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
@@ -348,7 +384,7 @@ Item {
                                                 anchors.rightMargin: Theme.spacingS
                                                 text: buttonText
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: modelData.ssid === NetworkService.currentWifiSSID ? Theme.onPrimaryContainer : Theme.onPrimary
+                                                color: modelData.ssid === NetworkService.currentWifiSSID ? Theme.onPrimary : Theme.onPrimary
                                                 horizontalAlignment: Text.AlignHCenter
                                             }
 
@@ -494,7 +530,7 @@ Item {
                                                 anchors.rightMargin: Theme.spacingS
                                                 text: "Edit"
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: Theme.onPrimaryContainer
+                                                color: Theme.surfaceText
                                                 horizontalAlignment: Text.AlignHCenter
                                             }
 
@@ -513,14 +549,14 @@ Item {
                                             width: 60
                                             height: 24
                                             radius: Theme.cornerRadius * 0.5
-                                            color: Theme.errorContainer
+                                            color: Theme.error
                                             anchors.verticalCenter: parent.verticalCenter
 
                                             StyledText {
                                                 anchors.centerIn: parent
                                                 text: "Forget"
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: Theme.onErrorContainer
+                                                color: Theme.onPrimary
                                             }
 
                                             MouseArea {
@@ -654,7 +690,7 @@ Item {
                                         anchors.rightMargin: Theme.spacingS
                                         text: "Edit"
                                         font.pixelSize: Theme.fontSizeSmall
-                                        color: Theme.onPrimaryContainer
+                                        color: Theme.surfaceText
                                         horizontalAlignment: Text.AlignHCenter
                                     }
 
@@ -684,7 +720,7 @@ Item {
                                     width: implicitWidth
                                     height: implicitHeight
                                     radius: Theme.cornerRadius * 0.5
-                                    color: Theme.errorContainer
+                                    color: Theme.error
                                     anchors.verticalCenter: parent.verticalCenter
 
                                     StyledText {
@@ -695,7 +731,7 @@ Item {
                                         anchors.rightMargin: Theme.spacingS
                                         text: "Disconnect"
                                         font.pixelSize: Theme.fontSizeSmall
-                                        color: Theme.onErrorContainer
+                                        color: Theme.onPrimary
                                         horizontalAlignment: Text.AlignHCenter
                                     }
 
@@ -788,6 +824,10 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
+                                    const modal = getVpnAddModal()
+                                    if (modal) {
+                                        modal.show()
+                                    }
                                 }
                             }
                         }
@@ -810,82 +850,123 @@ Item {
 
                             Rectangle {
                                 width: parent.width
-                                height: 48
+                                height: Math.max(48, connectionInfoColumn.implicitHeight + Theme.spacingS * 2)
                                 radius: Theme.cornerRadius * 0.5
                                 color: Qt.rgba(Theme.primaryContainer.r, Theme.primaryContainer.g, Theme.primaryContainer.b, 0.5)
                                 border.width: 2
                                 border.color: Theme.primary
 
-                                Row {
+                                Column {
+                                    id: connectionInfoColumn
                                     anchors.fill: parent
                                     anchors.margins: Theme.spacingS
-                                    spacing: Theme.spacingM
+                                    spacing: Theme.spacingS
 
-                                    DarkIcon {
-                                        name: "vpn_key"
-                                        size: 20
-                                        color: Theme.primary
-                                        anchors.verticalCenter: parent.verticalCenter
-                                    }
+                                    Row {
+                                        width: parent.width
+                                        spacing: Theme.spacingM
 
-                                    Column {
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        spacing: 2
-
-                                        StyledText {
-                                            text: modelData.name || "Unknown"
-                                            font.pixelSize: Theme.fontSizeMedium
-                                            font.weight: Font.Medium
-                                            
-                                        }
-
-                                        StyledText {
-                                            text: "State: " + (modelData.state || "unknown")
-                                            font.pixelSize: Theme.fontSizeSmall
-                                            
-                                            opacity: 0.7
-                                        }
-                                    }
-
-
-                                    Rectangle {
-                                        property bool isHovered: disconnectVpnMouseArea.containsMouse
-                                        
-                                        // TextMetrics to calculate button size
-                                        TextMetrics {
-                                            id: vpnDisconnectTextMetrics
-                                            font.pixelSize: Theme.fontSizeSmall
-                                            text: "Disconnect"
-                                        }
-                                        
-                                        implicitWidth: vpnDisconnectTextMetrics.width + Theme.spacingS * 2
-                                        implicitHeight: Math.max(vpnDisconnectTextMetrics.height, 28) + Theme.spacingS * 2
-                                        width: implicitWidth
-                                        height: implicitHeight
-                                        radius: Theme.cornerRadius * 0.5
-                                        color: isHovered ? Theme.errorContainer : Theme.error
-                                        anchors.verticalCenter: parent.verticalCenter
-
-                                        StyledText {
-                                            anchors.left: parent.left
-                                            anchors.right: parent.right
+                                        DarkIcon {
+                                            name: "vpn_key"
+                                            size: 20
+                                            color: Theme.primary
                                             anchors.verticalCenter: parent.verticalCenter
-                                            anchors.leftMargin: Theme.spacingS
-                                            anchors.rightMargin: Theme.spacingS
-                                            text: "Disconnect"
-                                            font.pixelSize: Theme.fontSizeSmall
-                                            color: Theme.onError
-                                            horizontalAlignment: Text.AlignHCenter
                                         }
 
-                                        MouseArea {
-                                            id: disconnectVpnMouseArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                if (VpnService) {
-                                                    VpnService.disconnect(modelData.uuid || modelData.name)
+                                        Column {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            spacing: 2
+                                            width: parent.width - disconnectVpnButton.implicitWidth - Theme.spacingM * 3
+
+                                            StyledText {
+                                                text: modelData.name || "Unknown"
+                                                font.pixelSize: Theme.fontSizeMedium
+                                                font.weight: Font.Medium
+                                                
+                                            }
+
+                                            Row {
+                                                spacing: Theme.spacingS
+                                                width: parent.width
+
+                                                StyledText {
+                                                    text: "State: " + (modelData.state || "unknown")
+                                                    font.pixelSize: Theme.fontSizeSmall
+                                                    
+                                                    opacity: 0.7
+                                                }
+
+                                                StyledText {
+                                                    text: VpnService && modelData.uuid ? " • " + VpnService.getConnectionDuration(modelData.uuid) : ""
+                                                    font.pixelSize: Theme.fontSizeSmall
+                                                    
+                                                    opacity: 0.7
+                                                    visible: text !== ""
+                                                }
+                                            }
+
+                                            Column {
+                                                width: parent.width
+                                                spacing: 2
+                                                visible: VpnService && modelData.uuid && VpnService.getConnectionDetails(modelData.uuid).ipv4
+
+                                                StyledText {
+                                                    text: "IP: " + (VpnService ? VpnService.getConnectionDetails(modelData.uuid).ipv4 : "")
+                                                    font.pixelSize: Theme.fontSizeSmall
+                                                    
+                                                    opacity: 0.6
+                                                }
+
+                                                StyledText {
+                                                    text: "DNS: " + (VpnService ? VpnService.getConnectionDetails(modelData.uuid).dns : "")
+                                                    font.pixelSize: Theme.fontSizeSmall
+                                                    
+                                                    opacity: 0.6
+                                                    visible: text !== "DNS: "
+                                                }
+                                            }
+                                        }
+
+                                        Rectangle {
+                                            id: disconnectVpnButton
+                                            property bool isHovered: disconnectVpnMouseArea.containsMouse
+                                            
+                                            // TextMetrics to calculate button size
+                                            TextMetrics {
+                                                id: vpnDisconnectTextMetrics
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                text: "Disconnect"
+                                            }
+                                            
+                                            implicitWidth: vpnDisconnectTextMetrics.width + Theme.spacingS * 2
+                                            implicitHeight: Math.max(vpnDisconnectTextMetrics.height, 28) + Theme.spacingS * 2
+                                            width: implicitWidth
+                                            height: implicitHeight
+                                            radius: Theme.cornerRadius * 0.5
+                                            color: isHovered ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.8) : Theme.error
+                                            anchors.verticalCenter: parent.verticalCenter
+
+                                            StyledText {
+                                                anchors.left: parent.left
+                                                anchors.right: parent.right
+                                                anchors.verticalCenter: parent.verticalCenter
+                                                anchors.leftMargin: Theme.spacingS
+                                                anchors.rightMargin: Theme.spacingS
+                                                text: "Disconnect"
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                color: Theme.onError
+                                                horizontalAlignment: Text.AlignHCenter
+                                            }
+
+                                            MouseArea {
+                                                id: disconnectVpnMouseArea
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                onClicked: {
+                                                    if (VpnService) {
+                                                        VpnService.disconnect(modelData.uuid || modelData.name)
+                                                    }
                                                 }
                                             }
                                         }
@@ -978,7 +1059,7 @@ Item {
                                             width: implicitWidth
                                             height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
-                                            color: Theme.primaryContainer
+                                            color: vpnEditMouseArea.containsMouse ? Theme.primaryContainer : Theme.surfaceContainer
                                             anchors.verticalCenter: parent.verticalCenter
 
                                             StyledText {
@@ -989,12 +1070,14 @@ Item {
                                                 anchors.rightMargin: Theme.spacingS
                                                 text: "Edit"
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: Theme.onPrimaryContainer
+                                                color: Theme.surfaceText
                                                 horizontalAlignment: Text.AlignHCenter
                                             }
 
                                             MouseArea {
+                                                id: vpnEditMouseArea
                                                 anchors.fill: parent
+                                                hoverEnabled: true
                                                 cursorShape: Qt.PointingHandCursor
                                                 onClicked: {
                                                     const modal = getConnectionEditModal()
@@ -1002,6 +1085,19 @@ Item {
                                                         modal.show(modelData.name, modelData.uuid)
                                                     }
                                                 }
+                                            }
+                                        }
+
+                                        DarkActionButton {
+                                            buttonSize: 28
+                                            circular: true
+                                            iconName: "delete"
+                                            iconSize: 16
+                                            iconColor: Theme.error
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            visible: !(VpnService && VpnService.isActiveUuid(modelData.uuid))
+                                            onClicked: {
+                                                deleteVpnConnection(modelData.uuid, modelData.name)
                                             }
                                         }
 
@@ -1031,7 +1127,7 @@ Item {
                                                 anchors.rightMargin: Theme.spacingS
                                                 text: buttonText
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: VpnService && VpnService.isActiveUuid(modelData.uuid) ? Theme.onPrimaryContainer : Theme.onPrimary
+                                                color: VpnService && VpnService.isActiveUuid(modelData.uuid) ? Theme.onPrimary : Theme.onPrimary
                                                 horizontalAlignment: Text.AlignHCenter
                                             }
 

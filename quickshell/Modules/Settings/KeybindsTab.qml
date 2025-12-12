@@ -19,6 +19,17 @@ Item {
     property bool isLoading: false
     property bool hasUnsavedChanges: false
     property int editingIndex: -1
+    property string searchQuery: ""
+    property string selectedCategory: ""
+    property bool showingNewBind: false
+    property string expandedKey: ""
+
+    property var _filteredBinds: []
+    property var _cachedCategories: []
+    property real _savedScrollY: 0
+    property bool _preserveScroll: false
+    property bool _configFileExists: true
+    property bool _checkingFileExists: false
 
     readonly property var builtInKeybinds: [
         { "name": "Open Terminal", "modifiers": "SUPER", "key": "Q", "command": "exec, $terminal" },
@@ -88,7 +99,22 @@ Item {
     ]
 
     Component.onCompleted: {
+        checkConfigFileExists()
         loadKeybinds()
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            Qt.callLater(scrollToTop)
+            checkConfigFileExists()
+        }
+    }
+
+    function checkConfigFileExists() {
+        if (_checkingFileExists) return
+        _checkingFileExists = true
+        checkFileProcess.command = ["test", "-f", keybindsPath]
+        checkFileProcess.running = true
     }
 
     function loadKeybinds() {
@@ -148,9 +174,78 @@ Item {
         keybinds = parsed
         isLoading = false
         hasUnsavedChanges = false
+        _updateCategories()
+        _updateFiltered()
+    }
+
+    function _updateFiltered() {
+        const allBinds = keybinds.filter(k => k.type === 'keybind')
+        if (!searchQuery && !selectedCategory) {
+            _filteredBinds = allBinds
+            return
+        }
+
+        const q = searchQuery.toLowerCase()
+        const result = []
+
+        for (let i = 0; i < allBinds.length; i++) {
+            const bind = allBinds[i]
+            
+            if (q) {
+                const keyStr = (bind.modifiers || "") + " " + (bind.key || "") + " " + (bind.command || "")
+                if (keyStr.toLowerCase().indexOf(q) === -1) {
+                    continue
+                }
+            }
+            
+            if (selectedCategory) {
+                const category = _getCategoryForBind(bind)
+                if (category !== selectedCategory) {
+                    continue
+                }
+            }
+            
+            result.push(bind)
+        }
+        _filteredBinds = result
+    }
+
+    function _getCategoryForBind(bind) {
+        if (!bind.command) return ""
+        const cmd = bind.command.toLowerCase()
+        if (cmd.includes("workspace")) return "Workspaces"
+        if (cmd.includes("move") || cmd.includes("resize")) return "Window Management"
+        if (cmd.includes("exec") || cmd.includes("$")) return "Applications"
+        if (cmd.includes("toggle") || cmd.includes("fullscreen") || cmd.includes("floating")) return "Window Actions"
+        if (cmd.includes("focus")) return "Focus"
+        if (cmd.includes("ipc") || cmd.includes("quickshell")) return "Quickshell"
+        return "Other"
+    }
+
+    function _updateCategories() {
+        const allBinds = keybinds.filter(k => k.type === 'keybind')
+        const categories = new Set()
+        for (let i = 0; i < allBinds.length; i++) {
+            const cat = _getCategoryForBind(allBinds[i])
+            if (cat) categories.add(cat)
+        }
+        _cachedCategories = Array.from(categories).sort()
+    }
+
+    function toggleExpanded(bind) {
+        const key = (bind.modifiers || "") + "+" + (bind.key || "")
+        expandedKey = expandedKey === key ? "" : key
+    }
+
+    function isExpanded(bind) {
+        const key = (bind.modifiers || "") + "+" + (bind.key || "")
+        return expandedKey === key
     }
 
     function saveKeybinds() {
+        _savedScrollY = flickable.contentY
+        _preserveScroll = true
+        
         var lines = []
         var lastWasEmpty = false
         
@@ -171,27 +266,23 @@ Item {
                 line = item.original
             }
             
-            // Remove trailing whitespace (QML doesn't have trimEnd, so use regex)
             line = line.replace(/\s+$/, '')
             
-            // Skip consecutive blank lines (but keep single blank lines between sections)
             var isEmpty = line.length === 0 || line.trim().length === 0
             if (isEmpty && lastWasEmpty) {
-                continue // Skip this blank line if the previous was also blank
+                continue
             }
             lastWasEmpty = isEmpty
             
             lines.push(line)
         }
         
-        // Remove trailing blank lines
         while (lines.length > 0 && lines[lines.length - 1].trim().length === 0) {
             lines.pop()
         }
         
         var content = lines.join('\n')
         
-        // Ensure directory exists
         var dirPath = keybindsPath.substring(0, keybindsPath.lastIndexOf('/'))
         ensureDirProcess.command = ["mkdir", "-p", dirPath]
         ensureDirProcess.running = true
@@ -205,7 +296,6 @@ Item {
         
         onExited: exitCode => {
             if (pendingSaveContent !== "") {
-                // Ensure file exists first
                 touchFileProcess.command = ["touch", keybindsPath]
                 touchFileProcess.running = true
             }
@@ -219,7 +309,6 @@ Item {
         
         onExited: exitCode => {
             if (pendingSaveContent !== "") {
-                // Use separate FileView for saving (like Notepad does)
                 saveKeybindsFile.path = ""
                 Qt.callLater(() => {
                     saveKeybindsFile.path = keybindsPath
@@ -245,6 +334,37 @@ Item {
         keybinds.push(newKeybind)
         editingIndex = keybinds.length - 1
         hasUnsavedChanges = true
+        showingNewBind = true
+        _updateFiltered()
+        Qt.callLater(() => {
+            if (newModifiersField) {
+                newModifiersField.forceActiveFocus()
+            }
+        })
+    }
+
+    function cancelNewBind() {
+        if (editingIndex >= 0 && editingIndex < keybinds.length) {
+            keybinds.splice(editingIndex, 1)
+        }
+        editingIndex = -1
+        showingNewBind = false
+        hasUnsavedChanges = false
+        _updateFiltered()
+    }
+
+    function saveNewBind() {
+        if (editingIndex >= 0 && editingIndex < keybinds.length) {
+            var bind = keybinds[editingIndex]
+            if (bind.modifiers && bind.key && bind.command) {
+                hasUnsavedChanges = true
+                showingNewBind = false
+                editingIndex = -1
+                _updateFiltered()
+            } else {
+                cancelNewBind()
+            }
+        }
     }
 
     function addBuiltInKeybind(builtIn) {
@@ -260,6 +380,7 @@ Item {
         editingIndex = keybinds.length - 1
         hasUnsavedChanges = true
         builtInKeybindsPopup.close()
+        _updateFiltered()
     }
 
     function startEditing(index) {
@@ -268,6 +389,16 @@ Item {
 
     function stopEditing() {
         editingIndex = -1
+    }
+
+    function scrollToTop() {
+        flickable.contentY = 0
+    }
+
+    Timer {
+        id: searchDebounce
+        interval: 150
+        onTriggered: keybindsTab._updateFiltered()
     }
 
     FileView {
@@ -280,7 +411,15 @@ Item {
         
         onLoaded: {
             var fileContent = text()
+            const savedY = keybindsTab._savedScrollY
+            const wasPreserving = keybindsTab._preserveScroll
+            keybindsTab._preserveScroll = false
             parseKeybinds(fileContent)
+            if (wasPreserving) {
+                Qt.callLater(() => {
+                    flickable.contentY = savedY
+                })
+            }
         }
         
         onLoadFailed: {
@@ -288,6 +427,17 @@ Item {
             if (typeof ToastService !== "undefined") {
                 ToastService.showError("Failed to load keybinds file")
             }
+        }
+    }
+
+    Process {
+        id: checkFileProcess
+        command: ["test", "-f"]
+        running: false
+        
+        onExited: exitCode => {
+            _configFileExists = (exitCode === 0)
+            _checkingFileExists = false
         }
     }
     
@@ -303,11 +453,17 @@ Item {
             if (typeof ToastService !== "undefined") {
                 ToastService.showInfo("Keybinds saved successfully")
             }
-            // Reload the file to reflect changes
+            const savedY = keybindsTab._savedScrollY
+            const wasPreserving = keybindsTab._preserveScroll
+            keybindsTab._preserveScroll = false
             Qt.callLater(() => {
                 keybindsFile.reload()
+                if (wasPreserving) {
+                    Qt.callLater(() => {
+                        flickable.contentY = savedY
+                    })
+                }
             })
-            // Reload Hyprland configuration to apply changes
             reloadHyprlandProcess.running = true
             pendingSaveContent = ""
         }
@@ -339,24 +495,27 @@ Item {
     }
 
     DarkFlickable {
+        id: flickable
         anchors.fill: parent
-        anchors.topMargin: Theme.spacingL
         clip: true
-        contentHeight: mainColumn.height
         contentWidth: width
+        contentHeight: contentColumn.implicitHeight
 
         Column {
-            id: mainColumn
-            width: parent.width
-            spacing: Theme.spacingXL
+            id: contentColumn
+            width: flickable.width
+            spacing: Theme.spacingL
+            topPadding: Theme.spacingXL
+            bottomPadding: Theme.spacingXL
+            leftPadding: Theme.spacingL
+            rightPadding: Theme.spacingL
 
             StyledRect {
-                width: parent.width
+                width: parent.width - parent.leftPadding - parent.rightPadding
                 height: headerSection.implicitHeight + Theme.spacingL * 2
                 radius: Theme.cornerRadius
-                color: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g, Theme.surfaceVariant.b, 0.3)
-                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
-                border.width: 1
+                color: Qt.rgba(Theme.surfaceContainerHigh.r, Theme.surfaceContainerHigh.g, Theme.surfaceContainerHigh.b, Theme.popupTransparency)
+                border.width: 0
 
                 Column {
                     id: headerSection
@@ -376,199 +535,7 @@ Item {
                         }
 
                         Column {
-                            width: parent.width - Theme.iconSize - Theme.spacingM
-                            spacing: Theme.spacingXS
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            StyledText {
-                                text: "Hyprland Keybinds"
-                                font.pixelSize: Theme.fontSizeLarge
-                                font.weight: Font.Medium
-                                color: Theme.surfaceText
-                            }
-
-                            StyledText {
-                                text: "Manage keyboard shortcuts for Hyprland window manager. Changes are saved to your config file."
-                                font.pixelSize: Theme.fontSizeSmall
-                                color: Theme.surfaceVariantText
-                                wrapMode: Text.WordWrap
-                            }
-                        }
-                    }
-
-                    Row {
-                        width: parent.width
-                        spacing: Theme.spacingM
-                        anchors.topMargin: Theme.spacingM
-
-                        Rectangle {
-                            width: 140
-                            height: 40
-                            radius: Theme.cornerRadius
-                            color: reloadMouseArea.containsMouse ? Theme.primaryContainer : Theme.surfaceVariant
-                            enabled: !isLoading
-                            opacity: enabled ? 1 : 0.5
-
-                            Row {
-                                anchors.centerIn: parent
-                                spacing: Theme.spacingXS
-
-                                DarkIcon {
-                                    name: "refresh"
-                                    size: 18
-                                    color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                                StyledText {
-                                    text: "Reload"
-                                    font.pixelSize: Theme.fontSizeMedium
-                                    color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                            }
-
-                            MouseArea {
-                                id: reloadMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: parent.enabled
-                                onClicked: loadKeybinds()
-                            }
-                        }
-
-                        Rectangle {
-                            id: saveButton
-                            width: 140
-                            height: 40
-                            radius: Theme.cornerRadius
-                            property bool isEnabled: keybindsTab.hasUnsavedChanges && !keybindsTab.isLoading
-                            color: saveMouseArea.containsMouse ? Theme.primary : (isEnabled ? Theme.primaryContainer : Theme.surfaceVariant)
-                            opacity: isEnabled ? 1 : 0.5
-
-                            Row {
-                                anchors.centerIn: parent
-                                spacing: Theme.spacingXS
-
-                                DarkIcon {
-                                    name: "save"
-                                    size: 18
-                                    color: saveButton.isEnabled ? Theme.onPrimary : Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    visible: saveButton.isEnabled
-                                }
-
-                                StyledText {
-                                    text: "Save"
-                                    font.pixelSize: Theme.fontSizeMedium
-                                    color: saveButton.isEnabled ? Theme.onPrimary : Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                            }
-
-                            MouseArea {
-                                id: saveMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: saveButton.isEnabled
-                                onClicked: saveKeybinds()
-                            }
-                        }
-
-                        Rectangle {
-                            width: 180
-                            height: 40
-                            radius: Theme.cornerRadius
-                            color: selectFileMouseArea.containsMouse ? Theme.primaryContainer : Theme.surfaceVariant
-                            enabled: !isLoading
-                            opacity: enabled ? 1 : 0.5
-
-                            Row {
-                                anchors.centerIn: parent
-                                spacing: Theme.spacingXS
-
-                                DarkIcon {
-                                    name: "folder_open"
-                                    size: 18
-                                    color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                                StyledText {
-                                    text: "Select Config"
-                                    font.pixelSize: Theme.fontSizeMedium
-                                    color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                            }
-
-                            MouseArea {
-                                id: selectFileMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                enabled: parent.enabled
-                                onClicked: keybindsFileBrowser.open()
-                            }
-                        }
-                    }
-
-                    Row {
-                        width: parent.width
-                        spacing: Theme.spacingM
-                        visible: keybindsPath !== ""
-                        anchors.topMargin: Theme.spacingS
-
-                        StyledText {
-                            text: "Config file:"
-                            font.pixelSize: Theme.fontSizeSmall
-                            font.weight: Font.Medium
-                            color: Theme.surfaceVariantText
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        StyledText {
-                            width: parent.width - implicitWidth - Theme.spacingM
-                            text: keybindsPath
-                            font.pixelSize: Theme.fontSizeSmall
-                            color: Theme.surfaceText
-                            elide: Text.ElideMiddle
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-                    }
-                }
-            }
-
-            StyledRect {
-                width: parent.width
-                height: keybindsSection.implicitHeight + Theme.spacingL * 2
-                radius: Theme.cornerRadius
-                color: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g, Theme.surfaceVariant.b, 0.3)
-                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
-                border.width: 1
-                visible: !isLoading
-
-                Column {
-                    id: keybindsSection
-                    anchors.fill: parent
-                    anchors.margins: Theme.spacingL
-                    spacing: Theme.spacingM
-
-                    Row {
-                        width: parent.width
-                        spacing: Theme.spacingM
-
-                        DarkIcon {
-                            name: "settings"
-                            size: Theme.iconSize
-                            color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Column {
-                            width: parent.width - Theme.iconSize - Theme.spacingM
+                            width: parent.width - Theme.iconSize - Theme.spacingM * 2
                             spacing: Theme.spacingXS
                             anchors.verticalCenter: parent.verticalCenter
 
@@ -580,10 +547,11 @@ Item {
                             }
 
                             StyledText {
-                                text: "Edit keyboard shortcuts. Format: bind = MODIFIER, KEY, COMMAND"
+                                text: "Manage keyboard shortcuts for Hyprland"
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.surfaceVariantText
                                 wrapMode: Text.WordWrap
+                                width: parent.width
                             }
                         }
                     }
@@ -591,398 +559,299 @@ Item {
                     Row {
                         width: parent.width
                         spacing: Theme.spacingM
-                        anchors.topMargin: Theme.spacingM
 
-                        Rectangle {
-                            width: 160
-                            height: 40
-                            radius: Theme.cornerRadius
-                            color: addMouseArea.containsMouse ? Theme.primaryContainer : Theme.surfaceVariant
-
-                            Row {
-                                anchors.centerIn: parent
-                                spacing: Theme.spacingXS
-
-                                DarkIcon {
-                                    name: "add"
-                                    size: 18
-                                    color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                                StyledText {
-                                    text: "Add Keybind"
-                                    font.pixelSize: Theme.fontSizeMedium
-                                    color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                            }
-
-                            MouseArea {
-                                id: addMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: addNewKeybind()
+                        DarkTextField {
+                            id: searchField
+                            width: parent.width - addButton.width - Theme.spacingM
+                            height: 44
+                            placeholderText: "Search keybinds..."
+                            leftIconName: "search"
+                            autoExpandWidth: false
+                            autoExpandHeight: false
+                            onTextChanged: {
+                                keybindsTab.searchQuery = text
+                                searchDebounce.restart()
                             }
                         }
 
-                        Rectangle {
-                            width: 200
-                            height: 40
-                            radius: Theme.cornerRadius
-                            color: builtInMouseArea.containsMouse ? Theme.primaryContainer : Theme.surfaceVariant
-
-                            Row {
-                                anchors.centerIn: parent
-                                spacing: Theme.spacingXS
-
-                                DarkIcon {
-                                    name: "list"
-                                    size: 18
-                                    color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                                StyledText {
-                                    text: "Add Built-in Keybind"
-                                    font.pixelSize: Theme.fontSizeMedium
-                                    color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-                            }
-
-                            MouseArea {
-                                id: builtInMouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: builtInKeybindsPopup.open()
-                            }
+                        DarkActionButton {
+                            id: addButton
+                            width: 44
+                            height: 44
+                            circular: false
+                            iconName: "add"
+                            iconSize: Theme.iconSize
+                            iconColor: Theme.primary
+                            anchors.verticalCenter: parent.verticalCenter
+                            enabled: !keybindsTab.showingNewBind
+                            opacity: enabled ? 1 : 0.5
+                            onClicked: keybindsTab.addNewKeybind()
                         }
                     }
 
-                    Rectangle {
+                }
+            }
+
+            StyledRect {
+                id: warningBox
+                width: parent.width - parent.leftPadding - parent.rightPadding
+                height: warningSection.implicitHeight + Theme.spacingL * 2
+                radius: Theme.cornerRadius
+                readonly property bool showWarning: !_configFileExists && !isLoading
+                color: showWarning ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.15) : "transparent"
+                border.color: showWarning ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.3) : "transparent"
+                border.width: 1
+                visible: showWarning
+
+                Column {
+                    id: warningSection
+                    anchors.fill: parent
+                    anchors.margins: Theme.spacingL
+                    spacing: Theme.spacingM
+
+                    Row {
                         width: parent.width
-                        height: 40
-                        radius: Theme.cornerRadius
-                        color: Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.5)
-                        visible: keybindsTab.keybinds.filter(k => k.type === 'keybind').length > 0
-                        anchors.topMargin: Theme.spacingM
+                        spacing: Theme.spacingM
 
-                        Row {
-                            anchors.fill: parent
-                            anchors.margins: Theme.spacingL
-                            anchors.leftMargin: Theme.spacingL
-                            anchors.rightMargin: Theme.spacingL
-                            spacing: Theme.spacingM
-
-                            StyledText {
-                                width: 140
-                                text: "Modifier"
-                                font.pixelSize: Theme.fontSizeSmall
-                                font.weight: Font.Medium
-                                color: Theme.surfaceText
-                                verticalAlignment: Text.AlignVCenter
-                            }
-
-                            StyledText {
-                                width: 120
-                                text: "Key"
-                                font.pixelSize: Theme.fontSizeSmall
-                                font.weight: Font.Medium
-                                color: Theme.surfaceText
-                                verticalAlignment: Text.AlignVCenter
-                            }
-
-                            StyledText {
-                                width: parent.width - 140 - 120 - 40 - 32 - Theme.spacingM
-                                text: "Command"
-                                font.pixelSize: Theme.fontSizeSmall
-                                font.weight: Font.Medium
-                                color: Theme.surfaceText
-                                verticalAlignment: Text.AlignVCenter
-                            }
+                        DarkIcon {
+                            name: "warning"
+                            size: Theme.iconSize
+                            color: Theme.primary
+                            anchors.verticalCenter: parent.verticalCenter
                         }
-                    }
-
-                    DarkFlickable {
-                        width: parent.width
-                        height: Math.min(600, keybindsList.height)
-                        clip: true
-                        contentHeight: keybindsList.height
-                        contentWidth: width
-                        anchors.topMargin: Theme.spacingM
 
                         Column {
-                            id: keybindsList
-                            width: parent.width
-                            spacing: Theme.spacingS
+                            width: parent.width - Theme.iconSize - Theme.spacingM
+                            spacing: Theme.spacingXS
+                            anchors.verticalCenter: parent.verticalCenter
 
-                            Repeater {
-                                model: keybindsTab.keybinds
+                            StyledText {
+                                text: "Config File Missing"
+                                font.pixelSize: Theme.fontSizeMedium
+                                font.weight: Font.Medium
+                                color: Theme.primary
+                            }
 
-                                Item {
-                                    width: parent.width
-                                    height: keybindItem.height
-                                    visible: modelData.type === 'keybind'
-
-                                    Rectangle {
-                                        id: keybindItem
-                                        width: parent.width
-                                        height: Math.max(56, keybindContent.implicitHeight + Theme.spacingL * 2)
-                                        radius: Theme.cornerRadius
-                                        color: itemMouseArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.08) : Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.2)
-                                        border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.1)
-                                        border.width: 1
-
-                                        Row {
-                                            id: keybindContent
-                                            anchors.left: parent.left
-                                            anchors.right: deleteButton.visible ? deleteButton.left : parent.right
-                                            anchors.top: parent.top
-                                            anchors.bottom: parent.bottom
-                                            anchors.leftMargin: Theme.spacingL
-                                            anchors.rightMargin: deleteButton.visible ? Theme.spacingM : Theme.spacingL
-                                            anchors.topMargin: Theme.spacingL
-                                            anchors.bottomMargin: Theme.spacingL
-                                            spacing: Theme.spacingM
-
-                                            property bool isEditing: keybindsTab.editingIndex === index
-
-                                            StyledText {
-                                                width: 140
-                                                text: modelData.modifiers || "MOD"
-                                                font.pixelSize: Theme.fontSizeMedium
-                                                color: modelData.modifiers ? Theme.surfaceText : Theme.surfaceVariantText
-                                                wrapMode: Text.Wrap
-                                                visible: !keybindContent.isEditing
-
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    propagateComposedEvents: false
-                                                    onClicked: (mouse) => {
-                                                        if (keybindsTab.editingIndex !== index) {
-                                                            keybindsTab.startEditing(index)
-                                                        }
-                                                        Qt.callLater(() => {
-                                                            modifiersField.forceActiveFocus()
-                                                            modifiersField.selectAll()
-                                                        })
-                                                        mouse.accepted = true
-                                                    }
-                                                }
-                                            }
-
-                                            DarkTextField {
-                                                id: modifiersField
-                                                width: 140
-                                                placeholderText: "MOD"
-                                                text: modelData.modifiers || ""
-                                                visible: keybindContent.isEditing
-                                                onVisibleChanged: {
-                                                    if (visible && keybindsTab.editingIndex === index && !keyField.activeFocus && !commandField.activeFocus) {
-                                                        Qt.callLater(() => {
-                                                            forceActiveFocus()
-                                                            selectAll()
-                                                        })
-                                                    }
-                                                }
-                                                onTextChanged: {
-                                                    if (modelData.modifiers !== text) {
-                                                        // Update the array directly, not modelData
-                                                        if (index >= 0 && index < keybindsTab.keybinds.length) {
-                                                            keybindsTab.keybinds[index].modifiers = text
-                                                        }
-                                                        modelData.modifiers = text
-                                                        keybindsTab.hasUnsavedChanges = true
-                                                    }
-                                                }
-                                                Keys.onEscapePressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                                Keys.onTabPressed: {
-                                                    keyField.forceActiveFocus()
-                                                    keyField.selectAll()
-                                                }
-                                                Keys.onEnterPressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                                Keys.onReturnPressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                            }
-
-                                            StyledText {
-                                                width: 120
-                                                text: modelData.key || "key"
-                                                font.pixelSize: Theme.fontSizeMedium
-                                                color: modelData.key ? Theme.surfaceText : Theme.surfaceVariantText
-                                                wrapMode: Text.Wrap
-                                                visible: !keybindContent.isEditing
-
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    propagateComposedEvents: false
-                                                    onClicked: (mouse) => {
-                                                        if (keybindsTab.editingIndex !== index) {
-                                                            keybindsTab.startEditing(index)
-                                                        }
-                                                        Qt.callLater(() => {
-                                                            keyField.forceActiveFocus()
-                                                            keyField.selectAll()
-                                                        })
-                                                        mouse.accepted = true
-                                                    }
-                                                }
-                                            }
-
-                                            DarkTextField {
-                                                id: keyField
-                                                width: 120
-                                                placeholderText: "key"
-                                                text: modelData.key || ""
-                                                visible: keybindContent.isEditing
-                                                onTextChanged: {
-                                                    if (modelData.key !== text) {
-                                                        // Update the array directly first, then modelData
-                                                        if (index >= 0 && index < keybindsTab.keybinds.length) {
-                                                            keybindsTab.keybinds[index].key = text
-                                                        }
-                                                        modelData.key = text
-                                                        keybindsTab.hasUnsavedChanges = true
-                                                    }
-                                                }
-                                                Keys.onEscapePressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                                Keys.onTabPressed: {
-                                                    commandField.forceActiveFocus()
-                                                    commandField.selectAll()
-                                                }
-                                                Keys.onEnterPressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                                Keys.onReturnPressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                            }
-
-                                            StyledText {
-                                                id: commandText
-                                                width: parent.width - 140 - 120 - 40 - 32 - Theme.spacingM
-                                                text: modelData.command || "command"
-                                                font.pixelSize: Theme.fontSizeMedium
-                                                color: modelData.command ? Theme.surfaceText : Theme.surfaceVariantText
-                                                wrapMode: Text.Wrap
-                                                visible: !keybindContent.isEditing
-
-                                                MouseArea {
-                                                    anchors.fill: parent
-                                                    propagateComposedEvents: false
-                                                    onClicked: (mouse) => {
-                                                        if (keybindsTab.editingIndex !== index) {
-                                                            keybindsTab.startEditing(index)
-                                                        }
-                                                        Qt.callLater(() => {
-                                                            commandField.forceActiveFocus()
-                                                            commandField.selectAll()
-                                                        })
-                                                        mouse.accepted = true
-                                                    }
-                                                }
-                                            }
-
-                                            DarkTextField {
-                                                id: commandField
-                                                width: parent.width - 140 - 120 - 40 - 32 - Theme.spacingM
-                                                placeholderText: "command"
-                                                text: modelData.command || ""
-                                                visible: keybindContent.isEditing
-                                                onTextChanged: {
-                                                    if (modelData.command !== text) {
-                                                        // Update the array directly, not modelData
-                                                        if (index >= 0 && index < keybindsTab.keybinds.length) {
-                                                            keybindsTab.keybinds[index].command = text
-                                                        }
-                                                        modelData.command = text
-                                                        keybindsTab.hasUnsavedChanges = true
-                                                    }
-                                                }
-                                                Keys.onEscapePressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                                Keys.onEnterPressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                                Keys.onReturnPressed: {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                            }
-
-                                        }
-
-                                        DarkActionButton {
-                                            id: deleteButton
-                                            buttonSize: 32
-                                            circular: true
-                                            iconName: "delete"
-                                            iconSize: 16
-                                            iconColor: Theme.error
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            anchors.right: parent.right
-                                            anchors.rightMargin: Theme.spacingM
-                                            visible: itemMouseArea.containsMouse && !keybindContent.isEditing
-                                            onClicked: {
-                                                // Stop editing if we were editing this item
-                                                if (keybindsTab.editingIndex === index) {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                                // Mark as changed BEFORE modifying array
-                                                keybindsTab.hasUnsavedChanges = true
-                                                // Remove the item from the array
-                                                var newKeybinds = keybindsTab.keybinds.slice()
-                                                newKeybinds.splice(index, 1)
-                                                keybindsTab.keybinds = newKeybinds
-                                            }
-                                        }
-
-                                        MouseArea {
-                                            id: itemMouseArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            propagateComposedEvents: true
-                                            onClicked: {
-                                                if (keybindsTab.editingIndex !== index) {
-                                                    keybindsTab.startEditing(index)
-                                                    Qt.callLater(() => {
-                                                        modifiersField.forceActiveFocus()
-                                                        modifiersField.selectAll()
-                                                    })
-                                                }
-                                            }
-                                            onPressed: (mouse) => {
-                                                if (keybindsTab.editingIndex !== index && keybindsTab.editingIndex !== -1) {
-                                                    keybindsTab.stopEditing()
-                                                }
-                                                mouse.accepted = false
-                                            }
-                                        }
-                                    }
-                                }
+                            StyledText {
+                                text: "The keybinds config file does not exist. It will be created when you save your first keybind."
+                                font.pixelSize: Theme.fontSizeSmall
+                                color: Theme.surfaceVariantText
+                                wrapMode: Text.WordWrap
+                                width: parent.width
                             }
                         }
                     }
                 }
             }
 
-            StyledRect {
+            Flow {
+                width: parent.width - parent.leftPadding - parent.rightPadding
+                spacing: Theme.spacingS
+                visible: _cachedCategories.length > 0
+
+                        Rectangle {
+                            width: allChipText.implicitWidth + Theme.spacingL
+                            height: 32
+                            radius: 16
+                            color: !keybindsTab.selectedCategory ? Theme.primary : Theme.surfaceContainer
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Theme.shortDuration
+                                    easing.type: Theme.standardEasing
+                                }
+                            }
+
+                            StyledText {
+                                id: allChipText
+                                text: "All"
+                                font.pixelSize: Theme.fontSizeSmall
+                                color: !keybindsTab.selectedCategory ? Theme.primaryText : Theme.surfaceVariantText
+                                anchors.centerIn: parent
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    keybindsTab.selectedCategory = ""
+                                    keybindsTab._updateFiltered()
+                                }
+                            }
+                        }
+
+                        Repeater {
+                            model: keybindsTab._cachedCategories
+
+                            delegate: Rectangle {
+                                required property string modelData
+                                required property int index
+
+                                width: catText.implicitWidth + Theme.spacingL
+                                height: 32
+                                radius: 16
+                                color: keybindsTab.selectedCategory === modelData ? Theme.primary : Theme.surfaceContainer
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Theme.shortDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+
+                                StyledText {
+                                    id: catText
+                                    text: modelData
+                                    font.pixelSize: Theme.fontSizeSmall
+                                    color: keybindsTab.selectedCategory === modelData ? Theme.primaryText : Theme.surfaceVariantText
+                                    anchors.centerIn: parent
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        keybindsTab.selectedCategory = modelData
+                                        keybindsTab._updateFiltered()
+                                    }
+                                }
+                            }
+                        }
+            }
+
+            Column {
+                id: newBindSection
+                width: parent.width - parent.leftPadding - parent.rightPadding
+                spacing: Theme.spacingM
+                visible: keybindsTab.showingNewBind
+                opacity: visible ? 1 : 0
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: Theme.shortDuration
+                        easing.type: Theme.standardEasing
+                    }
+                }
+
+                StyledText {
+                    text: "New Keybind"
+                    font.pixelSize: Theme.fontSizeMedium
+                    font.weight: Font.Medium
+                    color: Theme.surfaceText
+                }
+
+                Row {
+                    id: keybindEditRow
+                    width: parent.width
+                    spacing: Theme.spacingM
+
+                            DarkTextField {
+                                id: newModifiersField
+                                width: 140
+                                height: 40
+                                placeholderText: "MODIFIER"
+                                autoExpandWidth: false
+                                autoExpandHeight: false
+                                text: editingIndex >= 0 && editingIndex < keybinds.length ? keybinds[editingIndex].modifiers || "" : ""
+                                onTextChanged: {
+                                    if (editingIndex >= 0 && editingIndex < keybinds.length) {
+                                        keybinds[editingIndex].modifiers = text
+                                        hasUnsavedChanges = true
+                                    }
+                                }
+                                Keys.onEscapePressed: cancelNewBind()
+                                Keys.onTabPressed: newKeyField.forceActiveFocus()
+                                Keys.onEnterPressed: {
+                                    if (newKeyField.text && newCommandField.text) {
+                                        saveNewBind()
+                                    } else {
+                                        newKeyField.forceActiveFocus()
+                                    }
+                                }
+                                Keys.onReturnPressed: {
+                                    if (newKeyField.text && newCommandField.text) {
+                                        saveNewBind()
+                                    } else {
+                                        newKeyField.forceActiveFocus()
+                                    }
+                                }
+                            }
+
+                            DarkTextField {
+                                id: newKeyField
+                                width: 120
+                                height: 40
+                                placeholderText: "KEY"
+                                autoExpandWidth: false
+                                autoExpandHeight: false
+                                text: editingIndex >= 0 && editingIndex < keybinds.length ? keybinds[editingIndex].key || "" : ""
+                                onTextChanged: {
+                                    if (editingIndex >= 0 && editingIndex < keybinds.length) {
+                                        keybinds[editingIndex].key = text
+                                        hasUnsavedChanges = true
+                                    }
+                                }
+                                Keys.onEscapePressed: cancelNewBind()
+                                Keys.onTabPressed: newCommandField.forceActiveFocus()
+                                Keys.onEnterPressed: {
+                                    if (newModifiersField.text && newCommandField.text) {
+                                        saveNewBind()
+                                    } else {
+                                        newCommandField.forceActiveFocus()
+                                    }
+                                }
+                                Keys.onReturnPressed: {
+                                    if (newModifiersField.text && newCommandField.text) {
+                                        saveNewBind()
+                                    } else {
+                                        newCommandField.forceActiveFocus()
+                                    }
+                                }
+                            }
+
+                            DarkTextField {
+                                id: newCommandField
+                                width: parent.width - 140 - 120 - Theme.spacingM * 2 - 80
+                                height: 40
+                                placeholderText: "COMMAND"
+                                autoExpandWidth: false
+                                autoExpandHeight: false
+                                text: editingIndex >= 0 && editingIndex < keybinds.length ? keybinds[editingIndex].command || "" : ""
+                                onTextChanged: {
+                                    if (editingIndex >= 0 && editingIndex < keybinds.length) {
+                                        keybinds[editingIndex].command = text
+                                        hasUnsavedChanges = true
+                                    }
+                                }
+                                Keys.onEscapePressed: cancelNewBind()
+                                Keys.onEnterPressed: {
+                                    if (newModifiersField.text && newKeyField.text) {
+                                        saveNewBind()
+                                    }
+                                }
+                                Keys.onReturnPressed: {
+                                    if (newModifiersField.text && newKeyField.text) {
+                                        saveNewBind()
+                                    }
+                                }
+                            }
+
+                            DarkActionButton {
+                                width: 36
+                                height: 36
+                                circular: true
+                                iconName: "close"
+                                iconSize: 18
+                                iconColor: Theme.error
+                                anchors.verticalCenter: parent.verticalCenter
+                                onClicked: cancelNewBind()
+                            }
+                }
+            }
+
+            Item {
                 width: parent.width
-                height: 80
-                radius: Theme.cornerRadius
-                color: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g, Theme.surfaceVariant.b, 0.3)
-                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
-                border.width: 1
+                height: isLoading ? 40 : 0
                 visible: isLoading
 
                 Row {
@@ -990,17 +859,315 @@ Item {
                     spacing: Theme.spacingM
 
                     DarkIcon {
-                        name: "hourglass_empty"
-                        size: 24
+                        name: "sync"
+                        size: 20
                         color: Theme.primary
                         anchors.verticalCenter: parent.verticalCenter
+
+                        RotationAnimation on rotation {
+                            from: 0
+                            to: 360
+                            duration: 1000
+                            loops: Animation.Infinite
+                            running: isLoading
+                        }
                     }
 
                     StyledText {
                         text: "Loading keybinds..."
                         font.pixelSize: Theme.fontSizeMedium
-                        color: Theme.surfaceText
+                        color: Theme.surfaceVariantText
                         anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+            }
+
+            StyledText {
+                text: "No keybinds found"
+                font.pixelSize: Theme.fontSizeMedium
+                color: Theme.surfaceVariantText
+                visible: !isLoading && _filteredBinds.length === 0
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            Column {
+                width: parent.width
+                spacing: Theme.spacingXS
+
+                Repeater {
+                    model: keybindsTab._filteredBinds
+
+                    Item {
+                        required property var modelData
+                        required property int index
+
+                        width: parent.width
+                        height: bindItem.height
+
+                        StyledRect {
+                            id: bindItem
+                            width: contentColumn.width - contentColumn.leftPadding - contentColumn.rightPadding
+                            height: collapsedContent.height + (isExpanded ? expandedContent.height + Theme.spacingM : 0) + Theme.spacingL * 2
+                            radius: Theme.cornerRadius
+                            color: itemMouseArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.08) : Qt.rgba(Theme.surfaceContainerHigh.r, Theme.surfaceContainerHigh.g, Theme.surfaceContainerHigh.b, Theme.popupTransparency)
+                            border.color: Theme.outlineVariant
+                            border.width: 1
+
+                            property bool isExpanded: keybindsTab.isExpanded(modelData)
+
+                            Behavior on height {
+                                NumberAnimation {
+                                    duration: Theme.shortDuration
+                                    easing.type: Theme.standardEasing
+                                }
+                            }
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Theme.shortDuration
+                                    easing.type: Theme.standardEasing
+                                }
+                            }
+
+                            Column {
+                                id: collapsedContent
+                                anchors.left: parent.left
+                                anchors.right: expandButton.left
+                                anchors.top: parent.top
+                                anchors.leftMargin: Theme.spacingL
+                                anchors.rightMargin: Theme.spacingM
+                                anchors.topMargin: Theme.spacingL
+                                spacing: Theme.spacingXS
+
+                                Row {
+                                    width: parent.width
+                                    spacing: Theme.spacingM
+
+                                    StyledText {
+                                        width: 140
+                                        text: modelData.modifiers || "MOD"
+                                        font.pixelSize: Theme.fontSizeMedium
+                                        color: modelData.modifiers ? Theme.surfaceText : Theme.surfaceVariantText
+                                        wrapMode: Text.Wrap
+                                    }
+
+                                    StyledText {
+                                        width: 120
+                                        text: modelData.key || "key"
+                                        font.pixelSize: Theme.fontSizeMedium
+                                        color: modelData.key ? Theme.surfaceText : Theme.surfaceVariantText
+                                        wrapMode: Text.Wrap
+                                    }
+
+                                    StyledText {
+                                        width: parent.width - 140 - 120 - Theme.spacingM * 2
+                                        text: modelData.command || "command"
+                                        font.pixelSize: Theme.fontSizeMedium
+                                        color: modelData.command ? Theme.surfaceText : Theme.surfaceVariantText
+                                        wrapMode: Text.Wrap
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                            }
+
+                            Column {
+                                id: expandedContent
+                                anchors.left: parent.left
+                                anchors.right: expandButton.left
+                                anchors.top: collapsedContent.bottom
+                                anchors.leftMargin: Theme.spacingL
+                                anchors.rightMargin: Theme.spacingM
+                                anchors.topMargin: Theme.spacingM
+                                spacing: Theme.spacingM
+                                visible: bindItem.isExpanded
+                                height: visible ? implicitHeight : 0
+
+                                Behavior on height {
+                                    NumberAnimation {
+                                        duration: Theme.shortDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: Theme.shortDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+
+                                opacity: visible ? 1 : 0
+
+                                Row {
+                                    width: parent.width
+                                    spacing: Theme.spacingM
+
+                                    DarkTextField {
+                                        id: modifiersField
+                                        width: 140
+                                        height: 40
+                                        placeholderText: "MODIFIER"
+                                        autoExpandWidth: false
+                                        autoExpandHeight: false
+                                        text: modelData.modifiers || ""
+                                        onTextChanged: {
+                                            if (modelData.modifiers !== text) {
+                                                var bindIndex = -1
+                                                for (var i = 0; i < keybindsTab.keybinds.length; i++) {
+                                                    if (keybindsTab.keybinds[i] === modelData) {
+                                                        bindIndex = i
+                                                        break
+                                                    }
+                                                }
+                                                if (bindIndex >= 0) {
+                                                    keybindsTab.keybinds[bindIndex].modifiers = text
+                                                }
+                                                modelData.modifiers = text
+                                                keybindsTab.hasUnsavedChanges = true
+                                            }
+                                        }
+                                        Keys.onEscapePressed: keybindsTab.toggleExpanded(modelData)
+                                        Keys.onTabPressed: {
+                                            keyField.forceActiveFocus()
+                                            keyField.selectAll()
+                                        }
+                                    }
+
+                                    DarkTextField {
+                                        id: keyField
+                                        width: 120
+                                        height: 40
+                                        placeholderText: "KEY"
+                                        autoExpandWidth: false
+                                        autoExpandHeight: false
+                                        text: modelData.key || ""
+                                        onTextChanged: {
+                                            if (modelData.key !== text) {
+                                                var bindIndex = -1
+                                                for (var i = 0; i < keybindsTab.keybinds.length; i++) {
+                                                    if (keybindsTab.keybinds[i] === modelData) {
+                                                        bindIndex = i
+                                                        break
+                                                    }
+                                                }
+                                                if (bindIndex >= 0) {
+                                                    keybindsTab.keybinds[bindIndex].key = text
+                                                }
+                                                modelData.key = text
+                                                keybindsTab.hasUnsavedChanges = true
+                                            }
+                                        }
+                                        Keys.onEscapePressed: keybindsTab.toggleExpanded(modelData)
+                                        Keys.onTabPressed: {
+                                            commandField.forceActiveFocus()
+                                            commandField.selectAll()
+                                        }
+                                    }
+
+                                    DarkTextField {
+                                        id: commandField
+                                        width: parent.width - 140 - 120 - Theme.spacingM * 2
+                                        height: 40
+                                        placeholderText: "COMMAND"
+                                        autoExpandWidth: false
+                                        autoExpandHeight: false
+                                        text: modelData.command || ""
+                                        onTextChanged: {
+                                            if (modelData.command !== text) {
+                                                var bindIndex = -1
+                                                for (var i = 0; i < keybindsTab.keybinds.length; i++) {
+                                                    if (keybindsTab.keybinds[i] === modelData) {
+                                                        bindIndex = i
+                                                        break
+                                                    }
+                                                }
+                                                if (bindIndex >= 0) {
+                                                    keybindsTab.keybinds[bindIndex].command = text
+                                                }
+                                                modelData.command = text
+                                                keybindsTab.hasUnsavedChanges = true
+                                            }
+                                        }
+                                        Keys.onEscapePressed: keybindsTab.toggleExpanded(modelData)
+                                    }
+                                }
+
+                                Row {
+                                    width: parent.width
+                                    spacing: Theme.spacingM
+                                    layoutDirection: Qt.RightToLeft
+
+                                    DarkActionButton {
+                                        buttonSize: 36
+                                        circular: false
+                                        iconName: "delete"
+                                        iconSize: 18
+                                        iconColor: Theme.error
+                                        onClicked: {
+                                            var bindIndex = -1
+                                            for (var i = 0; i < keybindsTab.keybinds.length; i++) {
+                                                if (keybindsTab.keybinds[i] === modelData) {
+                                                    bindIndex = i
+                                                    break
+                                                }
+                                            }
+                                    if (bindIndex >= 0) {
+                                        keybindsTab._savedScrollY = flickable.contentY
+                                        keybindsTab._preserveScroll = true
+                                        keybindsTab.hasUnsavedChanges = true
+                                        keybindsTab.keybinds.splice(bindIndex, 1)
+                                        keybindsTab._updateFiltered()
+                                        Qt.callLater(() => {
+                                            if (keybindsTab._preserveScroll) {
+                                                flickable.contentY = keybindsTab._savedScrollY
+                                                keybindsTab._preserveScroll = false
+                                            }
+                                        })
+                                    }
+                                }
+                            }
+                                }
+                            }
+
+                            DarkActionButton {
+                                id: expandButton
+                                buttonSize: 32
+                                circular: true
+                                iconName: bindItem.isExpanded ? "expand_less" : "expand_more"
+                                iconSize: 18
+                                iconColor: Theme.surfaceVariantText
+                                anchors.top: parent.top
+                                anchors.topMargin: Theme.spacingL
+                                anchors.right: parent.right
+                                anchors.rightMargin: Theme.spacingM
+                                onClicked: keybindsTab.toggleExpanded(modelData)
+
+                                Behavior on iconColor {
+                                    ColorAnimation {
+                                        duration: Theme.shortDuration
+                                        easing.type: Theme.standardEasing
+                                    }
+                                }
+                            }
+
+                            MouseArea {
+                                id: itemMouseArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                propagateComposedEvents: true
+                                onClicked: {
+                                    if (!bindItem.isExpanded) {
+                                        keybindsTab.toggleExpanded(modelData)
+                                        Qt.callLater(() => {
+                                            if (modifiersField) {
+                                                modifiersField.forceActiveFocus()
+                                                modifiersField.selectAll()
+                                            }
+                                        })
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1043,12 +1210,12 @@ Item {
                 width: parent.width
                 spacing: Theme.spacingM
 
-                    DarkIcon {
-                        name: "list"
-                        size: Theme.iconSize
-                        color: Theme.primary
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
+                DarkIcon {
+                    name: "list"
+                    size: Theme.iconSize
+                    color: Theme.primary
+                    anchors.verticalCenter: parent.verticalCenter
+                }
 
                 Column {
                     width: parent.width - Theme.iconSize - Theme.spacingM
@@ -1160,6 +1327,7 @@ Item {
             SettingsData.keybindsPath = cleanPath
             SettingsData.saveSettings()
             keybindsTab.keybindsPath = cleanPath
+            checkConfigFileExists()
             loadKeybinds()
             close()
         }

@@ -22,6 +22,7 @@ function calculateRowsAndWidgets(controlCenterColumn, expandedSection, expandedW
         } else {
             itemWidth = baseWidth
         }
+        itemWidth = itemWidth * 0.95 // Reduced by 5%
 
         if (currentRow.length > 0 && (currentWidth + spacing + itemWidth > baseWidth)) {
             rows.push([...currentRow])

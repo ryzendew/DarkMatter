@@ -174,6 +174,7 @@ PanelWindow {
 
             anchors.fill: parent
             active: root.visible
+            clip: true
             asynchronous: false
         }
 
