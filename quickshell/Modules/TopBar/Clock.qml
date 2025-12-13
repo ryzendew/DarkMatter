@@ -25,24 +25,24 @@ Rectangle {
         
         var parts = []
         
-        // First line: Day name and day number (e.g., "Mon 1")
+
         if (!SettingsData.clockCompactMode) {
             var dayName = systemClock.date.toLocaleDateString(Qt.locale(), "ddd")
             var dayNum = systemClock.date.toLocaleDateString(Qt.locale(), "d")
             parts.push(dayName + " " + dayNum)
         }
         
-        // Second line: Time with AM/PM (e.g., "11:29 PM")
+
         var use24Hour = SettingsData.use24HourClock
         var timeStr = ""
         if (use24Hour) {
-            // Force 24-hour format with AM/PM
+
             const hours = systemClock.date.getHours()
             const minutes = systemClock.date.getMinutes()
             const period = hours >= 12 ? "PM" : "AM"
             timeStr = String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + " " + period
         } else {
-            // Use combined format string for 12-hour time
+
             const formatted = systemClock.date.toLocaleTimeString(Qt.locale(), "h:mm AP")
             timeStr = formatted.replace(/\./g, "").trim()
         }
@@ -73,23 +73,23 @@ Rectangle {
         StyledText {
             id: clockTimeText
             text: {
-                // Force re-evaluation when use24HourClock changes
+
                 root.formatUpdateTrigger // Reference to force update
                 const use24Hour = SettingsData.use24HourClock
                 if (!systemClock?.date) return ""
                 
                 if (use24Hour) {
-                    // Force 24-hour format with AM/PM
+
                     const date = systemClock.date
                     const hours = date.getHours() // Returns 0-23
                     const minutes = date.getMinutes() // Returns 0-59
-                    // Format as HH:mm with AM/PM
+
                     const period = hours >= 12 ? "PM" : "AM"
                     return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + " " + period
                 } else {
-                    // Use combined format string for 12-hour time
+
                     const formatted = systemClock.date.toLocaleTimeString(Qt.locale(), "h:mm AP")
-                    // Clean up the format - remove dots and ensure proper spacing
+
                     return formatted.replace(/\./g, "").trim()
                 }
             }
@@ -188,10 +188,10 @@ Rectangle {
         precision: SystemClock.Seconds
     }
     
-    // Property to force re-evaluation when format changes
+
     property int formatUpdateTrigger: 0
     
-    // Force update when clock format changes
+
     Connections {
         target: SettingsData
         function onUse24HourClockChanged() {

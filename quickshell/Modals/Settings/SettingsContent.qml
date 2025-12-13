@@ -9,7 +9,7 @@ Item {
     property var parentModal: null
     
     onCurrentIndexChanged: {
-        // Trigger capability refresh when Display Config tab is activated
+
         if (currentIndex === 9 && displayConfigLoader.item) {
             Qt.callLater(() => {
                 if (displayConfigLoader.item && typeof displayConfigLoader.item.loadMonitorCapabilities === 'function') {
@@ -72,7 +72,7 @@ Item {
         color: "transparent"
         clip: true
         
-        // Content padding wrapper
+
         Item {
             anchors.fill: parent
             anchors.leftMargin: 24

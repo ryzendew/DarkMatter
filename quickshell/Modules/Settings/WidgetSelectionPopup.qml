@@ -21,23 +21,23 @@ Popup {
             filteredWidgets = allWidgets.slice()
             return
         }
-        
+
         var filtered = []
         var query = searchQuery.toLowerCase()
-        
+
         for (var i = 0; i < allWidgets.length; i++) {
             var widget = allWidgets[i]
             var text = widget.text ? widget.text.toLowerCase() : ""
             var description = widget.description ? widget.description.toLowerCase() : ""
             var id = widget.id ? widget.id.toLowerCase() : ""
-            
-            if (text.indexOf(query) !== -1 || 
-                description.indexOf(query) !== -1 || 
+
+            if (text.indexOf(query) !== -1 ||
+                description.indexOf(query) !== -1 ||
                 id.indexOf(query) !== -1) {
                 filtered.push(widget)
             }
         }
-        
+
         filteredWidgets = filtered
         selectedIndex = -1
         keyboardNavigationActive = false
@@ -110,7 +110,7 @@ Popup {
     contentItem: Item {
         anchors.fill: parent
         focus: true
-        
+
         Keys.onPressed: event => {
             if (event.key === Qt.Key_Escape) {
                 root.close()
@@ -214,7 +214,7 @@ Popup {
                     if (event.key === Qt.Key_Escape) {
                         root.close()
                         event.accepted = true
-                    } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Up || 
+                    } else if (event.key === Qt.Key_Down || event.key === Qt.Key_Up ||
                                ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && text.length === 0)) {
                         event.accepted = false
                     }
@@ -235,7 +235,7 @@ Popup {
                     height: 60
                     radius: Theme.cornerRadius
                     property bool isSelected: root.keyboardNavigationActive && index === root.selectedIndex
-                    color: isSelected ? Theme.primarySelected : 
+                    color: isSelected ? Theme.primarySelected :
                            widgetArea.containsMouse ? Theme.primaryHover : Qt.rgba(
                                                             Theme.surfaceVariant.r,
                                                             Theme.surfaceVariant.g,

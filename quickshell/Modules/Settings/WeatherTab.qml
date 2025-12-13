@@ -15,7 +15,6 @@ Item {
 
         Column {
             id: mainColumn
-
             width: parent.width
             spacing: Theme.spacingXL
 

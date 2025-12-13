@@ -45,7 +45,7 @@ Rectangle {
     radius: Math.max(Theme.cornerRadius, 16)
     color: "transparent"
     
-    // Padding constants for better spacing
+
     readonly property int horizontalPadding: Theme.spacingL
     readonly property int verticalPadding: Theme.spacingM
     readonly property int dropdownHorizontalPadding: Theme.spacingL + Theme.spacingS
@@ -102,7 +102,7 @@ Rectangle {
         }
     }
 
-    // TextMetrics to calculate text width and height for auto-expanding dropdown
+
     TextMetrics {
         id: textMetrics
         font.pixelSize: Theme.fontSizeMedium
@@ -115,7 +115,7 @@ Rectangle {
         }
     }
     
-    // Force recalculation when text changes
+
     onCurrentValueChanged: {
         Qt.callLater(() => {
             textMetrics.text = root.currentValue && root.currentValue !== "" ? root.currentValue : (root.text || "Select...")
@@ -133,7 +133,7 @@ Rectangle {
     Rectangle {
         id: dropdown
 
-        // Auto-expand width based on content with min/max constraints
+
         width: {
             const minWidth = 120
             const maxWidth = Math.min(600, root.width * 0.8)
@@ -147,11 +147,11 @@ Rectangle {
             return Math.max(minWidth, Math.min(maxWidth, contentWidth))
         }
         
-        // Auto-expand height based on content with min/max constraints
+
         height: {
             const minHeight = root.controlHeight // Minimum height (48px default)
             const maxHeight = 200 // Maximum height to prevent excessive expansion
-            // Use boundingRect.height for accurate text height measurement
+
             const textHeight = textMetrics.boundingRect.height || textMetrics.height || Theme.fontSizeMedium * 1.5
             const iconHeight = 20 // Icon height (if present)
             const verticalPadding = root.dropdownVerticalPadding * 2

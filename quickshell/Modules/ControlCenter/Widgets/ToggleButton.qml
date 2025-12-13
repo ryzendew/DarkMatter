@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import qs.Common
@@ -65,7 +66,7 @@ Rectangle {
         }
     }
 
-    Row {
+    RowLayout {
         anchors.fill: parent
         anchors.leftMargin: Theme.spacingL + 2
         anchors.rightMargin: Theme.spacingM
@@ -75,12 +76,12 @@ Rectangle {
             name: root.iconName
             size: (Theme.iconSize || 24)
             color: isActive ? (Theme.primaryContainer || Theme.primary) : (Theme.primary || "#888888")
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
             rotation: root.iconRotation
         }
 
         Item {
-            width: parent.width - (Theme.iconSize || 24) - parent.spacing
+            Layout.fillWidth: true
             height: parent.height
 
             Column {

@@ -21,7 +21,6 @@ Item {
 
         Column {
             id: mainColumn
-
             width: parent.width
             spacing: Theme.spacingXL
 
@@ -671,15 +670,14 @@ Item {
                         height: 32
                         radius: Theme.cornerRadius
                         color: resetMouseArea.containsMouse ? Theme.errorHover : Theme.error
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        
+
                         StyledText {
                             text: "Reset All"
                             color: Theme.errorText || "#ffffff"
                             anchors.centerIn: parent
                             font.pixelSize: Theme.fontSizeSmall
                         }
-                        
+
                         MouseArea {
                             id: resetMouseArea
                             anchors.fill: parent

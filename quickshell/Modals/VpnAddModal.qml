@@ -12,22 +12,17 @@ import qs.Widgets
 DarkModal {
     id: root
 
-    Component.onCompleted: {
-    }
-
-    Component.onDestruction: {
-    }
 
     property int selectedVpnType: 0
     property var vpnTypes: ["OpenVPN", "WireGuard", "IKEv2", "L2TP/IPsec", "PPTP", "StrongSwan", "Cisco AnyConnect"]
-    
+
     property string connectionName: ""
     property string openvpnServer: ""
     property string openvpnPort: "1194"
     property string openvpnProtocol: "udp"
     property string openvpnUsername: ""
     property string openvpnPassword: ""
-    
+
     property string wireguardPrivateKey: ""
     property string wireguardPublicKey: ""
     property string wireguardEndpoint: ""
@@ -37,31 +32,31 @@ DarkModal {
     property string wireguardMTU: ""
     property string wireguardDNS: ""
     property string wireguardPersistentKeepalive: ""
-    
+
     property string ikev2Address: ""
     property string ikev2Username: ""
     property string ikev2Password: ""
-    
+
     property string l2tpAddress: ""
     property string l2tpUsername: ""
     property string l2tpPassword: ""
     property string l2tpPsk: ""
-    
+
     property string pptpAddress: ""
     property string pptpUsername: ""
     property string pptpPassword: ""
-    
+
     property string strongswanAddress: ""
     property string strongswanCertificate: ""
     property string strongswanMethod: "eap"
     property string strongswanUsername: ""
     property string strongswanPassword: ""
-    
+
     property string ciscoAddress: ""
     property string ciscoUsername: ""
     property string ciscoPassword: ""
     property string ciscoGroup: ""
-    
+
     property bool importingFile: false
     property bool generatingKeys: false
     property string errorMessage: ""
@@ -69,39 +64,29 @@ DarkModal {
     property bool waitingForConnectionName: false
             property string pendingImportType: ""
 
-    onVisibleChanged: {
-    }
-
-    onShouldBeVisibleChanged: {
-    }
 
     function show() {
-        try {
-            reset()
-            open()
-        } catch (error) {
-            console.error("[VpnAddModal] Error in show():", error, error.stack)
-        }
+        reset()
+        open()
     }
 
     function reset() {
-        try {
-            selectedVpnType = 0
-            connectionName = ""
-            openvpnServer = ""
-            openvpnPort = "1194"
-            openvpnProtocol = "udp"
-            openvpnUsername = ""
-            openvpnPassword = ""
-            wireguardPrivateKey = ""
-            wireguardPublicKey = ""
-            wireguardEndpoint = ""
-            wireguardAllowedIPs = "0.0.0.0/0"
-            wireguardAddress = ""
-            wireguardPresharedKey = ""
-            wireguardMTU = ""
-            wireguardDNS = ""
-            wireguardPersistentKeepalive = ""
+        selectedVpnType = 0
+        connectionName = ""
+        openvpnServer = ""
+        openvpnPort = "1194"
+        openvpnProtocol = "udp"
+        openvpnUsername = ""
+        openvpnPassword = ""
+        wireguardPrivateKey = ""
+        wireguardPublicKey = ""
+        wireguardEndpoint = ""
+        wireguardAllowedIPs = "0.0.0.0/0"
+        wireguardAddress = ""
+        wireguardPresharedKey = ""
+        wireguardMTU = ""
+        wireguardDNS = ""
+        wireguardPersistentKeepalive = ""
         ikev2Address = ""
         ikev2Username = ""
         ikev2Password = ""
@@ -127,9 +112,6 @@ DarkModal {
         pendingImportFilePath = ""
         waitingForConnectionName = false
         pendingImportType = ""
-        } catch (error) {
-            console.error("[VpnAddModal] Error in reset():", error, error.stack)
-        }
     }
 
     function importOvpnFile(filePath, connectionName) {
@@ -140,7 +122,6 @@ DarkModal {
             importProcess.command = ["nmcli", "connection", "import", "type", "openvpn", "file", filePath]
             importProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in importOvpnFile():", error, error.stack)
             importingFile = false
             errorMessage = "Error importing file: " + error.toString()
         }
@@ -150,24 +131,24 @@ DarkModal {
         try {
             importingFile = true
             errorMessage = ""
-            
+
             importProcess.pendingConnectionName = connectionName || ""
             importProcess.command = ["nmcli", "connection", "import", "type", "wireguard", "file", filePath]
             importProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in importWireGuardConf():", error, error.stack)
+
             importingFile = false
             errorMessage = "Error importing file: " + error.toString()
         }
     }
-    
-    
+
+
     function cancelImport() {
         pendingImportFilePath = ""
         pendingImportType = ""
         waitingForConnectionName = false
     }
-    
+
     function parseWireGuardConf(content) {
         try {
             const lines = content.split('\n')
@@ -176,39 +157,39 @@ DarkModal {
             let peerData = {}
             let connectionName = ""
             let nextLineIsConnectionName = false
-            
+
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim()
-                
+
                 if (!line || line.startsWith('#')) {
                     continue
                 }
-                
+
                 if (line.startsWith('[') && line.endsWith(']')) {
                     const sectionName = line.slice(1, -1).toLowerCase()
-                    
+
                     if (sectionName === "connection name") {
                         nextLineIsConnectionName = true
                         currentSection = ""
                         continue
                     }
-                    
+
                     currentSection = sectionName
                     nextLineIsConnectionName = false
                     continue
                 }
-                
+
                 if (nextLineIsConnectionName) {
                     connectionName = line
                     nextLineIsConnectionName = false
                     continue
                 }
-                
+
                 const match = line.match(/^(\w+)\s*=\s*(.+)$/)
                 if (match) {
                     const key = match[1].trim().toLowerCase()
                     const value = match[2].trim()
-                    
+
                     if (currentSection === "interface") {
                         interfaceData[key] = value
                     } else if (currentSection === "peer") {
@@ -216,14 +197,14 @@ DarkModal {
                     }
                 }
             }
-            
+
             if (connectionName) {
                 root.connectionName = connectionName
             } else if (!root.connectionName && root.pendingImportFilePath) {
                 const fileName = root.pendingImportFilePath.split('/').pop().replace(/\.conf$/i, '')
                 root.connectionName = fileName || "WireGuard Connection"
             }
-            
+
             if (interfaceData['privatekey']) {
                 root.wireguardPrivateKey = interfaceData['privatekey']
             }
@@ -236,7 +217,7 @@ DarkModal {
             if (interfaceData['mtu']) {
                 root.wireguardMTU = interfaceData['mtu']
             }
-            
+
             if (peerData['publickey']) {
                 root.wireguardPublicKey = peerData['publickey']
             }
@@ -252,14 +233,14 @@ DarkModal {
             if (peerData['persistentkeepalive']) {
                 root.wireguardPersistentKeepalive = peerData['persistentkeepalive']
             }
-            
+
             root.waitingForConnectionName = true
         } catch (error) {
-            console.error("[VpnAddModal] Error parsing WireGuard conf:", error)
+
             root.errorMessage = "Failed to parse WireGuard configuration: " + (error.toString() || "Unknown error")
         }
     }
-    
+
     function parseOpenVPNConf(content) {
         try {
             const lines = content.split('\n')
@@ -269,14 +250,14 @@ DarkModal {
             let username = ""
             let password = ""
             let authUserPass = false
-            
+
             for (let line of lines) {
                 line = line.trim()
-                
+
                 if (!line || line.startsWith('#')) {
                     continue
                 }
-                
+
                 const remoteMatch = line.match(/^remote\s+(\S+)(?:\s+(\d+))?(?:\s+(\S+))?/i)
                 if (remoteMatch) {
                     remoteLine = remoteMatch[1]
@@ -288,49 +269,47 @@ DarkModal {
                     }
                     continue
                 }
-                
-                // Parse proto directive
+
+
                 const protoMatch = line.match(/^proto\s+(\S+)/i)
                 if (protoMatch) {
                     proto = protoMatch[1].toLowerCase()
                     continue
                 }
-                
-                // Parse port directive
+
+
                 const portMatch = line.match(/^port\s+(\d+)/i)
                 if (portMatch) {
                     port = portMatch[1]
                     continue
                 }
-                
-                // Check for auth-user-pass (credentials might be in separate file or inline)
+
+
                 if (line.match(/^auth-user-pass/i)) {
                     authUserPass = true
-                    // Try to get inline credentials if present
+
                     const authMatch = line.match(/^auth-user-pass\s+(.+)/i)
                     if (authMatch && authMatch[1].trim() !== "") {
-                        // Credentials file path - we can't read it automatically
-                        // User will need to enter credentials manually
                     }
                     continue
                 }
-                
-                // Parse username (if inline)
+
+
                 const userMatch = line.match(/^username\s+(.+)/i)
                 if (userMatch) {
                     username = userMatch[1].trim()
                     continue
                 }
-                
-                // Parse password (if inline) - this is rare but possible
+
+
                 const passMatch = line.match(/^password\s+(.+)/i)
                 if (passMatch) {
                     password = passMatch[1].trim()
                     continue
                 }
             }
-            
-            // Populate form fields
+
+
             if (remoteLine) {
                 root.openvpnServer = remoteLine
             }
@@ -346,16 +325,16 @@ DarkModal {
             if (password) {
                 root.openvpnPassword = password
             }
-            
-            // Extract connection name from filename if not set
+
+
             if (!root.connectionName && root.pendingImportFilePath) {
                 const fileName = root.pendingImportFilePath.split('/').pop().replace(/\.ovpn$/i, '')
                 root.connectionName = fileName || "OpenVPN Connection"
             }
-            
+
             root.waitingForConnectionName = true
         } catch (error) {
-            console.error("[VpnAddModal] Error parsing OpenVPN conf:", error)
+
             root.errorMessage = "Failed to parse OpenVPN configuration: " + (error.toString() || "Unknown error")
         }
     }
@@ -366,7 +345,7 @@ DarkModal {
             errorMessage = ""
             generateKeysProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in generateWireGuardKeys():", error, error.stack)
+
             generatingKeys = false
             errorMessage = "Error generating keys: " + error.toString()
         }
@@ -389,7 +368,7 @@ DarkModal {
             const vpnSecrets = openvpnPassword.trim() ? `password=${openvpnPassword}` : ""
 
             let cmd = ["nmcli", "connection", "add", "type", "vpn", "vpn-type", "openvpn", "con-name", connectionName.trim()]
-            
+
             if (vpnDataWithUser) {
                 cmd.push("vpn.data", vpnDataWithUser)
             }
@@ -401,7 +380,7 @@ DarkModal {
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in addOpenVPNConnection():", error, error.stack)
+
             errorMessage = "Error creating OpenVPN connection: " + error.toString()
         }
     }
@@ -427,10 +406,10 @@ DarkModal {
 
             errorMessage = ""
             importingFile = true
-            
+
             let configContent = "[Interface]\n"
             configContent += "PrivateKey = " + wireguardPrivateKey.trim() + "\n"
-            
+
             if (wireguardAddress.trim()) {
                 configContent += "Address = " + wireguardAddress.trim() + "\n"
             }
@@ -440,32 +419,32 @@ DarkModal {
             if (wireguardMTU.trim()) {
                 configContent += "MTU = " + wireguardMTU.trim() + "\n"
             }
-            
+
             configContent += "\n[Peer]\n"
             configContent += "PublicKey = " + wireguardPublicKey.trim() + "\n"
             configContent += "Endpoint = " + wireguardEndpoint.trim() + "\n"
             configContent += "AllowedIPs = " + (wireguardAllowedIPs.trim() || "0.0.0.0/0") + "\n"
-            
+
             if (wireguardPresharedKey.trim()) {
                 configContent += "PresharedKey = " + wireguardPresharedKey.trim() + "\n"
             }
             if (wireguardPersistentKeepalive.trim()) {
                 configContent += "PersistentKeepalive = " + wireguardPersistentKeepalive.trim() + "\n"
             }
-            
+
             const tempConfigPath = "/tmp/quickshell_wg_" + Date.now() + ".conf"
-            
+
             createTempWireGuardConfig.configContent = configContent
             createTempWireGuardConfig.tempPath = tempConfigPath
             createTempWireGuardConfig.connectionName = connectionName.trim()
-            
+
             const escapedPath = tempConfigPath.replace(/'/g, "'\\''")
             const escapedContent = configContent.replace(/'/g, "'\\''").replace(/\$/g, "\\$").replace(/`/g, "\\`").replace(/\\/g, "\\\\")
             createTempWireGuardConfig.command = ["bash", "-c", `printf '%s' '${escapedContent}' > '${escapedPath}'`]
-            
+
             createTempWireGuardConfig.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in addWireGuardConnection():", error, error.stack)
+
             errorMessage = "Error creating WireGuard connection: " + error.toString()
         }
     }
@@ -498,7 +477,7 @@ DarkModal {
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in addIKEv2Connection():", error, error.stack)
+
             errorMessage = "Error creating IKEv2 connection: " + error.toString()
         }
     }
@@ -537,7 +516,7 @@ DarkModal {
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in addL2TPConnection():", error, error.stack)
+
             errorMessage = "Error creating L2TP connection: " + error.toString()
         }
     }
@@ -573,7 +552,7 @@ DarkModal {
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in addPPTPConnection():", error, error.stack)
+
             errorMessage = "Error creating PPTP connection: " + error.toString()
         }
     }
@@ -612,7 +591,7 @@ DarkModal {
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in addStrongSwanConnection():", error, error.stack)
+
             errorMessage = "Error creating StrongSwan connection: " + error.toString()
         }
     }
@@ -651,7 +630,7 @@ DarkModal {
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
-            console.error("[VpnAddModal] Error in addCiscoConnection():", error, error.stack)
+
             errorMessage = "Error creating Cisco AnyConnect connection: " + error.toString()
         }
     }
@@ -659,16 +638,16 @@ DarkModal {
     function saveConnection() {
         try {
             errorMessage = ""
-            
-            // If we have a pending import file, clear the import state and use form values
+
+
             if (pendingImportFilePath && waitingForConnectionName) {
                 waitingForConnectionName = false
                 pendingImportFilePath = ""
                 pendingImportType = ""
-                // Continue to normal save flow using form values
+
             }
-            
-            // Normal save flow (uses form values)
+
+
             if (selectedVpnType === 0) {
                 addOpenVPNConnection()
             } else if (selectedVpnType === 1) {
@@ -684,11 +663,11 @@ DarkModal {
             } else if (selectedVpnType === 6) {
                 addCiscoConnection()
             } else {
-                console.error("[VpnAddModal] Unknown VPN type:", selectedVpnType)
+
                 errorMessage = "Unknown VPN type selected"
             }
         } catch (error) {
-            console.error("[VpnAddModal] Error in saveConnection():", error, error.stack)
+
             errorMessage = "Error saving connection: " + error.toString()
         }
     }
@@ -699,8 +678,6 @@ DarkModal {
     positioning: "center"
     enableShadow: true
     allowStacking: true
-
-
     Connections {
         function onCloseAllModalsExcept(excludedModal) {
             if (excludedModal !== root && !allowStacking && shouldBeVisible) {
@@ -709,18 +686,17 @@ DarkModal {
         }
         target: ModalManager
     }
-    
+
     onBackgroundClicked: () => {
         close()
     }
 
     content: Component {
-        FocusScope {
+            FocusScope {
             id: contentScope
             anchors.fill: parent
             focus: true
 
-            
             Keys.onEscapePressed: event => {
                 root.close()
                 event.accepted = true
@@ -796,13 +772,13 @@ DarkModal {
 
                         Rectangle {
                             property bool isSelected: root.selectedVpnType === index
-                            
+
                             TextMetrics {
                                 id: vpnTypeTextMetrics
                                 font.pixelSize: Theme.fontSizeSmall
                                 text: modelData
                             }
-                            
+
                             implicitWidth: vpnTypeTextMetrics.width + Theme.spacingS * 2
                             implicitHeight: 32
                             width: implicitWidth
@@ -870,7 +846,7 @@ DarkModal {
                                 }
                             }
                         }
-                        
+
                         Connections {
                             target: root
                             function onWaitingForConnectionNameChanged() {
@@ -961,7 +937,7 @@ DarkModal {
 
                                         Rectangle {
                                             property bool isSelected: root.openvpnProtocol === modelData
-                                            
+
                                             width: 60
                                             height: 28
                                             radius: Theme.cornerRadius * 0.5
@@ -1064,7 +1040,7 @@ DarkModal {
                         height: 40
                         visible: root.importingFile
 
-                        Row {
+                        RowLayout {
                             anchors.centerIn: parent
                             spacing: Theme.spacingM
 
@@ -1072,7 +1048,7 @@ DarkModal {
                                 name: "sync"
                                 size: 20
                                 color: Theme.primary
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
 
                                 RotationAnimation on rotation {
                                     from: 0
@@ -1087,12 +1063,11 @@ DarkModal {
                                 text: "Importing..."
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.surfaceText
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
                             }
                         }
                     }
-                    
-                    // Show info message when file is imported and parsed
+
                     StyledText {
                         text: root.waitingForConnectionName ? "Configuration loaded from file. Review and enter a connection name, then click 'Add' to save." : ""
                         font.pixelSize: Theme.fontSizeSmall
@@ -1138,7 +1113,7 @@ DarkModal {
                                 }
                             }
                         }
-                        
+
                         Connections {
                             target: root
                             function onWaitingForConnectionNameChanged() {
@@ -1163,13 +1138,13 @@ DarkModal {
                             color: Theme.surfaceText
                         }
 
-                        Row {
+                        RowLayout {
                             width: parent.width
                             spacing: Theme.spacingS
 
                             DarkTextField {
                                 id: wireguardPrivateKeyField
-                                width: parent.width - generateKeysButton.width - Theme.spacingS
+                                Layout.fillWidth: true
                                 height: 40
                                 placeholderText: "Generate or paste private key"
                                 echoMode: TextInput.Password
@@ -1184,6 +1159,7 @@ DarkModal {
                                 radius: Theme.cornerRadius * 0.5
                                 color: generateKeysMouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
                                 visible: !root.generatingKeys
+                                Layout.alignment: Qt.AlignVCenter
 
                                 StyledText {
                                     anchors.centerIn: parent
@@ -1205,8 +1181,9 @@ DarkModal {
                                 width: 120
                                 height: 40
                                 visible: root.generatingKeys
+                                Layout.alignment: Qt.AlignVCenter
 
-                                Row {
+                                RowLayout {
                                     anchors.centerIn: parent
                                     spacing: Theme.spacingXS
 
@@ -1214,7 +1191,7 @@ DarkModal {
                                         name: "sync"
                                         size: 16
                                         color: Theme.primary
-                                        anchors.verticalCenter: parent.verticalCenter
+                                        Layout.alignment: Qt.AlignVCenter
 
                                         RotationAnimation on rotation {
                                             from: 0
@@ -1229,7 +1206,7 @@ DarkModal {
                                         text: "Generating..."
                                         font.pixelSize: Theme.fontSizeSmall
                                         color: Theme.surfaceText
-                                        anchors.verticalCenter: parent.verticalCenter
+                                        Layout.alignment: Qt.AlignVCenter
                                     }
                                 }
                             }
@@ -1330,7 +1307,7 @@ DarkModal {
                         border.color: Theme.outlineVariant
                         visible: !root.waitingForConnectionName
 
-                        Row {
+                        RowLayout {
                             anchors.centerIn: parent
                             spacing: Theme.spacingS
 
@@ -1338,14 +1315,14 @@ DarkModal {
                                 name: "file_upload"
                                 size: 18
                                 color: Theme.primary
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
                             }
 
                             StyledText {
                                 text: "Import .conf file"
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.surfaceText
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
                             }
                         }
 
@@ -1365,7 +1342,7 @@ DarkModal {
                         height: 40
                         visible: root.importingFile && root.selectedVpnType === 1
 
-                        Row {
+                        RowLayout {
                             anchors.centerIn: parent
                             spacing: Theme.spacingM
 
@@ -1373,7 +1350,7 @@ DarkModal {
                                 name: "sync"
                                 size: 20
                                 color: Theme.primary
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
 
                                 RotationAnimation on rotation {
                                     from: 0
@@ -1388,12 +1365,11 @@ DarkModal {
                                 text: "Importing..."
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.surfaceText
-                                anchors.verticalCenter: parent.verticalCenter
+                                Layout.alignment: Qt.AlignVCenter
                             }
                         }
                     }
-                    
-                    // Show info message when file is imported and parsed
+
                     StyledText {
                         text: root.waitingForConnectionName ? "Configuration loaded from file. Review and enter a connection name, then click 'Add' to save." : ""
                         font.pixelSize: Theme.fontSizeSmall
@@ -1809,7 +1785,7 @@ DarkModal {
 
                                     Rectangle {
                                         property bool isSelected: root.strongswanMethod === modelData
-                                        
+
                                         width: 80
                                         height: 28
                                         radius: Theme.cornerRadius * 0.5
@@ -2030,17 +2006,20 @@ DarkModal {
                     wrapMode: Text.WordWrap
                 }
 
-                Row {
+                RowLayout {
                     width: parent.width
                     spacing: Theme.spacingM
 
-                    Item { width: 1; height: 1 }
+                    Item {
+                        Layout.fillWidth: true
+                    }
 
                     Rectangle {
                         width: 100
                         height: 36
                         radius: Theme.cornerRadius * 0.5
                         color: cancelMouseArea.containsMouse ? Theme.surfaceContainer : Theme.surfaceVariant
+                        Layout.alignment: Qt.AlignVCenter
 
                         StyledText {
                             anchors.centerIn: parent
@@ -2065,6 +2044,7 @@ DarkModal {
                         height: 36
                         radius: Theme.cornerRadius * 0.5
                         color: saveMouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
+                        Layout.alignment: Qt.AlignVCenter
 
                         StyledText {
                             anchors.centerIn: parent
@@ -2081,13 +2061,14 @@ DarkModal {
                             onClicked: saveConnection()
                         }
                     }
-                    
+
                     Rectangle {
                         width: 100
                         height: 36
                         radius: Theme.cornerRadius * 0.5
                         color: cancelImportButtonMouseArea.containsMouse ? Theme.surfaceContainer : Theme.surfaceVariant
                         visible: root.waitingForConnectionName
+                        Layout.alignment: Qt.AlignVCenter
 
                         StyledText {
                             anchors.centerIn: parent
@@ -2115,7 +2096,7 @@ DarkModal {
         id: fileBrowserLoader
         active: false
         asynchronous: true
-        
+
         onStatusChanged: {
             if (status === Loader.Ready) {
                 if (pendingFileBrowserOpen && item && typeof item.open === 'function') {
@@ -2127,11 +2108,11 @@ DarkModal {
                     })
                 }
             } else if (status === Loader.Error) {
-                console.error("[VpnAddModal] fileBrowserLoader error:", sourceComponent)
+
                 pendingFileBrowserOpen = false
             }
         }
-        
+
         onItemChanged: {
             if (item && fileBrowserLoader.status === Loader.Ready && pendingFileBrowserOpen) {
                 Qt.callLater(() => {
@@ -2142,7 +2123,7 @@ DarkModal {
                 })
             }
         }
-        
+
         sourceComponent: Component {
             FileBrowserModal {
                 browserTitle: root.selectedVpnType === 1 ? "Select WireGuard Configuration File" : "Select OpenVPN Configuration File"
@@ -2158,7 +2139,7 @@ DarkModal {
                         root.pendingImportFilePath = cleanPath
                         root.pendingImportType = root.selectedVpnType === 1 ? "wireguard" : "openvpn"
                         root.connectionName = ""
-                        
+
                         if (root.selectedVpnType === 1) {
                             wireguardConfFileView.path = ""
                             wireguardConfFileView.path = cleanPath
@@ -2166,12 +2147,12 @@ DarkModal {
                             openvpnConfFileView.path = ""
                             openvpnConfFileView.path = cleanPath
                         }
-                        
+
                         if (fileBrowserLoader.item) {
                             fileBrowserLoader.item.close()
                         }
                     } catch (error) {
-                        console.error("[VpnAddModal] Error in onFileSelected:", error, error.stack)
+
                     }
                 }
             }
@@ -2181,11 +2162,11 @@ DarkModal {
     function openFileBrowser() {
         try {
             pendingFileBrowserOpen = true
-            
+
             if (!fileBrowserLoader.active) {
                 fileBrowserLoader.active = true
             }
-            
+
             if (fileBrowserLoader.status === Loader.Ready && fileBrowserLoader.item) {
                 Qt.callLater(() => {
                     if (fileBrowserLoader.item && typeof fileBrowserLoader.item.open === 'function') {
@@ -2195,7 +2176,7 @@ DarkModal {
                 })
             }
         } catch (error) {
-            console.error("[VpnAddModal] Error in openFileBrowser():", error, error.stack)
+
             pendingFileBrowserOpen = false
         }
     }
@@ -2210,43 +2191,43 @@ DarkModal {
         blockLoading: false
         atomicWrites: true
         printErrors: true
-        
+
         onLoaded: {
             try {
                 const content = text()
                 root.parseWireGuardConf(content)
             } catch (error) {
-                console.error("[VpnAddModal] Error parsing WireGuard conf:", error)
+
                 root.errorMessage = "Failed to parse configuration file: " + (error || "Unknown error")
             }
         }
-        
+
         onLoadFailed: (error) => {
-            console.error("[VpnAddModal] Failed to load WireGuard conf file:", error)
+
             root.importingFile = false
             root.errorMessage = "Failed to read configuration file: " + (error || "Unknown error")
         }
     }
-    
+
     FileView {
         id: openvpnConfFileView
         blockWrites: true
         blockLoading: false
         atomicWrites: true
         printErrors: true
-        
+
         onLoaded: {
             try {
                 const content = text()
                 root.parseOpenVPNConf(content)
             } catch (error) {
-                console.error("[VpnAddModal] Error parsing OpenVPN conf:", error)
+
                 root.errorMessage = "Failed to parse configuration file: " + (error || "Unknown error")
             }
         }
-        
+
         onLoadFailed: (error) => {
-            console.error("[VpnAddModal] Failed to load OpenVPN conf file:", error)
+
             root.importingFile = false
             root.errorMessage = "Failed to read configuration file: " + (error || "Unknown error")
         }
@@ -2272,10 +2253,10 @@ DarkModal {
                 }
             }
         }
-        
+
         stderr: StdioCollector {
         }
-        
+
         property string importedConnectionId: ""
 
         onStarted: {
@@ -2295,28 +2276,28 @@ DarkModal {
                         }
                         root.close()
                     } catch (error) {
-                        console.error("[VpnAddModal] Error after successful import:", error, error.stack)
+
                     }
                 }
             } else {
-                console.error("[VpnAddModal] Import failed with exit code:", exitCode)
+
                 root.importingFile = false
                 const errorMsg = importProcess.stderr.text || "Failed to import configuration file"
                 root.errorMessage = errorMsg
             }
         }
     }
-    
+
     Process {
         id: findImportedConnection
         running: false
         command: []
-        
+
         onStarted: {
             const vpnType = root.pendingImportType === "wireguard" ? "wireguard" : "vpn"
             command = ["bash", "-c", `nmcli -t -f NAME,UUID,TYPE connection show | grep ':${vpnType}$' | tail -1 | cut -d: -f2`]
         }
-        
+
         stdout: StdioCollector {
             onStreamFinished: {
                 const uuid = text.trim()
@@ -2333,7 +2314,7 @@ DarkModal {
                 }
             }
         }
-        
+
         onExited: exitCode => {
             if (exitCode !== 0) {
                 root.importingFile = false
@@ -2345,12 +2326,12 @@ DarkModal {
             }
         }
     }
-    
+
     Process {
         id: renameConnectionProcess
         running: false
         command: []
-        
+
         onExited: exitCode => {
             root.importingFile = false
             if (exitCode === 0) {
@@ -2373,8 +2354,6 @@ DarkModal {
         id: generateKeysProcess
         running: false
         command: ["wg", "genkey"]
-
-
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -2382,7 +2361,7 @@ DarkModal {
                     generatePubkeyProcess.command = ["sh", "-c", "echo '" + root.wireguardPrivateKey + "' | wg pubkey"]
                     generatePubkeyProcess.running = true
                 } catch (error) {
-                    console.error("[VpnAddModal] Error processing private key:", error, error.stack)
+
                     root.generatingKeys = false
                     root.errorMessage = "Error processing keys: " + error.toString()
                 }
@@ -2400,15 +2379,13 @@ DarkModal {
         id: generatePubkeyProcess
         running: false
         command: []
-
-
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
                     root.wireguardPublicKey = text.trim()
                     root.generatingKeys = false
                 } catch (error) {
-                    console.error("[VpnAddModal] Error processing public key:", error, error.stack)
+
                     root.generatingKeys = false
                     root.errorMessage = "Error processing public key: " + error.toString()
                 }
@@ -2429,37 +2406,37 @@ DarkModal {
         property string configContent: ""
         property string tempPath: ""
         property string connectionName: ""
-        
+
         stderr: StdioCollector {
             onStreamFinished: {
                 if (text.trim()) {
-                    console.error("[VpnAddModal] createTempWireGuardConfig stderr:", text)
+
                 }
             }
         }
-        
+
         stdout: StdioCollector {
         }
-        
+
         onExited: exitCode => {
             if (exitCode === 0) {
                 importWireGuardFromTemp.tempPath = createTempWireGuardConfig.tempPath
                 importWireGuardFromTemp.connectionName = createTempWireGuardConfig.connectionName
-                
+
                 const wg0Path = "/tmp/wg0.conf"
                 const escapedTempPath = createTempWireGuardConfig.tempPath.replace(/'/g, "'\\''")
                 const escapedWg0Path = wg0Path.replace(/'/g, "'\\''")
                 importWireGuardFromTemp.command = ["bash", "-c", `cp '${escapedTempPath}' '${escapedWg0Path}' && nmcli connection import type wireguard file '${escapedWg0Path}'`]
-                
+
                 importWireGuardFromTemp.running = true
             } else {
-                console.error("[VpnAddModal] Failed to create temp config file, exit code:", exitCode)
+
                 root.importingFile = false
                 root.errorMessage = "Failed to create temporary configuration file. Exit code: " + exitCode
             }
         }
     }
-    
+
     Process {
         id: importWireGuardFromTemp
         running: false
@@ -2467,15 +2444,15 @@ DarkModal {
         property string tempPath: ""
         property string connectionName: ""
         property string importedConnectionId: ""
-        
+
         stderr: StdioCollector {
             onStreamFinished: {
                 if (text.trim()) {
-                    console.error("[VpnAddModal] importWireGuardFromTemp stderr:", text)
+
                 }
             }
         }
-        
+
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.trim()) {
@@ -2494,9 +2471,9 @@ DarkModal {
                 }
             }
         }
-        
+
         property string importedConnectionName: ""
-        
+
         onExited: exitCode => {
             if (tempPath) {
                 cleanupTempFile.path = tempPath
@@ -2504,7 +2481,7 @@ DarkModal {
             }
             cleanupTempFile2.path = "/tmp/wg0.conf"
             cleanupTempFile2.running = true
-            
+
             if (exitCode === 0) {
                 if (importedConnectionId) {
                     renameImportedWireGuard.connectionName = connectionName
@@ -2519,13 +2496,13 @@ DarkModal {
                     renameImportedWireGuard.running = true
                 }
             } else {
-                console.error("[VpnAddModal] Failed to import WireGuard config, exit code:", exitCode)
+
                 root.importingFile = false
                 root.errorMessage = "Failed to import WireGuard configuration. Check console for details."
             }
         }
     }
-    
+
     Process {
         id: renameImportedWireGuard
         running: false
@@ -2533,15 +2510,15 @@ DarkModal {
         property string connectionName: ""
         property string importedConnectionId: ""
         property string importedConnectionName: ""
-        
+
         stderr: StdioCollector {
             onStreamFinished: {
                 if (text.trim()) {
-                    console.error("[VpnAddModal] renameImportedWireGuard stderr:", text)
+
                 }
             }
         }
-        
+
         onStarted: {
             const escapedName = connectionName.replace(/'/g, "'\\''")
             if (importedConnectionId) {
@@ -2553,7 +2530,7 @@ DarkModal {
                 command = ["bash", "-c", `wg_connections=$(nmcli -t -f UUID,NAME,TYPE connection show | grep ':wireguard$' | grep -E '^[^:]+:(wg[0-9]+|wg0):wireguard$'); if [ -n "$wg_connections" ]; then most_recent=$(echo "$wg_connections" | tail -1); uuid=$(echo "$most_recent" | cut -d: -f1); nmcli connection modify uuid "$uuid" connection.id '${escapedName}'; else all_wg=$(nmcli -t -f UUID,NAME,TYPE connection show | grep ':wireguard$'); if [ -z "$all_wg" ]; then echo "Connection not found"; exit 1; fi; most_recent_uuid=$(echo "$all_wg" | tail -1 | cut -d: -f1); nmcli connection modify uuid "$most_recent_uuid" connection.id '${escapedName}'; fi`]
             }
         }
-        
+
         onExited: exitCode => {
             if (exitCode === 0) {
                 applyWireGuardSettings.connectionName = connectionName
@@ -2564,22 +2541,22 @@ DarkModal {
             }
         }
     }
-    
+
     Process {
         id: applyWireGuardSettings
         running: false
         command: []
         property string connectionName: ""
-        
+
         onStarted: {
             let cmd = ["nmcli", "connection", "modify", connectionName]
             let hasChanges = false
-            
+
             if (root.wireguardMTU.trim()) {
                 cmd.push("wireguard.mtu", root.wireguardMTU.trim())
                 hasChanges = true
             }
-            
+
             if (root.wireguardDNS.trim()) {
                 function splitDNS(dnsString) {
                     const dnsServers = dnsString.split(',').map(dns => dns.trim()).filter(dns => dns)
@@ -2594,7 +2571,7 @@ DarkModal {
                     }
                     return { ipv4: ipv4.join(','), ipv6: ipv6.join(',') }
                 }
-                
+
                 const dns = splitDNS(root.wireguardDNS.trim())
                 if (dns.ipv4) {
                     cmd.push("ipv4.dns", dns.ipv4)
@@ -2605,14 +2582,14 @@ DarkModal {
                     hasChanges = true
                 }
             }
-            
+
             if (hasChanges) {
                 command = cmd
             } else {
                 command = ["true"]
             }
         }
-        
+
         onExited: exitCode => {
             root.importingFile = false
             if (exitCode === 0) {
@@ -2623,7 +2600,7 @@ DarkModal {
                     }
                     root.close()
                 } catch (error) {
-                    console.error("[VpnAddModal] Error after successful connection add:", error, error.stack)
+
                 }
             } else {
                 ToastService.showInfo("VPN connection added (some settings may need manual configuration)")
@@ -2634,32 +2611,27 @@ DarkModal {
             }
         }
     }
-    
+
     Process {
         id: cleanupTempFile
         running: false
         command: []
         property string path: ""
-        
+
         onStarted: {
             command = ["rm", "-f", path]
         }
-        
-        onExited: exitCode => {
-        }
+
     }
-    
+
     Process {
         id: cleanupTempFile2
         running: false
         command: []
         property string path: ""
-        
+
         onStarted: {
             command = ["rm", "-f", path]
-        }
-        
-        onExited: exitCode => {
         }
     }
 
@@ -2677,10 +2649,8 @@ DarkModal {
                     }
                     root.close()
                 } catch (error) {
-                    console.error("[VpnAddModal] Error after successful connection add:", error, error.stack)
                 }
             } else {
-                console.error("[VpnAddModal] Connection add failed with exit code:", exitCode)
                 root.errorMessage = "Failed to add VPN connection. Check your configuration."
             }
         }

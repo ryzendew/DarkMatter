@@ -52,7 +52,6 @@ Item {
         width: parent.width
         spacing: Theme.spacingL
 
-        // Output Applications Section
         StyledRect {
             width: parent.width
             height: outputSection.implicitHeight + Theme.spacingL * 2
@@ -235,12 +234,11 @@ Item {
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.surfaceVariantText
                     visible: (ApplicationAudioService.applicationStreams || []).length === 0
-                    anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
         }
 
-        // Input Applications Section
+
         StyledRect {
             width: parent.width
             height: inputSection.implicitHeight + Theme.spacingL * 2
@@ -423,7 +421,6 @@ Item {
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.surfaceVariantText
                     visible: (ApplicationAudioService.applicationInputStreams || []).length === 0
-                    anchors.horizontalCenter: parent.horizontalCenter
                 }
             }
         }

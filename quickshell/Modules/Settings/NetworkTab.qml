@@ -12,14 +12,14 @@ Item {
     id: networkTab
 
     property var parentModal: null
-    
+
     property bool dnsMethodAuto: true
-    
+
     property int ipv4MethodIndex: 0
     property int ipv6MethodIndex: 0
-    
+
     property int proxyMethodIndex: 0
-    
+
     property int macAddressIndex: 0
 
     ConnectionEditModal {
@@ -112,7 +112,6 @@ Item {
                             text: "WiFi"
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
-                            
                             Layout.alignment: Qt.AlignVCenter
                         }
 
@@ -168,7 +167,6 @@ Item {
                                 StyledText {
                                     text: "Connected to:"
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
                                     opacity: 0.7
                                 }
 
@@ -179,40 +177,40 @@ Item {
                                     color: Theme.primary
                                 }
 
-
                                 StyledText {
                                     text: "Signal: " + NetworkService.wifiSignalStrength + "%"
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
                                 }
                             }
 
-                            Row {
+                            RowLayout {
                                 width: parent.width
                                 spacing: Theme.spacingM
 
                                 StyledText {
                                     text: "IP: " + (NetworkService.wifiIP || "Not assigned")
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
                                 }
 
+                                Item {
+                                    Layout.fillWidth: true
+                                }
 
                                 Rectangle {
-                                    // TextMetrics to calculate button size
+
                                     TextMetrics {
                                         id: wifiDisconnectTextMetrics
                                         font.pixelSize: Theme.fontSizeSmall
                                         text: "Disconnect"
                                     }
-                                    
+
                                     implicitWidth: wifiDisconnectTextMetrics.width + Theme.spacingS * 2
                                     implicitHeight: Math.max(wifiDisconnectTextMetrics.height, 28) + Theme.spacingS * 2
                                     width: implicitWidth
                                     height: implicitHeight
                                     radius: Theme.cornerRadius * 0.5
                                     color: Theme.error
-                                    anchors.verticalCenter: parent.verticalCenter
+                                    Layout.alignment: Qt.AlignVCenter
 
                                     StyledText {
                                         anchors.left: parent.left
@@ -247,7 +245,6 @@ Item {
                             text: "Available Networks"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
                         }
 
                         Rectangle {
@@ -306,7 +303,7 @@ Item {
                                     border.width: modelData.ssid === NetworkService.currentWifiSSID ? 2 : 0
                                     border.color: Theme.primary
 
-                                    Row {
+                                    RowLayout {
                                         anchors.fill: parent
                                         anchors.margins: Theme.spacingS
                                         spacing: Theme.spacingM
@@ -314,19 +311,17 @@ Item {
                                         DarkIcon {
                                             name: modelData.secured ? "lock" : "lock_open"
                                             size: 20
-                                            
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
                                         Column {
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
                                             spacing: 2
 
                                             StyledText {
                                                 text: modelData.ssid || "Unknown"
                                                 font.pixelSize: Theme.fontSizeMedium
                                                 font.weight: Font.Medium
-                                                
                                             }
 
                                             Row {
@@ -350,31 +345,32 @@ Item {
                                                 StyledText {
                                                     text: modelData.signal ? modelData.signal + "%" : ""
                                                     font.pixelSize: Theme.fontSizeSmall
-                                                    
                                                     opacity: 0.7
                                                     anchors.verticalCenter: parent.verticalCenter
                                                 }
                                             }
                                         }
 
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
 
                                         Rectangle {
                                             property string buttonText: modelData.ssid === NetworkService.currentWifiSSID ? "Connected" : "Connect"
-                                            
-                                            // TextMetrics to calculate button size
+
                                             TextMetrics {
                                                 id: wifiConnectTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 text: buttonText
                                             }
-                                            
+
                                             implicitWidth: wifiConnectTextMetrics.width + Theme.spacingS * 2
                                             implicitHeight: Math.max(wifiConnectTextMetrics.height, 28) + Theme.spacingS * 2
                                             width: implicitWidth
                                             height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
                                             color: modelData.ssid === NetworkService.currentWifiSSID ? Theme.primaryContainer : Theme.primary
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
 
                                             StyledText {
                                                 anchors.left: parent.left
@@ -411,9 +407,8 @@ Item {
                             StyledText {
                                 text: "No networks found"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 opacity: 0.5
-                                anchors.horizontalCenter: parent.horizontalCenter
                                 visible: !NetworkService.isScanning && (!NetworkService.wifiNetworks || NetworkService.wifiNetworks.length === 0)
                             }
                         }
@@ -469,7 +464,7 @@ Item {
                             text: "Saved Networks"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
+
                         }
 
                         Column {
@@ -493,7 +488,7 @@ Item {
                                         DarkIcon {
                                             name: "wifi"
                                             size: 18
-                                            
+
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
 
@@ -504,16 +499,16 @@ Item {
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
 
-                                        Item { width: 1; height: 1 }
+                                        Item { Layout.fillWidth: true }
 
                                         Rectangle {
-                                            // TextMetrics to calculate button size
+
                                             TextMetrics {
                                                 id: savedWifiEditTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 text: "Edit"
                                             }
-                                            
+
                                             implicitWidth: savedWifiEditTextMetrics.width + Theme.spacingS * 2
                                             implicitHeight: Math.max(savedWifiEditTextMetrics.height, 24) + Theme.spacingS * 2
                                             width: implicitWidth
@@ -601,7 +596,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -609,15 +604,18 @@ Item {
                             name: "cable"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
                             text: "Ethernet"
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
-                            
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
                         }
                     }
 
@@ -641,7 +639,6 @@ Item {
                                 StyledText {
                                     text: "Interface:"
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
                                     opacity: 0.7
                                 }
 
@@ -652,35 +649,35 @@ Item {
                                     color: Theme.primary
                                 }
 
-
                                 StyledText {
                                     text: "IP: " + (NetworkService.ethernetIP || "Not assigned")
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
                                 }
                             }
 
-                            Row {
+                            RowLayout {
                                 width: parent.width
                                 spacing: Theme.spacingM
 
-                                Item { width: 1; height: 1 }
+                                Item {
+                                    Layout.fillWidth: true
+                                }
 
                                 Rectangle {
-                                    // TextMetrics to calculate button size
+
                                     TextMetrics {
                                         id: ethernetEditTextMetrics
                                         font.pixelSize: Theme.fontSizeSmall
                                         text: "Edit"
                                     }
-                                    
+
                                     implicitWidth: ethernetEditTextMetrics.width + Theme.spacingS * 2
                                     implicitHeight: Math.max(ethernetEditTextMetrics.height, 28) + Theme.spacingS * 2
                                     width: implicitWidth
                                     height: implicitHeight
                                     radius: Theme.cornerRadius * 0.5
                                     color: Theme.primaryContainer
-                                    anchors.verticalCenter: parent.verticalCenter
+                                    Layout.alignment: Qt.AlignVCenter
 
                                     StyledText {
                                         anchors.left: parent.left
@@ -708,13 +705,13 @@ Item {
                                 }
 
                                 Rectangle {
-                                    // TextMetrics to calculate button size
+
                                     TextMetrics {
                                         id: ethernetDisconnectTextMetrics
                                         font.pixelSize: Theme.fontSizeSmall
                                         text: "Disconnect"
                                     }
-                                    
+
                                     implicitWidth: ethernetDisconnectTextMetrics.width + Theme.spacingS * 2
                                     implicitHeight: Math.max(ethernetDisconnectTextMetrics.height, 28) + Theme.spacingS * 2
                                     width: implicitWidth
@@ -750,7 +747,7 @@ Item {
                     StyledText {
                         text: NetworkService.ethernetConnected ? "Ethernet connected" : "No ethernet connection"
                         font.pixelSize: Theme.fontSizeSmall
-                        
+
                         opacity: 0.7
                         visible: !NetworkService.ethernetConnected
                     }
@@ -771,7 +768,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -779,25 +776,26 @@ Item {
                             name: "vpn_key"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
                             text: "VPN"
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
-                            
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
-                        Item { width: 1; height: 1 }
+                        Item {
+                            Layout.fillWidth: true
+                        }
 
                         Rectangle {
                             width: 100
                             height: 32
                             radius: Theme.cornerRadius * 0.5
                             color: addVpnMouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
 
                             Row {
                                 anchors.centerIn: parent
@@ -842,7 +840,6 @@ Item {
                             text: "Active Connections"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
                         }
 
                         Repeater {
@@ -862,7 +859,7 @@ Item {
                                     anchors.margins: Theme.spacingS
                                     spacing: Theme.spacingS
 
-                                    Row {
+                                    RowLayout {
                                         width: parent.width
                                         spacing: Theme.spacingM
 
@@ -870,19 +867,18 @@ Item {
                                             name: "vpn_key"
                                             size: 20
                                             color: Theme.primary
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
                                         Column {
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
+                                            Layout.fillWidth: true
                                             spacing: 2
-                                            width: parent.width - disconnectVpnButton.implicitWidth - Theme.spacingM * 3
 
                                             StyledText {
                                                 text: modelData.name || "Unknown"
                                                 font.pixelSize: Theme.fontSizeMedium
                                                 font.weight: Font.Medium
-                                                
                                             }
 
                                             Row {
@@ -892,14 +888,12 @@ Item {
                                                 StyledText {
                                                     text: "State: " + (modelData.state || "unknown")
                                                     font.pixelSize: Theme.fontSizeSmall
-                                                    
                                                     opacity: 0.7
                                                 }
 
                                                 StyledText {
                                                     text: VpnService && modelData.uuid ? " • " + VpnService.getConnectionDuration(modelData.uuid) : ""
                                                     font.pixelSize: Theme.fontSizeSmall
-                                                    
                                                     opacity: 0.7
                                                     visible: text !== ""
                                                 }
@@ -917,14 +911,12 @@ Item {
                                                 StyledText {
                                                     text: "IP: " + (VpnService ? VpnService.getConnectionDetails(modelData.uuid).ipv4 : "")
                                                     font.pixelSize: Theme.fontSizeSmall
-                                                    
                                                     opacity: 0.6
                                                 }
 
                                                 StyledText {
                                                     text: "DNS: " + (VpnService ? VpnService.getConnectionDetails(modelData.uuid).dns : "")
                                                     font.pixelSize: Theme.fontSizeSmall
-                                                    
                                                     opacity: 0.6
                                                     visible: text !== "DNS: "
                                                 }
@@ -934,21 +926,20 @@ Item {
                                         Rectangle {
                                             id: disconnectVpnButton
                                             property bool isHovered: disconnectVpnMouseArea.containsMouse
-                                            
-                                            // TextMetrics to calculate button size
+
                                             TextMetrics {
                                                 id: vpnDisconnectTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 text: "Disconnect"
                                             }
-                                            
+
                                             implicitWidth: vpnDisconnectTextMetrics.width + Theme.spacingS * 2
                                             implicitHeight: Math.max(vpnDisconnectTextMetrics.height, 28) + Theme.spacingS * 2
                                             width: implicitWidth
                                             height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
                                             color: isHovered ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.8) : Theme.error
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
 
                                             StyledText {
                                                 anchors.left: parent.left
@@ -958,7 +949,6 @@ Item {
                                                 anchors.rightMargin: Theme.spacingS
                                                 text: "Disconnect"
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                // Use appropriate text color based on error background brightness
                                                 color: {
                                                     const err = Theme.error
                                                     const brightness = 0.299 * err.r + 0.587 * err.g + 0.114 * err.b
@@ -993,7 +983,6 @@ Item {
                             text: "VPN Profiles"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
                         }
 
                         Column {
@@ -1005,33 +994,37 @@ Item {
 
                                 Rectangle {
                                     width: parent.width
-                                    height: 48
+                                    height: vpnProfileLayout.implicitHeight + 8
                                     radius: Theme.cornerRadius * 0.5
                                     color: vpnProfileMouseArea.containsMouse ? Theme.surfaceHover : Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.5)
                                     border.width: VpnService && VpnService.isActiveUuid(modelData.uuid) ? 2 : 0
                                     border.color: Theme.primary
 
-                                    Row {
-                                        anchors.fill: parent
-                                        anchors.margins: Theme.spacingS
+                                    RowLayout {
+                                        id: vpnProfileLayout
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.top: parent.top
+                                        anchors.leftMargin: 4
+                                        anchors.rightMargin: 4
+                                        anchors.topMargin: 4
                                         spacing: Theme.spacingM
 
                                         DarkIcon {
                                             name: "vpn_key"
                                             size: 20
-                                            
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
                                         Column {
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
+                                            Layout.fillWidth: true
                                             spacing: 2
 
                                             StyledText {
                                                 text: modelData.name || "Unknown"
                                                 font.pixelSize: Theme.fontSizeMedium
                                                 font.weight: Font.Medium
-                                                
                                             }
 
                                             Row {
@@ -1040,36 +1033,34 @@ Item {
                                                 StyledText {
                                                     text: modelData.type || "vpn"
                                                     font.pixelSize: Theme.fontSizeSmall
-                                                    
                                                     opacity: 0.7
                                                 }
 
                                                 StyledText {
                                                     text: modelData.serviceType ? " • " + modelData.serviceType : ""
                                                     font.pixelSize: Theme.fontSizeSmall
-                                                    
                                                     opacity: 0.7
                                                 }
                                             }
                                         }
 
-                                        Item { width: 1; height: 1 }
+                                        Item { Layout.fillWidth: true }
 
                                         Rectangle {
-                                            // TextMetrics to calculate button size
+
                                             TextMetrics {
                                                 id: vpnEditTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 text: "Edit"
                                             }
-                                            
+
                                             implicitWidth: vpnEditTextMetrics.width + Theme.spacingS * 2
                                             implicitHeight: Math.max(vpnEditTextMetrics.height, 28) + Theme.spacingS * 2
                                             width: implicitWidth
                                             height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
                                             color: vpnEditMouseArea.containsMouse ? Theme.primaryContainer : Theme.surfaceContainer
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
 
                                             StyledText {
                                                 anchors.left: parent.left
@@ -1103,7 +1094,7 @@ Item {
                                             iconName: "delete"
                                             iconSize: 16
                                             iconColor: Theme.error
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
                                             visible: !(VpnService && VpnService.isActiveUuid(modelData.uuid))
                                             onClicked: {
                                                 deleteVpnConnection(modelData.uuid, modelData.name)
@@ -1113,21 +1104,20 @@ Item {
                                         Rectangle {
                                             id: vpnConnectButton
                                             property string buttonText: VpnService && VpnService.isActiveUuid(modelData.uuid) ? "Connected" : "Connect"
-                                            
-                                            // TextMetrics to calculate button size
+
                                             TextMetrics {
                                                 id: vpnConnectTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 text: vpnConnectButton.buttonText
                                             }
-                                            
+
                                             implicitWidth: vpnConnectTextMetrics.width + Theme.spacingS * 2
                                             implicitHeight: Math.max(vpnConnectTextMetrics.height, 28) + Theme.spacingS * 2
                                             width: implicitWidth
                                             height: implicitHeight
                                             radius: Theme.cornerRadius * 0.5
                                             color: VpnService && VpnService.isActiveUuid(modelData.uuid) ? Theme.primaryContainer : Theme.primary
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
 
                                             StyledText {
                                                 anchors.left: parent.left
@@ -1164,9 +1154,8 @@ Item {
                             StyledText {
                                 text: "No VPN profiles configured"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 opacity: 0.5
-                                anchors.horizontalCenter: parent.horizontalCenter
                                 visible: !VpnService || !VpnService.profiles || VpnService.profiles.length === 0
                             }
                         }
@@ -1203,7 +1192,7 @@ Item {
                             text: "DNS Configuration"
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
-                            
+
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -1215,7 +1204,7 @@ Item {
                         StyledText {
                             text: "DNS Method:"
                             font.pixelSize: Theme.fontSizeMedium
-                            
+
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
@@ -1239,14 +1228,14 @@ Item {
 
                                     Rectangle {
                                         property bool isSelected: (index === 0 && networkTab.dnsMethodAuto) || (index === 1 && !networkTab.dnsMethodAuto)
-                                        
-                                        // TextMetrics to calculate button size
+
+
                                         TextMetrics {
                                             id: dnsButtonTextMetrics
                                             font.pixelSize: Theme.fontSizeSmall
                                             text: modelData
                                         }
-                                        
+
                                         implicitWidth: dnsButtonTextMetrics.width + Theme.spacingS * 2
                                         implicitHeight: Math.max(dnsButtonTextMetrics.height, 32) + Theme.spacingS * 2
                                         width: implicitWidth
@@ -1278,7 +1267,7 @@ Item {
                             }
                         }
 
-                        Item { width: 1; height: 1 }
+                        Item { Layout.fillWidth: true }
                     }
 
                     Column {
@@ -1290,7 +1279,7 @@ Item {
                             text: "DNS Servers"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
+
                         }
 
                         Row {
@@ -1300,7 +1289,7 @@ Item {
                             StyledText {
                                 text: "Primary:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 80
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -1334,7 +1323,7 @@ Item {
                             StyledText {
                                 text: "Secondary:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 80
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -1368,7 +1357,7 @@ Item {
                             StyledText {
                                 text: "Presets:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
@@ -1382,14 +1371,14 @@ Item {
 
                                 Rectangle {
                                     property bool isHovered: dnsPresetMouseArea.containsMouse
-                                    
-                                    // TextMetrics to calculate button size
+
+
                                     TextMetrics {
                                         id: dnsPresetTextMetrics
                                         font.pixelSize: Theme.fontSizeSmall
                                         text: modelData.name
                                     }
-                                    
+
                                     implicitWidth: dnsPresetTextMetrics.width + Theme.spacingS * 2
                                     implicitHeight: Math.max(dnsPresetTextMetrics.height, 28) + Theme.spacingS * 2
                                     width: implicitWidth
@@ -1424,13 +1413,13 @@ Item {
                         }
 
                         Rectangle {
-                            // TextMetrics to calculate button size
+
                             TextMetrics {
                                 id: applyDnsTextMetrics
                                 font.pixelSize: Theme.fontSizeSmall
                                 text: "Apply"
                             }
-                            
+
                             implicitWidth: applyDnsTextMetrics.width + Theme.spacingS * 2
                             implicitHeight: Math.max(applyDnsTextMetrics.height, 32) + Theme.spacingS * 2
                             width: implicitWidth
@@ -1460,7 +1449,7 @@ Item {
                                     if (primaryDnsInput.text.trim()) {
                                         NetworkService.setDnsServers("", primaryDnsInput.text.trim(), secondaryDnsInput.text.trim())
                                     } else {
-                                        const connectionName = NetworkService.networkStatus === "wifi" ? NetworkService.wifiConnectionUuid : 
+                                        const connectionName = NetworkService.networkStatus === "wifi" ? NetworkService.wifiConnectionUuid :
                                                                NetworkService.networkStatus === "ethernet" ? NetworkService.ethernetConnectionUuid : ""
                                         if (connectionName) {
                                             Quickshell.execDetached(["nmcli", "connection", "modify", connectionName, "ipv4.dns", "", "ipv4.dns-search", ""])
@@ -1503,7 +1492,7 @@ Item {
                             text: "IP Configuration"
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
-                            
+
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -1516,7 +1505,7 @@ Item {
                             text: "IPv4"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
+
                         }
 
                         Row {
@@ -1526,7 +1515,7 @@ Item {
                             StyledText {
                                 text: "Method:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 100
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -1554,15 +1543,15 @@ Item {
                                         Rectangle {
                                             property bool isSelected: networkTab.ipv4MethodIndex === index
                                             property bool isHovered: buttonMouseArea.containsMouse
-                                            
-                                            // TextMetrics to calculate button size
+
+
                                             TextMetrics {
                                                 id: buttonTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 font.weight: isSelected ? Font.Medium : Font.Normal
                                                 text: modelData
                                             }
-                                            
+
                                             implicitWidth: buttonTextMetrics.width + Theme.spacingS * 2
                                             implicitHeight: Math.max(buttonTextMetrics.height, 32) + Theme.spacingS * 2
                                             width: implicitWidth
@@ -1604,7 +1593,7 @@ Item {
                                 }
                             }
 
-                            Item { width: 1; height: 1 }
+                            Item { Layout.fillWidth: true }
                         }
 
                         Column {
@@ -1619,7 +1608,7 @@ Item {
                                 StyledText {
                                     text: "IP Address:"
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
+
                                     width: 100
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
@@ -1653,7 +1642,7 @@ Item {
                                 StyledText {
                                     text: "Gateway:"
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
+
                                     width: 100
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
@@ -1672,7 +1661,7 @@ Item {
                                         anchors.fill: parent
                                         anchors.margins: Theme.spacingS
                                         font.pixelSize: Theme.fontSizeSmall
-                                        
+
                                         placeholderText: "192.168.1.1"
                                     background: Rectangle {
                                         color: "transparent"
@@ -1682,13 +1671,13 @@ Item {
                             }
 
                             Rectangle {
-                                // TextMetrics to calculate button size
+
                                 TextMetrics {
                                     id: applyIpv4TextMetrics
                                     font.pixelSize: Theme.fontSizeSmall
                                     text: "Apply"
                                 }
-                                
+
                                 implicitWidth: applyIpv4TextMetrics.width + Theme.spacingS * 2
                                 implicitHeight: Math.max(applyIpv4TextMetrics.height, 32) + Theme.spacingS * 2
                                 width: implicitWidth
@@ -1715,7 +1704,7 @@ Item {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        const method = networkTab.ipv4MethodIndex === 0 ? "auto" : 
+                                        const method = networkTab.ipv4MethodIndex === 0 ? "auto" :
                                                       networkTab.ipv4MethodIndex === 1 ? "manual" : "link-local"
                                         const address = networkTab.ipv4MethodIndex === 1 ? ipv4AddressInput.text.trim() : ""
                                         const gateway = networkTab.ipv4MethodIndex === 1 ? ipv4GatewayInput.text.trim() : ""
@@ -1739,7 +1728,7 @@ Item {
                             text: "IPv6"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
+
                         }
 
                         Row {
@@ -1749,7 +1738,7 @@ Item {
                             StyledText {
                                 text: "Method:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 100
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -1777,15 +1766,15 @@ Item {
                                         Rectangle {
                                             property bool isSelected: networkTab.ipv6MethodIndex === index
                                             property bool isHovered: buttonMouseArea.containsMouse
-                                            
-                                            // TextMetrics to calculate button size
+
+
                                             TextMetrics {
                                                 id: buttonTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 font.weight: isSelected ? Font.Medium : Font.Normal
                                                 text: modelData
                                             }
-                                            
+
                                             implicitWidth: buttonTextMetrics.width + Theme.spacingS * 2
                                             implicitHeight: Math.max(buttonTextMetrics.height, 32) + Theme.spacingS * 2
                                             width: implicitWidth
@@ -1827,7 +1816,7 @@ Item {
                                 }
                             }
 
-                            Item { width: 1; height: 1 }
+                            Item { Layout.fillWidth: true }
                         }
 
                         Column {
@@ -1842,7 +1831,7 @@ Item {
                                 StyledText {
                                     text: "IPv6 Address:"
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
+
                                     width: 100
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
@@ -1861,7 +1850,7 @@ Item {
                                         anchors.fill: parent
                                         anchors.margins: Theme.spacingS
                                         font.pixelSize: Theme.fontSizeSmall
-                                        
+
                                         placeholderText: "2001:db8::1/64"
                                     background: Rectangle {
                                         color: "transparent"
@@ -1877,7 +1866,7 @@ Item {
                                 StyledText {
                                     text: "Gateway:"
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
+
                                     width: 100
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
@@ -1896,7 +1885,7 @@ Item {
                                         anchors.fill: parent
                                         anchors.margins: Theme.spacingS
                                         font.pixelSize: Theme.fontSizeSmall
-                                        
+
                                         placeholderText: "2001:db8::1"
                                     background: Rectangle {
                                         color: "transparent"
@@ -1906,13 +1895,13 @@ Item {
                             }
 
                             Rectangle {
-                                // TextMetrics to calculate button size
+
                                 TextMetrics {
                                     id: applyIpv6TextMetrics
                                     font.pixelSize: Theme.fontSizeSmall
                                     text: "Apply"
                                 }
-                                
+
                                 implicitWidth: applyIpv6TextMetrics.width + Theme.spacingS * 2
                                 implicitHeight: Math.max(applyIpv6TextMetrics.height, 32) + Theme.spacingS * 2
                                 width: implicitWidth
@@ -1939,7 +1928,7 @@ Item {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        const method = networkTab.ipv6MethodIndex === 0 ? "auto" : 
+                                        const method = networkTab.ipv6MethodIndex === 0 ? "auto" :
                                                       networkTab.ipv6MethodIndex === 1 ? "manual" : "ignore"
                                         const address = networkTab.ipv6MethodIndex === 1 ? ipv6AddressInput.text.trim() : ""
                                         const gateway = networkTab.ipv6MethodIndex === 1 ? ipv6GatewayInput.text.trim() : ""
@@ -1981,7 +1970,7 @@ Item {
                             text: "Proxy Configuration"
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
-                            
+
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -1993,7 +1982,7 @@ Item {
                         StyledText {
                             text: "Proxy Method:"
                             font.pixelSize: Theme.fontSizeMedium
-                            
+
                             anchors.verticalCenter: parent.verticalCenter
                         }
 
@@ -2017,14 +2006,14 @@ Item {
 
                                     Rectangle {
                                         property bool isSelected: networkTab.proxyMethodIndex === index
-                                        
-                                        // TextMetrics to calculate button size
+
+
                                         TextMetrics {
                                             id: proxyButtonTextMetrics
                                             font.pixelSize: Theme.fontSizeSmall
                                             text: modelData
                                         }
-                                        
+
                                         implicitWidth: proxyButtonTextMetrics.width + Theme.spacingS * 2
                                         implicitHeight: Math.max(proxyButtonTextMetrics.height, 32) + Theme.spacingS * 2
                                         width: implicitWidth
@@ -2056,7 +2045,7 @@ Item {
                             }
                         }
 
-                            Item { width: 1; height: 1 }
+                            Item { Layout.fillWidth: true }
                         }
 
                         Column {
@@ -2068,7 +2057,7 @@ Item {
                             text: "Proxy Servers"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
+
                         }
 
                         Row {
@@ -2214,7 +2203,7 @@ Item {
                             StyledText {
                                 text: "No Proxy For:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 120
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -2233,7 +2222,7 @@ Item {
                                     anchors.fill: parent
                                     anchors.margins: Theme.spacingS
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
+
                                     placeholderText: "localhost,127.0.0.1,*.local"
                                 background: Rectangle {
                                     color: "transparent"
@@ -2252,7 +2241,7 @@ Item {
                             text: "Automatic Proxy Configuration"
                             font.pixelSize: Theme.fontSizeMedium
                             font.weight: Font.Medium
-                            
+
                         }
 
                         Row {
@@ -2262,7 +2251,7 @@ Item {
                             StyledText {
                                 text: "PAC URL:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 100
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -2281,7 +2270,7 @@ Item {
                                     anchors.fill: parent
                                     anchors.margins: Theme.spacingS
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
+
                                     placeholderText: "http://proxy.example.com/proxy.pac"
                                 background: Rectangle {
                                     color: "transparent"
@@ -2291,13 +2280,13 @@ Item {
                         }
 
                         Rectangle {
-                            // TextMetrics to calculate button size
+
                             TextMetrics {
                                 id: applyProxyTextMetrics
                                 font.pixelSize: Theme.fontSizeSmall
                                 text: "Apply"
                             }
-                            
+
                             implicitWidth: applyProxyTextMetrics.width + Theme.spacingS * 2
                             implicitHeight: Math.max(applyProxyTextMetrics.height, 32) + Theme.spacingS * 2
                             width: implicitWidth
@@ -2324,15 +2313,15 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    const method = networkTab.proxyMethodIndex === 0 ? "none" : 
+                                    const method = networkTab.proxyMethodIndex === 0 ? "none" :
                                                   networkTab.proxyMethodIndex === 1 ? "manual" : "auto"
-                                    
+
                                     if (method === "manual") {
-                                        NetworkService.setProxyConfig("", method, 
-                                            httpProxyInput.text.trim(), 
-                                            httpsProxyInput.text.trim(), 
-                                            ftpProxyInput.text.trim(), 
-                                            socksProxyInput.text.trim(), 
+                                        NetworkService.setProxyConfig("", method,
+                                            httpProxyInput.text.trim(),
+                                            httpsProxyInput.text.trim(),
+                                            ftpProxyInput.text.trim(),
+                                            socksProxyInput.text.trim(),
                                             noProxyInput.text.trim())
                                     } else {
                                         NetworkService.setProxyConfig("", method, "", "", "", "", "")
@@ -2373,7 +2362,7 @@ Item {
                             text: "Advanced Settings"
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
-                            
+
                             anchors.verticalCenter: parent.verticalCenter
                         }
                     }
@@ -2389,7 +2378,7 @@ Item {
                             StyledText {
                                 text: "MTU:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 100
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -2408,7 +2397,7 @@ Item {
                                     anchors.fill: parent
                                     anchors.margins: Theme.spacingS
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
+
                                     placeholderText: "1500"
                                     validator: IntValidator { bottom: 576; top: 9000 }
                                 }
@@ -2417,22 +2406,22 @@ Item {
                             StyledText {
                                 text: "(576-9000, default: 1500)"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 opacity: 0.7
                                 anchors.verticalCenter: parent.verticalCenter
                             }
 
-                            Item { width: 1; height: 1 }
+                            Item { Layout.fillWidth: true }
                         }
 
                         Rectangle {
-                            // TextMetrics to calculate button size
+
                             TextMetrics {
                                 id: applyMtuTextMetrics
                                 font.pixelSize: Theme.fontSizeSmall
                                 text: "Apply"
                             }
-                            
+
                             implicitWidth: applyMtuTextMetrics.width + Theme.spacingS * 2
                             implicitHeight: Math.max(applyMtuTextMetrics.height, 32) + Theme.spacingS * 2
                             width: implicitWidth
@@ -2488,7 +2477,7 @@ Item {
                             StyledText {
                                 text: "MAC Address:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 100
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -2513,14 +2502,14 @@ Item {
 
                                         Rectangle {
                                             property bool isSelected: networkTab.macAddressIndex === index
-                                            
-                                            // TextMetrics to calculate button size
+
+
                                             TextMetrics {
                                                 id: macButtonTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 text: modelData
                                             }
-                                            
+
                                             implicitWidth: macButtonTextMetrics.width + Theme.spacingS * 2
                                             implicitHeight: Math.max(macButtonTextMetrics.height, 32) + Theme.spacingS * 2
                                             width: implicitWidth
@@ -2552,7 +2541,7 @@ Item {
                                 }
                             }
 
-                            Item { width: 1; height: 1 }
+                            Item { Layout.fillWidth: true }
                         }
 
                         Row {
@@ -2563,7 +2552,7 @@ Item {
                             StyledText {
                                 text: "Cloned MAC:"
                                 font.pixelSize: Theme.fontSizeSmall
-                                
+
                                 width: 100
                                 anchors.verticalCenter: parent.verticalCenter
                             }
@@ -2582,7 +2571,7 @@ Item {
                                     anchors.fill: parent
                                     anchors.margins: Theme.spacingS
                                     font.pixelSize: Theme.fontSizeSmall
-                                    
+
                                     placeholderText: "aa:bb:cc:dd:ee:ff"
                                 background: Rectangle {
                                     color: "transparent"
@@ -2592,13 +2581,13 @@ Item {
                         }
 
                         Rectangle {
-                            // TextMetrics to calculate button size
+
                             TextMetrics {
                                 id: applyMacTextMetrics
                                 font.pixelSize: Theme.fontSizeSmall
                                 text: "Apply"
                             }
-                            
+
                             implicitWidth: applyMacTextMetrics.width + Theme.spacingS * 2
                             implicitHeight: Math.max(applyMacTextMetrics.height, 32) + Theme.spacingS * 2
                             width: implicitWidth
@@ -2642,7 +2631,7 @@ Item {
     Process {
         id: findEthernetConnection
         running: false
-        command: ["bash", "-c", 
+        command: ["bash", "-c",
             "ETH_CONN=$(nmcli -t -f NAME,UUID connection show | grep ':802-3-ethernet$' | cut -d: -f1 | head -1); " +
             "ETH_UUID=$(nmcli -t -f NAME,UUID connection show | grep ':802-3-ethernet$' | cut -d: -f2 | head -1); " +
             "if [ -n \"$ETH_CONN\" ]; then echo \"$ETH_CONN:$ETH_UUID\"; fi"

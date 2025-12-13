@@ -90,24 +90,24 @@ Item {
             enumerateFonts()
             fontsEnumerated = true
         }
-        
+
         if (typeof ColorPaletteService !== 'undefined') {
-            
+
             ColorPaletteService.customThemeCreated.connect(function(themeData) {
                 if (typeof Theme !== 'undefined') {
                     Theme.customThemeData = themeData
-                    
+
                     Theme.switchTheme("custom", true, false) // Save prefs, no transition
-                    
+
                     Theme.generateSystemThemesFromCurrentTheme()
                 } else {
                 }
             })
-            
+
             ColorPaletteService.colorsExtracted.connect(function() {
                 themeColorsTab.forceUpdate = !themeColorsTab.forceUpdate
             })
-            
+
             ColorPaletteService.themesUpdated.connect(function() {
                 themeColorsTab.forceUpdate = !themeColorsTab.forceUpdate
             })
@@ -151,7 +151,6 @@ Item {
 
                 Column {
                     id: mainColumn
-
                     width: parent.width
                     spacing: Theme.spacingXL
 
@@ -219,7 +218,6 @@ Item {
                     Column {
                         width: parent.width
                         spacing: Theme.spacingS
-                        anchors.horizontalCenter: parent.horizontalCenter
 
                         StyledText {
                             text: {
@@ -234,7 +232,6 @@ Item {
                             font.pixelSize: Theme.fontSizeMedium
                             color: Theme.primary
                             font.weight: Font.Medium
-                            anchors.horizontalCenter: parent.horizontalCenter
                         }
                     }
 
@@ -253,7 +250,6 @@ Item {
                             model: ["Generic", "Catppuccin", "Auto", "Custom"]
                             currentIndex: currentThemeIndex
                             selectionMode: "single"
-                            anchors.horizontalCenter: parent.horizontalCenter
                             onSelectionChanged: (index, selected) => {
                                 if (!selected) return
                                 switch (index) {
@@ -292,10 +288,9 @@ Item {
                                 radius: Theme.cornerRadius
                                 color: isEnabled ? (isPressed ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.16) : (isHovered ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.1))) : Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.3)
                                 opacity: isEnabled ? 1.0 : 0.5
-                                anchors.horizontalCenter: parent.horizontalCenter
                                 border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, isEnabled ? (isHovered ? 0.2 : 0.15) : 0.1)
                                 border.width: 1
-                                
+
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: Theme.shortDuration
@@ -309,7 +304,7 @@ Item {
                                         easing.type: Theme.standardEasing
                                     }
                                 }
-                                
+
                                 Rectangle {
                                     id: extractStateLayer
                                     anchors.fill: parent
@@ -325,7 +320,7 @@ Item {
                                         }
                                     }
                                 }
-                                
+
                                 Item {
                                     anchors.centerIn: parent
                                     width: extractContentRow.implicitWidth
@@ -353,7 +348,7 @@ Item {
                                         }
                                     }
                                 }
-                                
+
                                 MouseArea {
                                     id: extractMouseArea
                                     anchors.fill: parent
@@ -378,12 +373,10 @@ Item {
                                     font.pixelSize: Theme.fontSizeMedium
                                     font.weight: Font.Medium
                                     color: Theme.surfaceText
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                 }
 
                                 Row {
                                     spacing: Theme.spacingM
-                                    anchors.horizontalCenter: parent.horizontalCenter
 
                                     Rectangle {
                                         width: 220
@@ -491,7 +484,6 @@ Item {
                                     border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.12)
                                     border.width: 1
                                     visible: false
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                     layer.enabled: true
                                     layer.smooth: true
 
@@ -565,7 +557,6 @@ Item {
                                     font.pixelSize: Theme.fontSizeMedium
                                     font.weight: Font.Medium
                                     color: Theme.surfaceText
-                                    anchors.horizontalCenter: parent.horizontalCenter
                                     visible: {
                                         if (ColorPaletteService.extractedColors.length > 0) {
                                             return ColorPaletteService.extractedColors.length > 0
@@ -577,8 +568,8 @@ Item {
                                 Grid {
                                     id: colorGrid
                                     columns: {
-                                        var colors = ColorPaletteService.extractedColors.length > 0 ? 
-                                                    ColorPaletteService.extractedColors : 
+                                        var colors = ColorPaletteService.extractedColors.length > 0 ?
+                                                    ColorPaletteService.extractedColors :
                                                     ["blue", "purple", "green", "orange", "red", "cyan", "pink", "amber", "coral", "monochrome"]
                                         var count = colors.length
                                         if (count <= 4) return count
@@ -588,12 +579,11 @@ Item {
                                     }
                                     rowSpacing: Theme.spacingM
                                     columnSpacing: Theme.spacingM
-                                    anchors.horizontalCenter: parent.horizontalCenter
 
                                     Repeater {
                                         model: {
                                             forceUpdate // Trigger update when this changes
-                                            return ColorPaletteService.extractedColors.length > 0 ? 
+                                            return ColorPaletteService.extractedColors.length > 0 ?
                                                    ColorPaletteService.extractedColors : // Show all extracted colors
                                                    ["blue", "purple", "green", "orange", "red", "cyan", "pink", "amber", "coral", "monochrome"] // Fallback to original colors
                                         }
@@ -604,7 +594,7 @@ Item {
                                             property bool isSelected: isExtractedColor && ColorPaletteService.selectedColors.includes(colorValue)
                                             property string textColor: {
                                                 if (isExtractedColor && typeof SettingsData !== 'undefined') {
-                                                    // Direct binding like logo button - updates in real time
+
                                                     const hexR = Math.max(0, Math.min(255, SettingsData.extractedColorTextR)).toString(16).padStart(2, '0')
                                                     const hexG = Math.max(0, Math.min(255, SettingsData.extractedColorTextG)).toString(16).padStart(2, '0')
                                                     const hexB = Math.max(0, Math.min(255, SettingsData.extractedColorTextB)).toString(16).padStart(2, '0')
@@ -627,14 +617,14 @@ Item {
                                                 anchors.centerIn: parent
                                                 visible: isSelected
                                                 opacity: isSelected ? 1 : 0
-                                                
+
                                                 Behavior on opacity {
                                                     NumberAnimation {
                                                         duration: Theme.shortDuration
                                                         easing.type: Theme.standardEasing
                                                     }
                                                 }
-                                                
+
                                                 Behavior on color {
                                                     ColorAnimation {
                                                         duration: Theme.shortDuration
@@ -652,7 +642,6 @@ Item {
                                                 radius: Theme.cornerRadius
                                                 anchors.bottom: parent.top
                                                 anchors.bottomMargin: Theme.spacingS
-                                                anchors.horizontalCenter: parent.horizontalCenter
                                                 visible: mouseArea.containsMouse
                                                 layer.enabled: true
                                                 layer.smooth: true
@@ -661,7 +650,7 @@ Item {
                                                     id: nameText
                                                     property string textColorValue: {
                                                         if (isExtractedColor && typeof SettingsData !== 'undefined') {
-                                                            // Direct binding like logo button - updates in real time
+
                                                             const hexR = Math.max(0, Math.min(255, SettingsData.extractedColorTextR)).toString(16).padStart(2, '0')
                                                             const hexG = Math.max(0, Math.min(255, SettingsData.extractedColorTextG)).toString(16).padStart(2, '0')
                                                             const hexB = Math.max(0, Math.min(255, SettingsData.extractedColorTextB)).toString(16).padStart(2, '0')
@@ -674,7 +663,7 @@ Item {
                                                     font.weight: Font.Medium
                                                     color: textColorValue
                                                     anchors.centerIn: parent
-                                                    
+
                                                     Behavior on color {
                                                         ColorAnimation {
                                                             duration: Theme.shortDuration
@@ -721,12 +710,10 @@ Item {
 
                         Column {
                             spacing: Theme.spacingS
-                            anchors.horizontalCenter: parent.horizontalCenter
                             visible: Theme.currentThemeCategory === "catppuccin" && Theme.currentTheme !== Theme.dynamic && Theme.currentThemeName !== "custom"
 
                             Row {
                                 spacing: Theme.spacingM
-                                anchors.horizontalCenter: parent.horizontalCenter
 
                                 Repeater {
                                     model: ["cat-rosewater", "cat-flamingo", "cat-pink", "cat-mauve", "cat-red", "cat-maroon", "cat-peach"]
@@ -750,7 +737,6 @@ Item {
                                             radius: Theme.cornerRadius
                                             anchors.bottom: parent.top
                                             anchors.bottomMargin: Theme.spacingS
-                                            anchors.horizontalCenter: parent.horizontalCenter
                                             visible: mouseAreaCat.containsMouse
                                             layer.enabled: true
                                             layer.smooth: true
@@ -794,7 +780,6 @@ Item {
 
                             Row {
                                 spacing: Theme.spacingM
-                                anchors.horizontalCenter: parent.horizontalCenter
 
                                 Repeater {
                                     model: ["cat-yellow", "cat-green", "cat-teal", "cat-sky", "cat-sapphire", "cat-blue", "cat-lavender"]
@@ -818,7 +803,6 @@ Item {
                                             radius: Theme.cornerRadius
                                             anchors.bottom: parent.top
                                             anchors.bottomMargin: Theme.spacingS
-                                            anchors.horizontalCenter: parent.horizontalCenter
                                             visible: mouseAreaCat2.containsMouse
                                             layer.enabled: true
                                             layer.smooth: true
@@ -1098,11 +1082,11 @@ Item {
                             showValue: true
                             wheelEnabled: false
                             onSliderValueChanged: newValue => {
-                                // Update property for real-time preview, but don't save yet
+
                                 SettingsData.extractedColorTextR = newValue
                             }
                             onSliderDragFinished: finalValue => {
-                                // Save and apply changes when slider is released
+
                                 SettingsData.setExtractedColorTextR(finalValue)
                             }
                         }
@@ -1128,11 +1112,11 @@ Item {
                             showValue: true
                             wheelEnabled: false
                             onSliderValueChanged: newValue => {
-                                // Update property for real-time preview, but don't save yet
+
                                 SettingsData.extractedColorTextG = newValue
                             }
                             onSliderDragFinished: finalValue => {
-                                // Save and apply changes when slider is released
+
                                 SettingsData.setExtractedColorTextG(finalValue)
                             }
                         }
@@ -1158,37 +1142,37 @@ Item {
                             showValue: true
                             wheelEnabled: false
                             onSliderValueChanged: newValue => {
-                                // Update property for real-time preview, but don't save yet
+
                                 SettingsData.extractedColorTextB = newValue
                             }
                             onSliderDragFinished: finalValue => {
-                                // Save and apply changes when slider is released
+
                                 SettingsData.setExtractedColorTextB(finalValue)
                             }
                         }
                     }
-                    
+
                     Row {
                         width: parent.width
                         spacing: Theme.spacingM
-                        
+
                         StyledRect {
                             width: (parent.width - Theme.spacingM) / 2
                             height: 40
                             radius: Theme.cornerRadius
                             color: saveButtonMouseArea.containsMouse ? Theme.primary : Theme.primaryContainer
-                            
+
                             Row {
                                 anchors.centerIn: parent
                                 spacing: Theme.spacingXS
-                                
+
                                 DarkIcon {
                                     name: "save"
                                     size: 18
                                     color: Theme.primaryText || Theme.onPrimary || "#ffffff"
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
-                                
+
                                 StyledText {
                                     text: "Save"
                                     font.pixelSize: Theme.fontSizeMedium
@@ -1196,14 +1180,14 @@ Item {
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
-                            
+
                             MouseArea {
                                 id: saveButtonMouseArea
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    // Auto-save to current theme
+
                                     if (SettingsData.currentColorTheme) {
                                         SettingsData.saveTextColorPreset(SettingsData.currentColorTheme)
                                     } else {
@@ -1215,24 +1199,24 @@ Item {
                                 }
                             }
                         }
-                        
+
                         StyledRect {
                             width: (parent.width - Theme.spacingM) / 2
                             height: 40
                             radius: Theme.cornerRadius
                             color: loadButtonMouseArea.containsMouse ? Theme.secondary : (typeof Theme !== 'undefined' && Theme.secondaryContainer ? Theme.secondaryContainer : Theme.surfaceVariant)
-                            
+
                             Row {
                                 anchors.centerIn: parent
                                 spacing: Theme.spacingXS
-                                
+
                                 DarkIcon {
                                     name: "folder_open"
                                     size: 18
                                     color: ColorPaletteService.getTextColorForBackground(loadButtonMouseArea.containsMouse ? Theme.secondary : (typeof Theme !== 'undefined' && Theme.secondaryContainer ? Theme.secondaryContainer : Theme.surfaceVariant))
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
-                                
+
                                 StyledText {
                                     text: "Load"
                                     font.pixelSize: Theme.fontSizeMedium
@@ -1240,14 +1224,14 @@ Item {
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }
-                            
+
                             MouseArea {
                                 id: loadButtonMouseArea
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    // Auto-load from current theme
+
                                     if (SettingsData.currentColorTheme) {
                                         const loaded = SettingsData.loadTextColorFromTheme(SettingsData.currentColorTheme)
                                         if (loaded) {
@@ -1268,17 +1252,17 @@ Item {
                             }
                         }
                     }
-                    
+
                     Column {
                         width: parent.width
                         spacing: Theme.spacingXS
-                        
+
                         StyledText {
                             text: "Preview"
                             font.pixelSize: Theme.fontSizeSmall
                             color: Theme.surfaceTextMedium
                         }
-                        
+
                         Rectangle {
                             width: parent.width
                             height: 60
@@ -1286,7 +1270,7 @@ Item {
                             color: ColorPaletteService.extractedColors.length > 0 && ColorPaletteService.extractedColors[0] ? ColorPaletteService.extractedColors[0] : "#000000"
                             border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.3)
                             border.width: 1
-                            
+
                             StyledText {
                                 id: previewText
                                 anchors.centerIn: parent
@@ -1295,14 +1279,14 @@ Item {
                                 font.weight: Font.Medium
                                 property string previewColor: ColorPaletteService.extractedColors.length > 0 && ColorPaletteService.extractedColors[0] ? ColorPaletteService.extractedColors[0] : "#000000"
                                 color: ColorPaletteService.getTextColorForBackground(previewColor)
-                                
+
                                 Connections {
                                     target: ColorPaletteService
                                     function onTextColorAdjustmentChanged() {
                                         previewText.color = ColorPaletteService.getTextColorForBackground(previewText.previewColor)
                                     }
                                 }
-                                
+
                                 Connections {
                                     target: SettingsData
                                     function onExtractedColorTextRChanged() {
@@ -1315,7 +1299,7 @@ Item {
                                         previewText.color = ColorPaletteService.getTextColorForBackground(previewText.previewColor)
                                     }
                                 }
-                                
+
                                 Behavior on color {
                                     ColorAnimation {
                                         duration: Theme.shortDuration
@@ -2992,10 +2976,10 @@ Item {
                             DarkDropdown {
                                 width: parent.width
                                 text: "GNOME Shell Theme"
-                                description: SettingsData.userThemeExtensionAvailable && SettingsData.userThemeExtensionEnabled 
-                                            ? "Shell Interface Theme\n(requires shell restart)" 
-                                            : SettingsData.userThemeExtensionAvailable 
-                                            ? "Shell Interface Theme\n(extension not enabled)" 
+                                description: SettingsData.userThemeExtensionAvailable && SettingsData.userThemeExtensionEnabled
+                                            ? "Shell Interface Theme\n(requires shell restart)"
+                                            : SettingsData.userThemeExtensionAvailable
+                                            ? "Shell Interface Theme\n(extension not enabled)"
                                             : "Shell Interface Theme\n(CSS fallback, no extension)"
                                 currentValue: SettingsData.shellTheme
                                 enableFuzzySearch: true

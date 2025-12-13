@@ -30,7 +30,7 @@ Item {
         loading = true
         monitors = []
         monitorCapabilities = {}
-        
+
         var screens = Quickshell.screens
         for (var i = 0; i < screens.length; i++) {
             var screen = screens[i]
@@ -50,7 +50,7 @@ Item {
                 description: screen.name
             }
         }
-        
+
         loading = false
     }
 

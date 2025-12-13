@@ -377,7 +377,7 @@ Singleton {
         }
     }
     
-    // Watch sortedToplevels changes by monitoring the property
+
     property var _sortedToplevelsWatcher: CompositorService.sortedToplevels
     on_SortedToplevelsWatcherChanged: {
         if (CompositorService.isHyprland) {

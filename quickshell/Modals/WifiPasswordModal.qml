@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.Common
 import qs.Modals.Common
 import qs.Services
@@ -70,11 +71,11 @@ DarkModal {
                 width: parent.width - Theme.spacingM * 2
                 spacing: Theme.spacingM
 
-                Row {
+                RowLayout {
                     width: parent.width
 
                     Column {
-                        width: parent.width - 40
+                        Layout.fillWidth: true
                         spacing: Theme.spacingXS
 
                         StyledText {
@@ -97,6 +98,7 @@ DarkModal {
                         iconName: "close"
                         iconSize: Theme.iconSize - 4
                         iconColor: Theme.surfaceText
+                        Layout.alignment: Qt.AlignTop
                         onClicked: () => {
                                        close()
                                        wifiPasswordInput = ""

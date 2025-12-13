@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import qs.Common
 import qs.Services
 import qs.Widgets
 
-Row {
+RowLayout {
     id: root
 
     height: 40
@@ -15,7 +16,7 @@ Row {
     Rectangle {
         width: Theme.iconSize + Theme.spacingS * 2
         height: Theme.iconSize + Theme.spacingS * 2
-        anchors.verticalCenter: parent.verticalCenter
+        Layout.alignment: Qt.AlignVCenter
         radius: (Theme.iconSize + Theme.spacingS * 2) / 2
         color: iconArea.containsMouse
                ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12)
@@ -69,8 +70,8 @@ Row {
     }
 
     DarkSlider {
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.width - (Theme.iconSize + Theme.spacingS * 2)
+        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignVCenter
         enabled: DisplayService.brightnessAvailable
         minimum: 1
         maximum: 100

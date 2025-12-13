@@ -19,7 +19,7 @@ Singleton {
     property var tabsBeingCreated: ({})
 
     Component.onCompleted: {
-        // Ensure the notepad-files directory exists
+
         ensureDirectoryExists()
     }
 
@@ -121,24 +121,24 @@ Singleton {
             return
         }
         
-        // Ensure directory exists before loading
+
         ensureDirectoryExists()
         
-        // Check if file exists, create it if it doesn't
+
         var checkProcess = fileCheckProcessComponent.createObject(root, {
             filePath: fullPath,
             callback: function(exists) {
                 if (!exists) {
-                    // File doesn't exist, create it first
+
                     createEmptyFile(fullPath, function() {
-                        // Now load the file
+
                         var loader = tabFileLoaderComponent.createObject(root, {
                             path: fullPath,
                             callback: callback
                         })
                     })
                 } else {
-                    // File exists, load it
+
                     var loader = tabFileLoaderComponent.createObject(root, {
                         path: fullPath,
                         callback: callback
@@ -332,9 +332,8 @@ Singleton {
             }
 
             onLoadFailed: {
-                // This should rarely happen now since we check/create before loading
-                // But if it does, return empty content
-                console.log("[NotepadStorageService] Failed to load file:", path)
+
+
                 callback("")
                 destroy()
             }
@@ -379,7 +378,7 @@ Singleton {
             cleanPath = baseDir + "/" + cleanPath
         }
 
-        // Ensure directory exists before creating file
+
         ensureDirectoryExists()
 
         var creator = fileCreatorComponent.createObject(root, {
@@ -421,17 +420,17 @@ Singleton {
             property var callback
             property bool directoryCreated: false
             
-            // First ensure directory exists, then create file
+
             command: directoryCreated ? ["touch", filePath] : ["mkdir", "-p", filePath.substring(0, filePath.lastIndexOf("/"))]
 
             Component.onCompleted: {
-                // Extract directory from file path
+
                 var dirPath = filePath.substring(0, filePath.lastIndexOf("/"))
                 if (dirPath) {
-                    // Create directory first
+
                     running = true
                 } else {
-                    // No directory needed, just create file
+
                     directoryCreated = true
                     running = true
                 }
@@ -439,11 +438,11 @@ Singleton {
 
             onExited: (exitCode) => {
                 if (!directoryCreated) {
-                    // Directory created, now create the file
+
                     directoryCreated = true
                     running = true
                 } else {
-                    // File created (or already existed)
+
                     if (callback) callback()
                     destroy()
                 }

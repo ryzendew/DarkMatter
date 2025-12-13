@@ -160,7 +160,7 @@ Singleton {
         try {
             const date = new Date(isoString)
             if (SettingsData.use24HourClock) {
-                // Force 24-hour format with AM/PM
+
                 const hours = date.getHours()
                 const minutes = date.getMinutes()
                 const period = hours >= 12 ? "PM" : "AM"

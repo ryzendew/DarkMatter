@@ -526,7 +526,6 @@ Column {
         border.color: Qt.rgba(Theme.outline.r, Theme.outline.g,
                               Theme.outline.b, 0.2)
         border.width: 1
-        anchors.horizontalCenter: parent.horizontalCenter
 
         StyledText {
             text: "Add Widget"
@@ -570,10 +569,10 @@ Column {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        
+
         onOpened: {
         }
-        
+
         onClosed: {
         }
 

@@ -10,19 +10,19 @@ StyledRect {
     property var monitorData: null
     property var monitorCapabilities: ({})
     signal settingChanged(string setting, var value)
-    
-    // Check if monitor supports HDR and VRR
-    // HDR support can come from:
-    // 1. hyprctl detection (monitorCapabilities.hdr === true)
-    // 2. EDID detection (monitorCapabilities.hdrFromEdid === true)
-    // 3. Config file (monitorData.cm === "hdr" or "hdredid", or monitorData.supports_hdr === true)
-    // 4. Monitor capabilities description/model (known HDR-capable monitors)
+
+
+
+
+
+
+
     readonly property bool supportsHDR: {
-        // Check capabilities first (from hyprctl or EDID)
+
         if (monitorCapabilities && monitorCapabilities.hdr === true) {
             return true
         }
-        // Check config file for HDR settings
+
         if (monitorData) {
             var cm = (monitorData.cm || "").toLowerCase()
             if (cm === "hdr" || cm === "hdredid") {
@@ -32,12 +32,12 @@ StyledRect {
                 return true
             }
         }
-        // Check if monitor description/model suggests HDR capability
-        // Some monitors like KTC H27S17 are known to support HDR
+
+
         if (monitorCapabilities) {
             var desc = (monitorCapabilities.description || "").toLowerCase()
             var model = (monitorCapabilities.model || "").toLowerCase()
-            // Check for known HDR-capable monitor models/descriptions
+
             if (desc.includes("h27s17") || model.includes("h27s17")) {
                 return true
             }
@@ -140,7 +140,7 @@ StyledRect {
                 text: "Resolution"
                 options: {
                     if (!monitorCapabilities || !monitorCapabilities.resolutions || monitorCapabilities.resolutions.length === 0) {
-                        // Fallback: show current resolution if available
+
                         if (monitorData && monitorData.resolution) {
                             return [monitorData.resolution]
                         }
@@ -153,7 +153,7 @@ StyledRect {
                     if (monitorData && value && value !== "No resolutions available") {
                         monitorData.resolution = value
                         settingChanged("resolution", value)
-                        // Update refresh rate dropdown to show rates for this resolution
+
                         if (refreshRateDropdown) {
                             refreshRateDropdown.selectedResolution = value
                             refreshRateDropdown.forceUpdate = !refreshRateDropdown.forceUpdate
@@ -174,45 +174,45 @@ StyledRect {
                 id: refreshRateDropdown
                 Layout.fillWidth: true
                 text: "Refresh Rate"
-                
+
                 property string selectedResolution: monitorData ? (monitorData.resolution || "") : ""
                 property bool forceUpdate: false
-                
+
                 function updateOptionsForResolution(resolution) {
                     selectedResolution = resolution
-                    // Force update by toggling property
+
                     forceUpdate = !forceUpdate
                 }
-                
+
                 options: {
-                    // Access forceUpdate to trigger recalculation
+
                     var _ = forceUpdate
-                    
+
                     if (!monitorCapabilities) {
                         if (monitorData && monitorData.refreshRate) {
                             return [monitorData.refreshRate.toString() + " Hz"]
                         }
                         return ["No refresh rates available"]
                     }
-                    
+
                     var currentRes = selectedResolution || (monitorData ? monitorData.resolution : "")
-                    
-                    // If we have a resolution-to-refresh-rate map, use it
+
+
                     if (monitorCapabilities.resolutionRefreshMap && currentRes && monitorCapabilities.resolutionRefreshMap[currentRes]) {
                         var rates = monitorCapabilities.resolutionRefreshMap[currentRes]
                         return rates.map(function(rate) {
                             return rate.toString() + " Hz"
                         })
                     }
-                    
-                    // Fallback to all available refresh rates
+
+
                     if (monitorCapabilities.refreshRates && monitorCapabilities.refreshRates.length > 0) {
                         return monitorCapabilities.refreshRates.map(function(rate) {
                             return rate.toString() + " Hz"
                         })
                     }
-                    
-                    // Final fallback
+
+
                     if (monitorData && monitorData.refreshRate) {
                         return [monitorData.refreshRate.toString() + " Hz"]
                     }
@@ -222,8 +222,8 @@ StyledRect {
                     if (!monitorData || !monitorData.refreshRate) return ""
                     var rate = parseFloat(monitorData.refreshRate)
                     var currentRes = selectedResolution || (monitorData ? monitorData.resolution : "")
-                    
-                    // Try to find in resolution-specific rates first
+
+
                     if (monitorCapabilities && monitorCapabilities.resolutionRefreshMap && currentRes && monitorCapabilities.resolutionRefreshMap[currentRes]) {
                         var rates = monitorCapabilities.resolutionRefreshMap[currentRes]
                         var exactMatch = rates.find(function(r) {
@@ -232,7 +232,7 @@ StyledRect {
                         if (exactMatch !== undefined) {
                             return exactMatch.toString() + " Hz"
                         }
-                        // Find closest in resolution-specific rates
+
                         var closest = rates[0]
                         var minDiff = Math.abs(closest - rate)
                         for (var i = 1; i < rates.length; i++) {
@@ -244,17 +244,17 @@ StyledRect {
                         }
                         return closest.toString() + " Hz"
                     }
-                    
-                    // Fallback to all refresh rates
+
+
                     if (monitorCapabilities && monitorCapabilities.refreshRates && monitorCapabilities.refreshRates.length > 0) {
-                        // Find exact match first
+
                         var exactMatch = monitorCapabilities.refreshRates.find(function(r) {
                             return Math.abs(r - rate) < 0.01
                         })
                         if (exactMatch !== undefined) {
                             return exactMatch.toString() + " Hz"
                         }
-                        // Otherwise find closest
+
                         var closest = monitorCapabilities.refreshRates[0]
                         var minDiff = Math.abs(closest - rate)
                         for (var i = 1; i < monitorCapabilities.refreshRates.length; i++) {
@@ -425,7 +425,7 @@ StyledRect {
                         "hdredid": "HDR EDID"
                     }
                     var value = map[cm.toLowerCase()] || "Auto"
-                    // If HDR is not supported and current value is HDR-related, default to Auto
+
                     if (!supportsHDR && (value === "HDR" || value === "HDR EDID")) {
                         return "Auto"
                     }
@@ -614,7 +614,7 @@ StyledRect {
             }
         }
 
-        // SDR Min Luminance
+
         Column {
             width: parent.width
             spacing: Theme.spacingS
@@ -676,7 +676,7 @@ StyledRect {
             visible: !monitorData || !monitorData.disabled
         }
 
-        // SDR Max Luminance
+
         Column {
             width: parent.width
             spacing: Theme.spacingS
@@ -723,7 +723,7 @@ StyledRect {
             }
         }
 
-        // Min Luminance
+
         Column {
             width: parent.width
             spacing: Theme.spacingS
@@ -771,7 +771,7 @@ StyledRect {
             }
         }
 
-        // Max Luminance
+
         Column {
             width: parent.width
             spacing: Theme.spacingS
@@ -820,7 +820,7 @@ StyledRect {
             visible: !monitorData || !monitorData.disabled
         }
 
-        // Max Avg Luminance
+
         Column {
             width: parent.width
             spacing: Theme.spacingS

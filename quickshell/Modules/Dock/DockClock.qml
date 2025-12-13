@@ -36,7 +36,7 @@ Item {
                 text: {
                     const now = new Date()
                     if (SettingsData.use24HourClock) {
-                        // Force 24-hour format with AM/PM
+
                         const hours = now.getHours()
                         const minutes = now.getMinutes()
                         const period = hours >= 12 ? "PM" : "AM"
@@ -60,7 +60,7 @@ Item {
         onTriggered: {
             const now = new Date()
             if (SettingsData.use24HourClock) {
-                // Force 24-hour format with AM/PM
+
                 const hours = now.getHours()
                 const minutes = now.getMinutes()
                 const period = hours >= 12 ? "PM" : "AM"

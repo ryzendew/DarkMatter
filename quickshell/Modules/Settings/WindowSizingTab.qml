@@ -29,7 +29,7 @@ Item {
         clip: true
         contentHeight: mainColumn.height
         contentWidth: width
-        
+
         function getTopMargin() {
             const screenHeight = Screen.height
             if (screenHeight >= 1080) return Theme.spacingM
@@ -39,10 +39,9 @@ Item {
 
         Column {
             id: mainColumn
-
             width: parent.width
             spacing: getColumnSpacing()
-            
+
             function getColumnSpacing() {
                 const screenHeight = Screen.height
                 if (screenHeight >= 1080) return Theme.spacingL
@@ -751,7 +750,7 @@ Item {
 
         let baseWidth
         if (screenWidth >= 3840) baseWidth = 2560 // 4K -> 1440p
-        else if (screenWidth >= 2560) baseWidth = 1920 // 1440p -> 1080p  
+        else if (screenWidth >= 2560) baseWidth = 1920 // 1440p -> 1080p
         else if (screenWidth >= 1920) baseWidth = 1280 // 1080p -> 720p
         else baseWidth = 800 // 720p or lower -> 800x600
 
@@ -791,56 +790,56 @@ Item {
         const height = getDefaultHeight()
         return Math.max(0, (Screen.height - height) / 2)
     }
-    
+
     function getMinWidth() {
         const screenWidth = Screen.width
         if (screenWidth >= 1920) return 600
         if (screenWidth >= 1280) return 500
         return Math.max(400, screenWidth * 0.7)
     }
-    
+
     function getMinHeight() {
         const screenHeight = Screen.height
         if (screenHeight >= 1080) return 400
         if (screenHeight >= 720) return 350
         return Math.max(300, screenHeight * 0.6)
     }
-    
+
     function getSmallPresetWidth() {
         const screenWidth = Screen.width
         if (screenWidth >= 1920) return 800
         if (screenWidth >= 1280) return Math.max(600, screenWidth * 0.6)
         return Math.max(400, screenWidth * 0.85)
     }
-    
+
     function getSmallPresetHeight() {
         const screenHeight = Screen.height
         if (screenHeight >= 1080) return 600
         if (screenHeight >= 720) return Math.max(450, screenHeight * 0.65)
         return Math.max(350, screenHeight * 0.8)
     }
-    
+
     function getMediumPresetWidth() {
         const screenWidth = Screen.width
         if (screenWidth >= 1920) return 1280
         if (screenWidth >= 1280) return Math.max(900, screenWidth * 0.75)
         return Math.max(500, screenWidth * 0.9)
     }
-    
+
     function getMediumPresetHeight() {
         const screenHeight = Screen.height
         if (screenHeight >= 1080) return 950
         if (screenHeight >= 720) return Math.max(650, screenHeight * 0.85)
         return Math.max(450, screenHeight * 0.9)
     }
-    
+
     function getLargePresetWidth() {
         const screenWidth = Screen.width
         if (screenWidth >= 1920) return 1920
         if (screenWidth >= 1280) return Math.min(screenWidth - 40, 1600)
         return Math.min(screenWidth - 20, 1200)
     }
-    
+
     function getLargePresetHeight() {
         const screenHeight = Screen.height
         if (screenHeight >= 1080) return 1325

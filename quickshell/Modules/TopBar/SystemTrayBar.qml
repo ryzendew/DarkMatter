@@ -143,26 +143,18 @@ Item {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: (mouse) => {
-                            console.log("[Systray] Mouse clicked - button:", mouse.button === Qt.LeftButton ? "Left" : mouse.button === Qt.RightButton ? "Right" : "Other")
                             if (!delegateRoot.trayItem) {
-                                console.log("[Systray] ERROR: trayItem is null!")
                                 return;
                             }
-                            console.log("[Systray] trayItem exists, id:", delegateRoot.trayItem.id || "unknown")
                             if (mouse.button === Qt.LeftButton && !delegateRoot.trayItem.onlyMenu) {
-                                console.log("[Systray] Left click - activating tray item")
                                 delegateRoot.trayItem.activate();
                                 return;
                             }
                             if (mouse.button === Qt.RightButton) {
-                                console.log("[Systray] Right click detected")
                                 const hasMenu = delegateRoot.trayItem.menu || delegateRoot.trayItem.hasMenu
-                                console.log("[Systray] Menu check - menu:", !!delegateRoot.trayItem.menu, "hasMenu:", !!delegateRoot.trayItem.hasMenu, "hasMenu (combined):", hasMenu)
                                 if (delegateRoot.trayItem && hasMenu) {
-                                    console.log("[Systray] Menu available, using showForTrayItem")
                                     root.showForTrayItem(delegateRoot.trayItem, visualContent, parentScreen, root.isAtBottom, root.isVertical, root.axis);
                                 } else {
-                                    console.log("[Systray] No menu available for this tray item")
                                 }
                             }
                         }
@@ -249,26 +241,18 @@ Item {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: (mouse) => {
-                            console.log("[Systray-Column] Mouse clicked - button:", mouse.button === Qt.LeftButton ? "Left" : mouse.button === Qt.RightButton ? "Right" : "Other")
                             if (!delegateRoot.trayItem) {
-                                console.log("[Systray-Column] ERROR: trayItem is null!")
                             return;
                         }
-                            console.log("[Systray-Column] trayItem exists, id:", delegateRoot.trayItem.id || "unknown")
                             if (mouse.button === Qt.LeftButton && !delegateRoot.trayItem.onlyMenu) {
-                                console.log("[Systray-Column] Left click - activating tray item")
                                 delegateRoot.trayItem.activate();
                             return;
                         }
                             if (mouse.button === Qt.RightButton) {
-                                console.log("[Systray-Column] Right click detected")
                                 const hasMenu = delegateRoot.trayItem.menu || delegateRoot.trayItem.hasMenu
-                                console.log("[Systray-Column] Menu check - menu:", !!delegateRoot.trayItem.menu, "hasMenu:", !!delegateRoot.trayItem.hasMenu, "hasMenu (combined):", hasMenu)
                                 if (delegateRoot.trayItem && hasMenu) {
-                                    console.log("[Systray-Column] Menu available, using showForTrayItem")
                                     root.showForTrayItem(delegateRoot.trayItem, visualContent, parentScreen, root.isAtBottom, root.isVertical, root.axis);
                                 } else {
-                                    console.log("[Systray-Column] No menu available for this tray item")
                                 }
                             }
                         }
@@ -300,8 +284,6 @@ Item {
             }
 
             function showForTrayItem(item, anchor, screen, atBottom, vertical, axisObj) {
-                console.log("[Systray-Menu] showForTrayItem called in menu component")
-                console.log("[Systray-Menu] Parameters - item:", !!item, "anchor:", !!anchor, "screen:", !!screen, "atBottom:", atBottom, "vertical:", vertical)
                 trayItem = item
                 anchorItem = anchor
                 parentScreen = screen
@@ -309,29 +291,22 @@ Item {
                 isVertical = vertical
                 axis = axisObj
                 menuHandle = item?.menu
-                console.log("[Systray-Menu] menuHandle:", !!menuHandle, "hasMenu:", item?.hasMenu)
 
                 if (parentScreen) {
-                    console.log("[Systray-Menu] Setting screen for menuWindow")
                     for (var i = 0; i < Quickshell.screens.length; i++) {
                         const s = Quickshell.screens[i]
                         if (s === parentScreen) {
                             menuWindow.screen = s
-                            console.log("[Systray-Menu] Screen set to index:", i)
                             break
                         }
                     }
                 } else {
-                    console.log("[Systray-Menu] No parentScreen provided")
                 }
                 showMenu = true
-                console.log("[Systray-Menu] showMenu set to true, menuWindow.visible should be:", menuWindow.visible)
             }
 
             function close() {
-                console.log("[Systray-Menu] close() called")
                 showMenu = false
-                console.log("[Systray-Menu] showMenu set to false, menuWindow.visible should be:", menuWindow.visible)
             }
 
             function showSubMenu(entry) {
@@ -357,7 +332,6 @@ Item {
                 id: menuWindow
                 visible: {
                     const result = menuRoot.showMenu && (menuRoot.trayItem?.hasMenu ?? false)
-                    console.log("[Systray-Menu] menuWindow.visible binding - showMenu:", menuRoot.showMenu, "hasMenu:", menuRoot.trayItem?.hasMenu ?? false, "result:", result)
                     return result
                 }
                 WlrLayershell.namespace: "quickshell:dock:blur"
@@ -375,17 +349,13 @@ Item {
                 property point anchorPos: Qt.point(screen.width / 2, screen.height / 2)
 
                 onVisibleChanged: {
-                    console.log("[Systray-Menu] menuWindow.visible changed to:", visible)
                     if (visible) {
-                        console.log("[Systray-Menu] Menu visible, updating position")
                         updatePosition()
                     }
                 }
 
                 function updatePosition() {
-                    console.log("[Systray-Menu] updatePosition() called")
                     if (!menuRoot.anchorItem || !menuRoot.trayItem) {
-                        console.log("[Systray-Menu] ERROR: Missing anchorItem or trayItem, using center position")
                         anchorPos = Qt.point(screen.width / 2, screen.height / 2)
                         return
                     }
@@ -395,13 +365,10 @@ Item {
                     const screenY = screen.y || 0
                     const relativeX = globalPos.x - screenX
                     const relativeY = globalPos.y - screenY
-                    console.log("[Systray-Menu] Position calculation - globalPos:", globalPos, "screen:", {x: screenX, y: screenY}, "relative:", {x: relativeX, y: relativeY})
                     const widgetThickness = Math.max(20, 26 + SettingsData.darkBarInnerPadding * 0.6)
                     const effectiveBarThickness = Math.max(widgetThickness + SettingsData.darkBarInnerPadding + 4, Theme.barHeight - 4 - (8 - SettingsData.darkBarInnerPadding))
-                    console.log("[Systray-Menu] Bar calculations - widgetThickness:", widgetThickness, "effectiveBarThickness:", effectiveBarThickness)
 
                     if (menuRoot.isVertical) {
-                        console.log("[Systray-Menu] Vertical layout")
                         const edge = menuRoot.axis?.edge
                         let targetX
                         if (edge === "left") {
@@ -411,20 +378,15 @@ Item {
                             targetX = screen.width - popupX
                         }
                         anchorPos = Qt.point(targetX, relativeY + menuRoot.anchorItem.height / 2)
-                        console.log("[Systray-Menu] Vertical anchorPos:", anchorPos)
                     } else {
-                        console.log("[Systray-Menu] Horizontal layout, isAtBottom:", menuRoot.isAtBottom)
                         let targetY
                         if (menuRoot.isAtBottom) {
                             targetY = relativeY
-                            console.log("[Systray-Menu] Bottom bar - targetY:", targetY, "relativeY:", relativeY)
                         } else {
                             const barHeight = root.widgetHeight || root.barThickness || 30
                             targetY = relativeY + menuRoot.anchorItem.height + Theme.spacingS
-                            console.log("[Systray-Menu] Top bar - targetY:", targetY, "relativeY:", relativeY, "iconHeight:", menuRoot.anchorItem.height)
                         }
                         anchorPos = Qt.point(relativeX + menuRoot.anchorItem.width / 2, targetY)
-                        console.log("[Systray-Menu] Horizontal anchorPos:", anchorPos)
                     }
                 }
 
@@ -723,19 +685,13 @@ Item {
     }
 
     function showForTrayItem(item, anchor, screen, atBottom, vertical, axisObj) {
-        console.log("[Systray] showForTrayItem called in root")
-        console.log("[Systray] Parameters - item:", !!item, "item.id:", item?.id || "unknown", "anchor:", !!anchor, "screen:", !!screen, "atBottom:", atBottom, "vertical:", vertical)
         if (currentTrayMenu) {
-            console.log("[Systray] Destroying existing menu")
             currentTrayMenu.destroy()
         }
-        console.log("[Systray] Creating new menu component")
         currentTrayMenu = trayMenuComponent.createObject(null)
         if (currentTrayMenu) {
-            console.log("[Systray] Menu component created, calling showForTrayItem on it")
             currentTrayMenu.showForTrayItem(item, anchor, screen, atBottom ?? false, vertical ?? false, axisObj)
         } else {
-            console.log("[Systray] ERROR: Failed to create menu component!")
         }
     }
 }

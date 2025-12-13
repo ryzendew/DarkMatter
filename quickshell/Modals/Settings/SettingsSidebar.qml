@@ -77,7 +77,7 @@ Item {
         else if (screenWidth >= 1280) baseWidth = 240
         else baseWidth = Math.max(200, Math.min(240, screenWidth * 0.25))
         
-        // Apply UI scale factor - explicitly reference SettingsData.settingsUiScale for reactivity
+
         const uiScale = typeof Theme !== "undefined" && typeof Theme.getSettingsUiScale === "function" 
             ? Theme.getSettingsUiScale() 
             : (typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
@@ -105,7 +105,7 @@ Item {
             else if (screenWidth >= 1280) baseWidth = 240
             else baseWidth = Math.max(200, Math.min(240, screenWidth * 0.25))
             
-            // Apply UI scale factor - explicitly reference SettingsData.settingsUiScale for reactivity
+
             const uiScale = typeof Theme !== "undefined" && typeof Theme.getSettingsUiScale === "function" 
                 ? Theme.getSettingsUiScale() 
                 : (typeof SettingsData !== "undefined" && SettingsData.settingsUiScale !== undefined 
@@ -181,7 +181,7 @@ Item {
                         return baseHeight * uiScale * controlScale
                     }
 
-                    // Active indicator - left border
+
                     Rectangle {
                         id: activeIndicator
                         anchors.left: parent.left
@@ -193,7 +193,7 @@ Item {
                         radius: 0
                     }
 
-                    // Background state layer
+
                     Rectangle {
                         id: backgroundLayer
                         anchors.fill: parent
@@ -216,7 +216,7 @@ Item {
                         }
                     }
 
-                    // Content row
+
                     Row {
                         anchors.left: parent.left
                         anchors.leftMargin: {

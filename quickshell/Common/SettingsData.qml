@@ -50,7 +50,7 @@ Singleton {
     property real darkDashContentBackgroundOpacity: 1.0
     property real darkDashAnimatedTintOpacity: 0.04
     
-    // Desktop Dark Dash Widget Settings (separate from regular Dark Dash)
+
     property real desktopDarkDashTransparency: 0.92
     property real desktopDarkDashDropShadowOpacity: 0.15
     property real desktopDarkDashBorderOpacity: 0.0
@@ -91,7 +91,7 @@ Singleton {
     property real desktopWeatherOpacity: 0.9
     property real desktopTerminalOpacity: 0.9
     
-    // Desktop Widget Visual Effects
+
     property real desktopWidgetDropShadowOpacity: 0.3
     property real desktopWidgetDropShadowRadius: 12
     property real desktopWidgetBorderOpacity: 0.3
@@ -1258,7 +1258,7 @@ Singleton {
         const name = presetName || currentColorTheme || "Preset " + (savedTextColorPresets.length + 1)
         const themeName = currentColorTheme || ""
         
-        // Remove existing preset with same name/theme
+
         savedTextColorPresets = savedTextColorPresets.filter(p => !(p.name === name && p.themeName === themeName))
         
         const preset = {
@@ -1284,7 +1284,7 @@ Singleton {
     }
     
     function loadTextColorFromTheme(themeName) {
-        // Auto-load RGB values from theme if they exist
+
         if (themeName && savedTextColorPresets.length > 0) {
             const themePreset = savedTextColorPresets.find(p => p.themeName === themeName)
             if (themePreset) {
@@ -1796,23 +1796,9 @@ Singleton {
         const options = ["auto"];
         for (let i = 0; i < DgopService.availableGpus.length; i++) {
             const gpu = DgopService.availableGpus[i];
-            let vendorName = "Unknown";
-            
-            if (gpu.vendor) {
-                const vendor = gpu.vendor.toLowerCase();
-                if (vendor.includes("nvidia")) {
-                    vendorName = "NVIDIA";
-                } else if (vendor.includes("amd") || vendor.includes("radeon")) {
-                    vendorName = "AMD";
-                } else if (vendor.includes("intel")) {
-                    vendorName = "INTEL";
-                } else {
-                    vendorName = gpu.vendor.toUpperCase();
-                }
-            }
-            
-            const displayName = gpu.displayName || gpu.fullName || vendorName;
-            options.push(`${vendorName} (${displayName})`);
+            let displayName = gpu.displayName || gpu.fullName || "Unknown GPU";
+            displayName = displayName.replace(/^GeForce\s+/i, "").replace(/^Radeon\s+/i, "").replace(/^AMD\s+/i, "").trim();
+            options.push(displayName);
         }
         
         return options;
@@ -1974,15 +1960,12 @@ Singleton {
         widgetDataChanged()
     }
     function setClockFormat(use24Hour) {
-        console.log("[SettingsData] Setting clock format to:", use24Hour ? "24-hour" : "12-hour", "current value:", use24HourClock)
         if (use24HourClock !== use24Hour) {
             use24HourClock = use24Hour
             saveSettings()
-            console.log("[SettingsData] Clock format updated to:", use24HourClock)
-            // Emit signal to notify components
+
             widgetDataChanged()
         } else {
-            console.log("[SettingsData] Clock format already set to:", use24Hour)
         }
     }
 

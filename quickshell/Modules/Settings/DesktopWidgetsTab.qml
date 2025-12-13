@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
 
@@ -1569,7 +1570,7 @@ Item {
                         }
                     }
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -1577,28 +1578,22 @@ Item {
                             text: "GPU Temperature Source"
                             font.pixelSize: Theme.fontSizeSmall
                             color: Theme.surfaceText
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: 200
+                            Layout.alignment: Qt.AlignVCenter
+                            Layout.preferredWidth: 200
+                            elide: Text.ElideRight
                         }
 
                         Item {
-                            width: Math.max(0, (parent.width - 200 - 200 - Theme.spacingM) / 2)
-                            height: 1
+                            Layout.fillWidth: true
                         }
 
                         DarkDropdown {
-                            width: 200
-                            height: 40
+                            Layout.minimumWidth: 200
                             options: SettingsData.getGpuDropdownOptions()
                             currentValue: SettingsData.desktopGpuSelection
                             onValueChanged: {
                                 SettingsData.setDesktopGpuSelection(value)
                             }
-                        }
-
-                        Item {
-                            width: Math.max(0, (parent.width - 200 - 200 - Theme.spacingM) / 2)
-                            height: 1
                         }
                     }
                 }

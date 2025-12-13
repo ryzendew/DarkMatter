@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
 import qs.Services
@@ -35,14 +36,6 @@ Item {
         PowerService.refreshStatus()
     }
 
-    Connections {
-        target: PowerService
-        function onLastErrorChanged() {
-            if (PowerService.lastError && PowerService.lastError.length > 0) {
-            }
-        }
-    }
-
     DarkFlickable {
         anchors.fill: parent
         anchors.topMargin: Theme.spacingL
@@ -52,7 +45,6 @@ Item {
 
         Column {
             id: mainColumn
-
             width: parent.width
             spacing: Theme.spacingXL
 
@@ -139,7 +131,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -147,7 +139,7 @@ Item {
                             name: "tune"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
@@ -155,7 +147,7 @@ Item {
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
                             color: Theme.surfaceText
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
 
@@ -200,7 +192,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -208,7 +200,7 @@ Item {
                             name: "power_settings_new"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
@@ -216,7 +208,7 @@ Item {
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
                             color: Theme.surfaceText
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
 

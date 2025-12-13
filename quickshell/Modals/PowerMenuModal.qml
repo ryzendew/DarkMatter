@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.Common
 import qs.Modals.Common
 import qs.Services
@@ -92,23 +93,20 @@ DarkModal {
                 anchors.margins: Theme.spacingL
                 spacing: Theme.spacingM
 
-                Row {
+                RowLayout {
                     width: parent.width
 
                     StyledText {
                         text: "Power Options"
                         font.pixelSize: Theme.fontSizeLarge
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignVCenter
                         color: Theme.surfaceText
                         font.weight: Font.Medium
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-
-                    Item {
-                        width: parent.width - 150
-                        height: 1
                     }
 
                     DarkActionButton {
+                        Layout.alignment: Qt.AlignVCenter
                         iconName: "close"
                         iconSize: Theme.iconSize - 4
                         iconColor: Theme.surfaceText

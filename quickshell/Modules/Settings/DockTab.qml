@@ -9,9 +9,6 @@ import qs.Services
 Item {
     id: dockTab
 
-    Component.onCompleted: {
-    }
-
     DarkFlickable {
         anchors.fill: parent
         anchors.topMargin: Theme.spacingL
@@ -63,11 +60,11 @@ Item {
                 }
             }
 
-            
 
-            
 
-            
+
+
+
 
             StyledRect {
                 width: parent.width
@@ -132,14 +129,14 @@ Item {
                         text: "Group Apps"
                         description: "Group multiple windows of the same application into a single dock entry"
                         checked: SettingsData.dockGroupApps
-                        
+
                         Binding {
                             target: groupAppsToggle
                             property: "checked"
                             value: SettingsData.dockGroupApps
                             when: SettingsData.dockGroupApps !== groupAppsToggle.checked
                         }
-                        
+
                         onToggled: checked => {
                                        SettingsData.setDockGroupApps(checked)
                                    }
@@ -180,14 +177,14 @@ Item {
                         text: "Hide on Games/Apps"
                         description: "Automatically hide the dock when games or fullscreen applications are running. Group multiple windows of the same application into a single dock entry"
                         checked: SettingsData.dockHideOnGames
-                        
+
                         Binding {
                             target: hideOnGamesToggle
                             property: "checked"
                             value: SettingsData.dockHideOnGames
                             when: SettingsData.dockHideOnGames !== hideOnGamesToggle.checked
                         }
-                        
+
                         onToggled: checked => {
                                        SettingsData.setDockHideOnGames(checked)
                                    }
@@ -1157,7 +1154,7 @@ Item {
                 }
             }
 
-            
+
 
             StyledRect {
                 width: parent.width
@@ -1616,7 +1613,7 @@ Item {
             widgets = SettingsData.dockLeftWidgets.slice()
         else if (sectionId === "dockRight")
             widgets = SettingsData.dockRightWidgets.slice()
-        
+
         for (var i = 0; i < widgets.length; i++) {
             var widget = widgets[i]
             var widgetId = typeof widget === "string" ? widget : widget.id
@@ -1638,7 +1635,7 @@ Item {
                 break
             }
         }
-        
+
         if (sectionId === "dockLeft")
             SettingsData.setDockLeftWidgets(widgets)
         else if (sectionId === "dockRight")
@@ -1658,7 +1655,7 @@ Item {
             widgets = SettingsData.dockLeftWidgets.slice()
         else if (sectionId === "dockRight")
             widgets = SettingsData.dockRightWidgets.slice()
-        
+
         if (widgetIndex >= 0 && widgetIndex < widgets.length) {
             var widget = widgets[widgetIndex]
             var widgetId = typeof widget === "string" ? widget : widget.id
@@ -1679,7 +1676,7 @@ Item {
                 }
             }
         }
-        
+
         if (sectionId === "dockLeft")
             SettingsData.setDockLeftWidgets(widgets)
         else if (sectionId === "dockRight")
@@ -1693,7 +1690,7 @@ Item {
             widgetData = SettingsData.dockLeftWidgets || []
         else if (sectionId === "dockRight")
             widgetData = SettingsData.dockRightWidgets || []
-        
+
         widgetData.forEach(widget => {
             var widgetId = typeof widget === "string" ? widget : widget.id
             var widgetDef = dockWidgetDefinitions.find(def => def.id === widgetId)
@@ -1710,13 +1707,13 @@ Item {
                 widgets.push(item)
             }
         })
-        
+
         return widgets
     }
 
     WidgetSelectionPopup {
         id: widgetSelectionPopup
-        
+
         onWidgetSelected: (widgetId, targetSection) => {
                              dockTab.addWidgetToSection(widgetId, targetSection)
                          }

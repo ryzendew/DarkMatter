@@ -342,7 +342,7 @@ Item {
             widgets = SettingsData.topBarCenterWidgets.slice()
         else if (sectionId === "right")
             widgets = SettingsData.topBarRightWidgets.slice()
-        
+
         if (widgetIndex >= 0 && widgetIndex < widgets.length) {
             var widget = widgets[widgetIndex]
             var widgetId = typeof widget === "string" ? widget : widget.id
@@ -372,7 +372,7 @@ Item {
                 }
             }
         }
-        
+
         if (sectionId === "left")
             SettingsData.setTopBarLeftWidgets(widgets)
         else if (sectionId === "center")
@@ -935,9 +935,9 @@ Item {
                 }
             }
 
-            
 
-            
+
+
 
 
             StyledRect {

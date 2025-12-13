@@ -331,7 +331,7 @@ Singleton {
             }
 
             if (use24Hour) {
-                // Force 24-hour format with AM/PM
+
                 const hours = date.getHours()
                 const minutes = date.getMinutes()
                 const period = hours >= 12 ? "PM" : "AM"

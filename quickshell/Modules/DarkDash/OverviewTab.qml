@@ -15,7 +15,6 @@ Item {
     height: implicitHeight
 
     Component.onCompleted: {
-        console.log("OverviewTab created - parent:", parent, "width:", width, "implicitWidth:", implicitWidth)
     }
 
     signal switchToWeatherTab()
@@ -28,7 +27,6 @@ Item {
         height: root.height
         
         Component.onCompleted: {
-            console.log("OverviewTab innerContainer - root.width:", root.width, "root.height:", root.height)
         }
 
         ClockCard {
@@ -47,24 +45,13 @@ Item {
             visible: SettingsData.weatherEnabled
 
             Component.onCompleted: {
-                console.log("WeatherOverviewCard created:")
-                console.log("  - weatherEnabled:", SettingsData.weatherEnabled)
-                console.log("  - innerContainer.width:", innerContainer.width)
-                console.log("  - root.width:", root.width)
-                console.log("  - calculated width:", width)
-                console.log("  - x position:", x)
-                console.log("  - visible:", visible)
                 if (typeof WeatherService !== "undefined") {
-                    console.log("  - WeatherService.weather.available:", WeatherService.weather.available)
-                    console.log("  - WeatherService.weather.temp:", WeatherService.weather.temp)
                 } else {
-                    console.log("  - WeatherService is undefined!")
                 }
             }
 
             onWidthChanged: {
                 if (width > 0) {
-                    console.log("WeatherOverviewCard width changed to:", width, "visible:", visible)
                 }
             }
 

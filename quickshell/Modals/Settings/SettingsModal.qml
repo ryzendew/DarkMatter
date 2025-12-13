@@ -173,7 +173,7 @@ DarkModal {
                 spacing: 0
                 clip: false
 
-                // Header bar with clean design
+
                 Rectangle {
                     width: parent.width
                     height: {
@@ -230,7 +230,7 @@ DarkModal {
                     }
                 }
 
-                // Main content area
+
                 Row {
                     width: parent.width
                     height: {
@@ -257,7 +257,7 @@ DarkModal {
                         }
                     }
 
-                    // Divider between sidebar and content
+
                     Rectangle {
                         width: 1
                         height: parent.height

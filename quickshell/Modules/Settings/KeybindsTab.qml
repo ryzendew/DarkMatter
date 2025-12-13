@@ -12,9 +12,9 @@ Item {
     id: keybindsTab
 
     readonly property string defaultKeybindsPath: (Quickshell.env("HOME") || Paths.stringify(StandardPaths.writableLocation(StandardPaths.HomeLocation))) + "/.config/hypr/hyprland/keybinds.conf"
-    
+
     property string keybindsPath: (SettingsData.keybindsPath && SettingsData.keybindsPath !== "") ? SettingsData.keybindsPath : defaultKeybindsPath
-    
+
     property var keybinds: []
     property bool isLoading: false
     property bool hasUnsavedChanges: false
@@ -126,10 +126,10 @@ Item {
     function parseKeybinds(content) {
         var lines = content.split('\n')
         var parsed = []
-        
+
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i].trim()
-            
+
             if (line.length === 0 || line.startsWith('#')) {
                 parsed.push({
                     type: 'comment',
@@ -138,7 +138,7 @@ Item {
                 })
                 continue
             }
-            
+
             var bindMatch = line.match(/^bind[rs]?\s*=\s*(.+)$/)
             if (bindMatch) {
                 var parts = bindMatch[1].split(',').map(p => p.trim())
@@ -146,7 +146,7 @@ Item {
                     var modifiers = parts[0]
                     var key = parts[1]
                     var command = parts.slice(2).join(',').trim()
-                    
+
                     parsed.push({
                         type: 'keybind',
                         original: lines[i],
@@ -170,7 +170,7 @@ Item {
                 })
             }
         }
-        
+
         keybinds = parsed
         isLoading = false
         hasUnsavedChanges = false
@@ -190,21 +190,21 @@ Item {
 
         for (let i = 0; i < allBinds.length; i++) {
             const bind = allBinds[i]
-            
+
             if (q) {
                 const keyStr = (bind.modifiers || "") + " " + (bind.key || "") + " " + (bind.command || "")
                 if (keyStr.toLowerCase().indexOf(q) === -1) {
                     continue
                 }
             }
-            
+
             if (selectedCategory) {
                 const category = _getCategoryForBind(bind)
                 if (category !== selectedCategory) {
                     continue
                 }
             }
-            
+
             result.push(bind)
         }
         _filteredBinds = result
@@ -245,14 +245,14 @@ Item {
     function saveKeybinds() {
         _savedScrollY = flickable.contentY
         _preserveScroll = true
-        
+
         var lines = []
         var lastWasEmpty = false
-        
+
         for (var i = 0; i < keybinds.length; i++) {
             var item = keybinds[i]
             var line = ""
-            
+
             if (item.type === 'comment' || item.type === 'raw') {
                 line = item.original
             } else if (item.type === 'keybind') {
@@ -265,35 +265,35 @@ Item {
             } else {
                 line = item.original
             }
-            
+
             line = line.replace(/\s+$/, '')
-            
+
             var isEmpty = line.length === 0 || line.trim().length === 0
             if (isEmpty && lastWasEmpty) {
                 continue
             }
             lastWasEmpty = isEmpty
-            
+
             lines.push(line)
         }
-        
+
         while (lines.length > 0 && lines[lines.length - 1].trim().length === 0) {
             lines.pop()
         }
-        
+
         var content = lines.join('\n')
-        
+
         var dirPath = keybindsPath.substring(0, keybindsPath.lastIndexOf('/'))
         ensureDirProcess.command = ["mkdir", "-p", dirPath]
         ensureDirProcess.running = true
         pendingSaveContent = content
     }
-    
+
     Process {
         id: ensureDirProcess
         command: ["mkdir", "-p"]
         running: false
-        
+
         onExited: exitCode => {
             if (pendingSaveContent !== "") {
                 touchFileProcess.command = ["touch", keybindsPath]
@@ -301,12 +301,12 @@ Item {
             }
         }
     }
-    
+
     Process {
         id: touchFileProcess
         command: ["touch"]
         running: false
-        
+
         onExited: exitCode => {
             if (pendingSaveContent !== "") {
                 saveKeybindsFile.path = ""
@@ -319,7 +319,7 @@ Item {
             }
         }
     }
-    
+
     property string pendingSaveContent: ""
 
     function addNewKeybind() {
@@ -408,7 +408,7 @@ Item {
         blockLoading: false
         atomicWrites: true
         printErrors: true
-        
+
         onLoaded: {
             var fileContent = text()
             const savedY = keybindsTab._savedScrollY
@@ -421,7 +421,7 @@ Item {
                 })
             }
         }
-        
+
         onLoadFailed: {
             isLoading = false
             if (typeof ToastService !== "undefined") {
@@ -434,20 +434,20 @@ Item {
         id: checkFileProcess
         command: ["test", "-f"]
         running: false
-        
+
         onExited: exitCode => {
             _configFileExists = (exitCode === 0)
             _checkingFileExists = false
         }
     }
-    
+
     FileView {
         id: saveKeybindsFile
         blockWrites: false
         blockLoading: true
         atomicWrites: true
         printErrors: true
-        
+
         onSaved: {
             hasUnsavedChanges = false
             if (typeof ToastService !== "undefined") {
@@ -467,7 +467,7 @@ Item {
             reloadHyprlandProcess.running = true
             pendingSaveContent = ""
         }
-        
+
         onSaveFailed: (error) => {
             if (typeof ToastService !== "undefined") {
                 ToastService.showError("Failed to save keybinds file: " + (error || "Unknown error"))
@@ -480,7 +480,7 @@ Item {
         id: reloadHyprlandProcess
         command: ["hyprctl", "reload"]
         running: false
-        
+
         onExited: exitCode => {
             if (exitCode === 0) {
                 if (typeof ToastService !== "undefined") {
@@ -887,7 +887,6 @@ Item {
                 font.pixelSize: Theme.fontSizeMedium
                 color: Theme.surfaceVariantText
                 visible: !isLoading && _filteredBinds.length === 0
-                anchors.horizontalCenter: parent.horizontalCenter
             }
 
             Column {
@@ -1321,7 +1320,7 @@ Item {
         fileExtensions: ["*.conf"]
         saveMode: false
         showHiddenFiles: true
-        
+
         onFileSelected: path => {
             var cleanPath = path.replace(/^file:\/\//, '')
             SettingsData.keybindsPath = cleanPath

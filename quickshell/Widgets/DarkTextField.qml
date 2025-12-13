@@ -96,7 +96,7 @@ StyledRect {
         textInput.insert(textInput.cursorPosition, str)
     }
 
-    // TextMetrics to calculate text dimensions
+
     TextMetrics {
         id: textMetrics
         font.pixelSize: textInput.font.pixelSize

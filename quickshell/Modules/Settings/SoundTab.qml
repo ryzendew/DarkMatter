@@ -20,7 +20,6 @@ Item {
             width: parent.width
             spacing: Theme.spacingL
 
-            // Application Volume Mixer
             Loader {
                 width: parent.width
                 source: "EnhancedVolumeMixer.qml"
@@ -32,7 +31,7 @@ Item {
                 }
             }
 
-            // Default Output Device Section
+
             StyledRect {
                 width: parent.width
                 height: outputSection.implicitHeight + Theme.spacingL * 2
@@ -61,7 +60,7 @@ Item {
                 }
             }
 
-            // Output Devices List
+
             StyledRect {
                 width: parent.width
                 height: outputDevicesSection.implicitHeight + Theme.spacingL * 2
@@ -166,7 +165,6 @@ Item {
                             text: "No output devices available"
                             font.pixelSize: Theme.fontSizeSmall
                             color: Theme.surfaceVariantText
-                            anchors.horizontalCenter: parent.horizontalCenter
                             visible: !Pipewire.nodes || !Pipewire.nodes.values || Pipewire.nodes.values.filter(node => {
                                 return node && node.ready && node.audio && node.isSink && !node.isStream
                             }).length === 0
@@ -175,7 +173,7 @@ Item {
                 }
             }
 
-            // Default Input Device Section
+
             StyledRect {
                 width: parent.width
                 height: inputSection.implicitHeight + Theme.spacingL * 2
@@ -204,7 +202,7 @@ Item {
                 }
             }
 
-            // Input Devices List
+
             StyledRect {
                 width: parent.width
                 height: inputDevicesSection.implicitHeight + Theme.spacingL * 2
@@ -307,7 +305,6 @@ Item {
                             text: "No input devices available"
                             font.pixelSize: Theme.fontSizeSmall
                             color: Theme.surfaceVariantText
-                            anchors.horizontalCenter: parent.horizontalCenter
                             visible: !Pipewire.nodes || !Pipewire.nodes.values || Pipewire.nodes.values.filter(node => {
                                 return node && node.ready && node.audio && !node.isSink && !node.isStream
                             }).length === 0

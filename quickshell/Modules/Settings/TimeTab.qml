@@ -43,11 +43,11 @@ Item {
         running: true
         repeat: true
         onTriggered: {
-            // Force time display update
+
         }
     }
-    
-    // Force update when format changes
+
+
     property int formatUpdateTrigger: 0
     Connections {
         target: SettingsData
@@ -65,7 +65,6 @@ Item {
 
         Column {
             id: mainColumn
-
             width: parent.width
             spacing: Theme.spacingXL
 
@@ -114,13 +113,13 @@ Item {
                                     root.formatUpdateTrigger // Force update when format changes
                                     const now = new Date()
                                     if (SettingsData.use24HourClock) {
-                                        // Force 24-hour format with AM/PM
+
                                         const hours = now.getHours()
                                         const minutes = now.getMinutes()
                                         const period = hours >= 12 ? "PM" : "AM"
                                         return String(hours).padStart(2, '0') + ":" + String(minutes).padStart(2, '0') + " " + period + " " + now.toLocaleDateString(Qt.locale(), Locale.LongFormat)
                                     } else {
-                                        // Use combined format string for 12-hour time
+
                                         const timeStr = now.toLocaleTimeString(Qt.locale(), "h:mm AP")
                                         const cleanedTime = timeStr.replace(/\./g, "").trim()
                                         return cleanedTime + " " + now.toLocaleDateString(Qt.locale(), Locale.LongFormat)
@@ -351,7 +350,7 @@ Item {
                             TimeService.setNTP(checked)
                         }
                     }
-                    
+
                     StyledText {
                         text: "Status: " + (TimeService.systemClockSynchronized ? "Synchronized" : "Not synchronized") + " (" + TimeService.ntpServiceStatus + ")"
                         font.pixelSize: Theme.fontSizeSmall

@@ -32,7 +32,6 @@ ShellRoot {
     id: root
 
     Component.onCompleted: {
-        console.warn("[DarkDash-Debug] shell.qml ShellRoot component completed - Dark Dash debug logging enabled")
         PortalService.init()
         DisplayService.nightModeEnabled
         WallpaperCyclingService.cyclingActive

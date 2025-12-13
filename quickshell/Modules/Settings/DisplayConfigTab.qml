@@ -21,9 +21,9 @@ Item {
     property string selectedMonitor: ""
     readonly property string monitorsConfPath: (Quickshell.env("HOME") || Paths.stringify(StandardPaths.writableLocation(StandardPaths.HomeLocation))) + "/.config/hypr/monitors.conf"
     readonly property string capabilitiesCachePath: Paths.stringify(`${StandardPaths.writableLocation(StandardPaths.GenericConfigLocation)}/DarkMaterialShell/monitor-capabilities.json`)
-    
+
     signal tabActivated()
-    
+
     function getFilteredMonitors() {
         if (selectedMonitor === "") {
             return monitors
@@ -36,11 +36,11 @@ Item {
         var lines = content.split('\n')
         var currentMonitor = null
         var inMonitorV2Block = false
-        
+
         for (var i = 0; i < lines.length; i++) {
             var line = lines[i].trim()
             if (line === '' || line.startsWith('#')) continue
-            
+
             if (line.startsWith('monitorv2') && line.includes('{')) {
                 inMonitorV2Block = true
                 if (currentMonitor) {
@@ -72,7 +72,7 @@ Item {
                 }
                 continue
             }
-            
+
             if (inMonitorV2Block) {
                 if (line === '}') {
                     inMonitorV2Block = false
@@ -82,12 +82,12 @@ Item {
                     }
                     continue
                 }
-                
+
                 var keyValue = line.split('=')
                 if (keyValue.length === 2) {
                     var key = keyValue[0].trim()
                     var value = keyValue[1].trim().replace(/^["']|["']$/g, '')
-                    
+
                     if (key === 'output') {
                         currentMonitor.name = value
                     } else if (key === 'mode') {
@@ -138,7 +138,7 @@ Item {
                 }
                 continue
             }
-            
+
             if (line.startsWith('monitor=')) {
                 if (currentMonitor) {
                     monitors.push(currentMonitor)
@@ -167,17 +167,17 @@ Item {
                     max_avg_luminance: 0,
                     isV2: false
                 }
-                
+
                 var monitorValue = line.substring(9).trim()
                 if (monitorValue.startsWith('"') && monitorValue.endsWith('"')) {
                     monitorValue = monitorValue.slice(1, -1)
                 }
-                
+
                 if (monitorValue === 'disable') {
                     currentMonitor.disabled = true
                     continue
                 }
-                
+
                 var parts = monitorValue.split(',')
                 if (parts.length > 0) {
                     var namePart = parts[0].trim()
@@ -185,7 +185,7 @@ Item {
                         namePart = namePart.slice(1, -1)
                     }
                     currentMonitor.name = namePart
-                    
+
                     if (parts.length > 1) {
                         var resolutionPart = parts[1].trim()
                         if (resolutionPart.includes('@')) {
@@ -210,7 +210,7 @@ Item {
                     if (parts.length > 5) {
                         currentMonitor.transform = parts[5].trim()
                     }
-                    
+
                     for (var j = 6; j < parts.length; j += 2) {
                         if (j + 1 < parts.length) {
                             var argName = parts[j].trim()
@@ -235,7 +235,7 @@ Item {
                         }
                     }
                 }
-            } 
+            }
             else if (currentMonitor && line.startsWith('monitor:')) {
                 var keyValue = line.substring(8).trim().split('=')
                 if (keyValue.length === 2) {
@@ -251,11 +251,11 @@ Item {
                 }
             }
         }
-        
+
         if (currentMonitor) {
             monitors.push(currentMonitor)
         }
-        
+
         return monitors
     }
 
@@ -269,21 +269,21 @@ Item {
         loadCapabilitiesProcess.running = true
         checkEdidHdrSupport()
     }
-    
+
     function checkEdidHdrSupport() {
         for (var i = 0; i < monitors.length; i++) {
             var monitor = monitors[i]
             if (!monitor || monitor.disabled) continue
-            
+
             var caps = displayConfigTab.monitorCapabilities[monitor.name]
             if (caps && caps.hdr === true) {
                 continue
             }
-            
+
             checkEdidForMonitor(monitor.name, i)
         }
     }
-    
+
     function checkEdidForMonitor(monitorName, index) {
         edidCheckProcess.command = ["sh", "-c", "for card in /sys/class/drm/card*/" + monitorName + "/edid; do if [ -r \"$card\" ] 2>/dev/null; then output=$(cat \"$card\" 2>/dev/null | edid-decode 2>&1); echo \"$output\" | grep -qiE '(hdr.*static.*metadata|hdr.*metadata.*block|hdr.*static|bt\\.2020|rec\\.2020)' && echo 'HDR' && break; fi; done"]
         edidCheckProcess.monitorName = monitorName
@@ -295,12 +295,12 @@ Item {
         var lines = []
         var content = originalContent || ""
         var contentLines = content ? content.split('\n') : []
-        
+
         var i = 0
         while (i < contentLines.length) {
             var line = contentLines[i]
             var trimmed = line.trim()
-            
+
             if (trimmed.startsWith('monitor=') || trimmed.startsWith('monitorv2')) {
                 if (trimmed.startsWith('monitor=')) {
                     i++
@@ -321,18 +321,18 @@ Item {
                     continue
                 }
             }
-            
+
             lines.push(line)
             i++
         }
-        
+
         for (var j = 0; j < monitors.length; j++) {
             var monitor = monitors[j]
             monitor.isV2 = true
-            
+
             lines.push("monitorv2 {")
                 lines.push("  output = " + (monitor.name.includes(" ") ? '"' + monitor.name + '"' : monitor.name))
-                
+
                 if (monitor.disabled) {
                     lines.push("  disabled = true")
                 } else {
@@ -398,35 +398,35 @@ Item {
                 lines.push("}")
             lines.push("")
         }
-        
+
         while (lines.length > 0 && lines[lines.length - 1].trim().length === 0) {
             lines.pop()
         }
-        
+
         var newContent = lines.join('\n')
-        
+
         var dirPath = monitorsConfPath.substring(0, monitorsConfPath.lastIndexOf('/'))
         ensureDirProcess.command = ["mkdir", "-p", dirPath]
         ensureDirProcess.running = true
         pendingSaveContent = newContent
     }
-    
+
     property string pendingSaveContent: ""
 
     function applyMonitorSetting(monitorName, setting, value) {
         var monitor = monitors.find(function(m) { return m.name === monitorName })
         if (!monitor) return
-        
+
         monitor[setting] = value
         hasUnsavedChanges = true
-        
+
         saveMonitorsConf()
     }
-    
+
     function updateMonitorResolution(monitorName, resolution) {
         applyMonitorSetting(monitorName, "resolution", resolution)
     }
-    
+
     function updateMonitorRefreshRate(monitorName, refreshRate) {
         applyMonitorSetting(monitorName, "refreshRate", refreshRate)
     }
@@ -438,16 +438,16 @@ Item {
             loadMonitorCapabilities()
         })
     }
-    
+
     onTabActivated: {
         loadMonitorCapabilities()
     }
-    
+
     function loadMonitorCapabilitiesFromCache() {
         capabilitiesCacheFile.path = ""
         capabilitiesCacheFile.path = capabilitiesCachePath
     }
-    
+
     function saveMonitorCapabilitiesToCache() {
         var cacheData = {
             rawData: rawMonitorData,
@@ -460,7 +460,7 @@ Item {
         ensureCapabilitiesDirProcess.running = true
         pendingCapabilitiesContent = capabilitiesJson
     }
-    
+
     property string pendingCapabilitiesContent: ""
 
     FileView {
@@ -470,7 +470,7 @@ Item {
         blockLoading: false
         atomicWrites: true
         printErrors: true
-        
+
         onLoaded: {
             var content = text()
             displayConfigTab.originalContent = content
@@ -488,7 +488,7 @@ Item {
                 }
             }
         }
-        
+
         onLoadFailed: {
             loadMonitorsFromHyprctl()
         }
@@ -560,14 +560,14 @@ Item {
                 try {
                     var json = JSON.parse(stdout.text)
                     displayConfigTab.rawMonitorData = json
-                    
+
                     var caps = {}
                     for (var i = 0; i < json.length; i++) {
                         var monitor = json[i]
                         var refreshRates = []
                         var resolutions = []
                         var resolutionRefreshMap = {}
-                        
+
                         if (monitor.availableModes && Array.isArray(monitor.availableModes)) {
                             for (var j = 0; j < monitor.availableModes.length; j++) {
                                 var modeStr = monitor.availableModes[j]
@@ -577,15 +577,15 @@ Item {
                                     var height = parseInt(match[2])
                                     var refresh = parseFloat(match[3])
                                     var res = width + "x" + height
-                                    
+
                                     if (!refreshRates.includes(refresh)) {
                                         refreshRates.push(refresh)
                                     }
-                                    
+
                                     if (!resolutions.includes(res)) {
                                         resolutions.push(res)
                                     }
-                                    
+
                                     if (!resolutionRefreshMap[res]) {
                                         resolutionRefreshMap[res] = []
                                     }
@@ -595,11 +595,11 @@ Item {
                                 }
                             }
                         }
-                        
+
                         refreshRates = refreshRates.filter(function(value, index, self) {
                             return self.indexOf(value) === index
                         }).sort(function(a, b) { return b - a })
-                        
+
                         resolutions = resolutions.filter(function(value, index, self) {
                             return self.indexOf(value) === index
                         }).sort(function(a, b) {
@@ -609,11 +609,11 @@ Item {
                             var bPixels = parseInt(bParts[0]) * parseInt(bParts[1])
                             return bPixels - aPixels
                         })
-                        
+
                         for (var res in resolutionRefreshMap) {
                             resolutionRefreshMap[res].sort(function(a, b) { return b - a })
                         }
-                        
+
                         var hdrFromHyprctl = monitor.hdr === true
                         var hdrFromConfig = false
                         for (var k = 0; k < displayConfigTab.monitors.length; k++) {
@@ -624,7 +624,7 @@ Item {
                                 break
                             }
                         }
-                        
+
                         caps[monitor.name] = {
                             refreshRates: refreshRates,
                             resolutions: resolutions,
@@ -669,7 +669,7 @@ Item {
             }
         }
     }
-    
+
     Process {
         id: edidCheckProcess
         property string monitorName: ""
@@ -678,7 +678,7 @@ Item {
         stdout: StdioCollector {}
         onExited: function(exitCode) {
             if (!monitorName) return
-            
+
             var output = stdout.text.trim().toUpperCase()
             if (output.includes("HDR")) {
                 var caps = Object.assign({}, displayConfigTab.monitorCapabilities)
@@ -706,7 +706,7 @@ Item {
             }
         }
     }
-    
+
     FileView {
         id: capabilitiesCacheFile
         path: displayConfigTab.capabilitiesCachePath
@@ -714,7 +714,7 @@ Item {
         blockLoading: false
         atomicWrites: true
         printErrors: false
-        
+
         onLoaded: {
             try {
                 var cached = JSON.parse(text())
@@ -733,18 +733,18 @@ Item {
                 displayConfigTab.rawMonitorData = []
             }
         }
-        
+
         onLoadFailed: {
             displayConfigTab.monitorCapabilities = {}
             displayConfigTab.rawMonitorData = []
         }
     }
-    
+
     Process {
         id: ensureCapabilitiesDirProcess
         command: ["mkdir", "-p"]
         running: false
-        
+
         onExited: exitCode => {
             if (pendingCapabilitiesContent !== "") {
                 touchCapabilitiesFileProcess.command = ["touch", capabilitiesCachePath]
@@ -752,12 +752,12 @@ Item {
             }
         }
     }
-    
+
     Process {
         id: touchCapabilitiesFileProcess
         command: ["touch"]
         running: false
-        
+
         onExited: exitCode => {
             if (pendingCapabilitiesContent !== "") {
                 saveCapabilitiesCacheFile.path = ""
@@ -770,18 +770,18 @@ Item {
             }
         }
     }
-    
+
     FileView {
         id: saveCapabilitiesCacheFile
         blockWrites: false
         blockLoading: true
         atomicWrites: true
         printErrors: true
-        
+
         onSaved: {
             pendingCapabilitiesContent = ""
         }
-        
+
         onSaveFailed: (error) => {
             pendingCapabilitiesContent = ""
         }
@@ -791,7 +791,7 @@ Item {
         id: ensureDirProcess
         command: ["mkdir", "-p"]
         running: false
-        
+
         onExited: exitCode => {
             if (pendingSaveContent !== "") {
                 touchFileProcess.command = ["touch", monitorsConfPath]
@@ -799,12 +799,12 @@ Item {
             }
         }
     }
-    
+
     Process {
         id: touchFileProcess
         command: ["touch"]
         running: false
-        
+
         onExited: exitCode => {
             if (pendingSaveContent !== "") {
                 saveMonitorsFile.path = ""
@@ -817,14 +817,14 @@ Item {
             }
         }
     }
-    
+
     FileView {
         id: saveMonitorsFile
         blockWrites: false
         blockLoading: true
         atomicWrites: true
         printErrors: true
-        
+
         onSaved: {
             hasUnsavedChanges = false
             if (typeof ToastService !== "undefined") {
@@ -836,7 +836,7 @@ Item {
             reloadHyprlandProcess.running = true
             pendingSaveContent = ""
         }
-        
+
         onSaveFailed: (error) => {
             if (typeof ToastService !== "undefined") {
                 ToastService.showError("Failed to save monitor configuration: " + (error || "Unknown error"))
@@ -844,12 +844,12 @@ Item {
             pendingSaveContent = ""
         }
     }
-    
+
     Process {
         id: reloadHyprlandProcess
         command: ["hyprctl", "reload"]
         running: false
-        
+
         onExited: exitCode => {
             if (exitCode === 0) {
                 if (typeof ToastService !== "undefined") {
@@ -915,7 +915,7 @@ Item {
                 width: parent.width
                 spacing: Theme.spacingM
                 visible: displayConfigTab.monitors.length > 0 && !displayConfigTab.loading && displayConfigTab.selectedMonitor !== ""
-                
+
                 StyledRect {
                     height: 40
                     width: showAllButtonText.implicitWidth + Theme.spacingL * 2
@@ -923,7 +923,7 @@ Item {
                     color: Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.1)
                     border.color: Theme.primary
                     border.width: 1
-                    
+
                     StyledText {
                         id: showAllButtonText
                         anchors.centerIn: parent
@@ -931,7 +931,7 @@ Item {
                         font.pixelSize: Theme.fontSizeMedium
                         color: Theme.primary
                     }
-                    
+
                     StateLayer {
                         stateColor: Theme.primary
                         cornerRadius: parent.radius
@@ -1018,7 +1018,7 @@ Item {
                                 var newValue = "0"
                                 if (value === "Enabled Globally (1)") newValue = "1"
                                 else if (value === "Fullscreen Only (2)") newValue = "2"
-                                
+
                                 modelData.vrr = newValue
                                 displayConfigTab.applyMonitorSetting(modelData.name, "vrr", newValue)
                             }
@@ -1028,6 +1028,6 @@ Item {
             }
         }
     }
-    
+
 }
 

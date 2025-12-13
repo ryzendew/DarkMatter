@@ -86,7 +86,6 @@ Item {
 
         Column {
             id: mainColumn
-
             width: parent.width
             spacing: 16
 
@@ -293,7 +292,7 @@ Item {
                         Item {
                             width: 200
                             height: 45 + Theme.spacingM
-                            
+
                             DarkTabBar {
                                 id: modeTabBarNight
                                 width: 200
@@ -315,7 +314,7 @@ Item {
                                                   DisplayService.setNightModeAutomationMode(index === 1 ? "location" : "time")
                                                   currentIndex = index
                                               }
-                                              
+
                                 Connections {
                                     target: SessionData
                                     function onNightModeAutoModeChanged() {

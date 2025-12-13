@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import qs.Common
 import qs.Modals.Common
 import qs.Services
@@ -48,11 +49,11 @@ DarkModal {
                 anchors.margins: Theme.spacingL
                 spacing: Theme.spacingL
 
-                Row {
+                RowLayout {
                     width: parent.width
 
                     Column {
-                        width: parent.width - 40
+                        Layout.fillWidth: true
                         spacing: Theme.spacingXS
 
                         StyledText {
@@ -69,16 +70,15 @@ DarkModal {
                             width: parent.width
                             elide: Text.ElideRight
                         }
-
                     }
 
                     DarkActionButton {
                         iconName: "close"
                         iconSize: Theme.iconSize - 4
                         iconColor: Theme.surfaceText
+                        Layout.alignment: Qt.AlignTop
                         onClicked: root.hideDialog()
                     }
-
                 }
 
                 Rectangle {

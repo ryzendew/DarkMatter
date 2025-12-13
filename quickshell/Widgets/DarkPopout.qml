@@ -29,25 +29,15 @@ PanelWindow {
     signal backgroundClicked
 
     function open() {
-        console.warn("[DarkPopout] open() called")
-        console.warn("[DarkPopout] Stopping closeTimer")
         closeTimer.stop()
-        console.warn("[DarkPopout] Setting shouldBeVisible to true")
         shouldBeVisible = true
-        console.warn("[DarkPopout] Setting visible to true")
         visible = true
-        console.warn("[DarkPopout] Emitting opened signal")
         opened()
-        console.warn("[DarkPopout] open() completed - shouldBeVisible:", shouldBeVisible, "visible:", visible)
     }
 
     function close() {
-        console.warn("[DarkPopout] close() called")
-        console.warn("[DarkPopout] Setting shouldBeVisible to false")
         shouldBeVisible = false
-        console.warn("[DarkPopout] Restarting closeTimer")
         closeTimer.restart()
-        console.warn("[DarkPopout] close() completed - shouldBeVisible:", shouldBeVisible, "visible:", visible)
     }
 
     function toggle() {
@@ -61,14 +51,10 @@ PanelWindow {
         id: closeTimer
         interval: animationDuration + 50
         onTriggered: {
-            console.warn("[DarkPopout] closeTimer triggered, shouldBeVisible:", shouldBeVisible)
             if (!shouldBeVisible) {
-                console.warn("[DarkPopout] Setting visible to false")
                 visible = false
-                console.warn("[DarkPopout] Emitting popoutClosed signal")
                 popoutClosed()
             } else {
-                console.warn("[DarkPopout] Timer triggered but shouldBeVisible is true, not closing")
             }
         }
     }

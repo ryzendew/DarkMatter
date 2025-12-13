@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import qs.Common
@@ -52,7 +53,7 @@ Rectangle {
         return networkInfoModalLoader.item
     }
     
-    Row {
+    RowLayout {
         id: headerRow
         anchors.left: parent.left
         anchors.right: parent.right
@@ -61,24 +62,24 @@ Rectangle {
         anchors.rightMargin: Theme.spacingM
         anchors.topMargin: Theme.spacingS
         height: 40
-        
+        spacing: Theme.spacingM
+
         StyledText {
             id: headerText
             text: "Network Settings"
             font.pixelSize: Theme.fontSizeLarge
             color: Theme.surfaceText
             font.weight: Font.Medium
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
         }
-        
+
         Item {
-            width: Math.max(0, parent.width - headerText.implicitWidth - preferenceControls.width - Theme.spacingM)
-            height: parent.height
+            Layout.fillWidth: true
         }
-        
+
         DarkButtonGroup {
             id: preferenceControls
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
             visible: NetworkService.ethernetConnected && NetworkService.wifiConnected
 
             property int currentPreferenceIndex: NetworkService.userPreference === "ethernet" ? 0 : 1

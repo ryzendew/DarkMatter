@@ -39,7 +39,7 @@ Rectangle {
         anchors.margins: Theme.spacingM
         spacing: Theme.spacingS
 
-        Row {
+        RowLayout {
             width: parent.width
             spacing: Theme.spacingS
 
@@ -47,7 +47,7 @@ Rectangle {
                 name: "volume_up"
                 size: Theme.iconSize
                 color: Theme.primary
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.alignment: Qt.AlignVCenter
             }
 
             StyledText {
@@ -55,14 +55,16 @@ Rectangle {
                 font.pixelSize: Theme.fontSizeL
                 font.weight: Font.Medium
                 color: Theme.onSurface
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.alignment: Qt.AlignVCenter
             }
 
-            Item { width: 1; height: 1 } // Spacer
+            Item {
+                Layout.fillWidth: true
+            }
 
             Row {
                 spacing: Theme.spacingXS
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.alignment: Qt.AlignVCenter
 
                 SmallToggleButton {
                     text: "Output"
@@ -188,7 +190,7 @@ Rectangle {
                 }
             }
 
-            Row {
+            RowLayout {
                 anchors.fill: parent
                 anchors.margins: Theme.spacingS
                 spacing: Theme.spacingS
@@ -197,7 +199,7 @@ Rectangle {
                     name: ApplicationAudioService.getApplicationIcon(node)
                     size: compact ? Theme.iconSizeS : Theme.iconSize
                     color: node && node.audio && !node.audio.muted && node.audio.volume > 0 ? Theme.primary : Theme.surfaceText
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.alignment: Qt.AlignVCenter
                 }
 
                 StyledText {
@@ -205,16 +207,14 @@ Rectangle {
                     font.pixelSize: compact ? Theme.fontSizeS : Theme.fontSizeM
                     color: Theme.onSurface
                     elide: Text.ElideRight
-                    width: Math.min(implicitWidth, parent.width - icon.width - slider.width - Theme.spacingS * 3)
-                    anchors.verticalCenter: parent.verticalCenter
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
                 }
-
-                Item { width: 1; height: 1 } // Spacer
 
                 DarkSlider {
                     id: slider
-                    width: compact ? 80 : 120
-                    height: parent.height
+                    Layout.preferredWidth: compact ? 80 : 120
+                    Layout.alignment: Qt.AlignVCenter
                     enabled: node && node.audio
                     minimum: 0
                     maximum: 100
@@ -223,7 +223,6 @@ Rectangle {
                     unit: "%"
                     thumbOutlineColor: Theme.surfaceContainer
                     trackColor: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g, Theme.surfaceVariant.b, Theme.getContentBackgroundAlpha() * 0.60)
-                    anchors.verticalCenter: parent.verticalCenter
 
                     onSliderValueChanged: function(newValue) {
                         if (node && node.audio) {

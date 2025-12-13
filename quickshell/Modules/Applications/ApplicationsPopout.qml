@@ -104,17 +104,14 @@ DarkPopout {
     }
 
     function toggleCategory(category) {
-        console.warn("[ApplicationsPopout] toggleCategory called for:", category)
         const newExpanded = {}
         for (const key in expandedCategories) {
             newExpanded[key] = expandedCategories[key]
         }
         const currentValue = expandedCategories[category] || false
         newExpanded[category] = !currentValue
-        console.warn("[ApplicationsPopout] Setting expandedCategories for", category, "to", newExpanded[category])
         expandedCategories = newExpanded
         _expandedCategoriesVersion++
-        console.warn("[ApplicationsPopout] _expandedCategoriesVersion is now:", _expandedCategoriesVersion)
     }
 
     function launchApp(app) {

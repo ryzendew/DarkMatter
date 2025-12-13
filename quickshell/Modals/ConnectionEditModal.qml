@@ -13,9 +13,8 @@ DarkModal {
 
     property string connectionName: ""
     property string connectionUuid: ""
-    property string connectionType: ""
     property string editedConnectionName: ""
-    
+
     property string currentIpv4Method: "auto"
     property string currentIpv4Address: ""
     property string currentIpv4Gateway: ""
@@ -26,59 +25,34 @@ DarkModal {
     property string currentDnsSecondary: ""
     property string currentMtu: ""
     property string currentMacAddress: ""
-    
+
     property bool loading: true
 
     property bool modalOpen: false
 
     function show(connName, connUuid) {
-        console.log("[ConnectionEditModal] show() called with name:", connName, "uuid:", connUuid)
-        try {
-            connectionName = connName || ""
-            connectionUuid = connUuid || ""
-            editedConnectionName = connName || ""
-            console.log("[ConnectionEditModal] Set connectionName:", connectionName, "connectionUuid:", connectionUuid)
-            loading = true
-            console.log("[ConnectionEditModal] Setting modalOpen to true")
-            modalOpen = true
-            console.log("[ConnectionEditModal] modalOpen:", modalOpen, "shouldBeVisible:", shouldBeVisible)
-            console.log("[ConnectionEditModal] Opening modal...")
-            open()
-            console.log("[ConnectionEditModal] After open(), modalOpen:", modalOpen, "shouldBeVisible:", shouldBeVisible, "visible:", visible)
-            console.log("[ConnectionEditModal] Loading connection settings...")
-            loadConnectionSettings()
-        } catch (error) {
-            console.error("[ConnectionEditModal] Error in show():", error, error.stack)
-            loading = false
+        connectionName = connName || ""
+        connectionUuid = connUuid || ""
+        editedConnectionName = connName || ""
+        loading = true
+        modalOpen = true
+        open()
+        loadConnectionSettings()
+    }
+
+    shouldBeVisible: modalOpen
+
+    onShouldBeVisibleChanged: {
+        if (!shouldBeVisible && modalOpen) {
             modalOpen = false
         }
     }
 
-    shouldBeVisible: modalOpen
-    
-    onShouldBeVisibleChanged: {
-        console.log("[ConnectionEditModal] shouldBeVisible changed to:", shouldBeVisible, "modalOpen:", modalOpen, "visible:", visible)
-        if (!shouldBeVisible && modalOpen) {
-            console.log("[ConnectionEditModal] shouldBeVisible is false but modalOpen is true, setting modalOpen to false")
-            modalOpen = false
-        }
-    }
-    
-    onModalOpenChanged: {
-        console.log("[ConnectionEditModal] modalOpen changed to:", modalOpen, "shouldBeVisible:", shouldBeVisible)
-    }
-    
-    onVisibleChanged: {
-        console.log("[ConnectionEditModal] visible changed to:", visible, "shouldBeVisible:", shouldBeVisible, "modalOpen:", modalOpen)
-    }
-    
     onOpened: {
-        console.log("[ConnectionEditModal] DarkModal opened signal received, ensuring modalOpen is true")
         modalOpen = true
     }
-    
+
     onDialogClosed: {
-        console.log("[ConnectionEditModal] DarkModal closed signal received, setting modalOpen to false")
         modalOpen = false
     }
     width: 800
@@ -86,43 +60,23 @@ DarkModal {
     positioning: "center"
     enableShadow: true
     allowStacking: true
-    
+
     onBackgroundClicked: () => {
-        console.log("[ConnectionEditModal] Background clicked")
         modalOpen = false
         close()
     }
-    
+
     function closeModal() {
-        console.log("[ConnectionEditModal] closeModal() called")
         modalOpen = false
         close()
-    }
-    
-    Component.onCompleted: {
-        console.log("[ConnectionEditModal] Component created")
-    }
-    
-    Component.onDestruction: {
-        console.log("[ConnectionEditModal] Component destroyed")
     }
 
     content: Component {
         FocusScope {
-            id: contentScope
             anchors.fill: parent
             focus: true
-            
-            Component.onCompleted: {
-                console.log("[ConnectionEditModal] Content component created")
-            }
-            
-            Component.onDestruction: {
-                console.log("[ConnectionEditModal] Content component destroyed")
-            }
-            
+
             Keys.onEscapePressed: event => {
-                console.log("[ConnectionEditModal] Escape key pressed")
                 root.closeModal()
                 event.accepted = true
             }
@@ -135,7 +89,7 @@ DarkModal {
                 anchors.margins: Theme.spacingL
                 spacing: Theme.spacingM
 
-                Row {
+                RowLayout {
                     width: parent.width
                     spacing: Theme.spacingM
 
@@ -143,13 +97,13 @@ DarkModal {
                         name: "settings_ethernet"
                         size: Theme.iconSize
                         color: Theme.primary
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.alignment: Qt.AlignVCenter
                     }
 
                     Column {
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.fillWidth: true
                         spacing: Theme.spacingXS
-                        width: parent.width - 200
 
                         StyledText {
                             text: "Edit Connection"
@@ -221,9 +175,12 @@ DarkModal {
                         }
                     }
 
-                    Item { width: parent.width - 200 }
+                    Item {
+                        Layout.fillWidth: true
+                    }
 
                     DarkActionButton {
+                        Layout.alignment: Qt.AlignVCenter
                         iconName: "close"
                         iconSize: Theme.iconSize - 4
                         iconColor: Theme.surfaceText
@@ -317,7 +274,7 @@ DarkModal {
                                         color: Theme.surfaceText
                                     }
 
-                                    Row {
+                                    RowLayout {
                                         width: parent.width
                                         spacing: Theme.spacingL
 
@@ -325,16 +282,16 @@ DarkModal {
                                             text: "Method:"
                                             font.pixelSize: Theme.fontSizeMedium
                                             color: Theme.surfaceText
-                                            width: 120
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.preferredWidth: 120
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
                                         Rectangle {
-                                            width: 240
+                                            Layout.preferredWidth: 240
                                             height: 40
                                             radius: Theme.cornerRadius * 0.5
                                             color: Theme.surfaceContainer
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
 
                                             Row {
                                                 anchors.fill: parent
@@ -381,7 +338,7 @@ DarkModal {
                                         spacing: Theme.spacingM
                                         visible: root.currentIpv4Method === "manual"
 
-                                        Row {
+                                        RowLayout {
                                             width: parent.width
                                             spacing: Theme.spacingM
 
@@ -389,12 +346,12 @@ DarkModal {
                                                 text: "IP Address:"
                                                 font.pixelSize: Theme.fontSizeMedium
                                                 color: Theme.surfaceText
-                                                width: 120
-                                                anchors.verticalCenter: parent.verticalCenter
+                                                Layout.preferredWidth: 120
+                                                Layout.alignment: Qt.AlignVCenter
                                             }
 
                                             Rectangle {
-                                                width: parent.width - 120 - Theme.spacingL
+                                                Layout.fillWidth: true
                                                 radius: Theme.cornerRadius * 0.5
                                                 color: Theme.surfaceContainer
                                                 border.width: 1
@@ -455,7 +412,7 @@ DarkModal {
                                             }
                                         }
 
-                                        Row {
+                                        RowLayout {
                                             width: parent.width
                                             spacing: Theme.spacingM
 
@@ -463,12 +420,12 @@ DarkModal {
                                                 text: "Gateway:"
                                                 font.pixelSize: Theme.fontSizeMedium
                                                 color: Theme.surfaceText
-                                                width: 120
-                                                anchors.verticalCenter: parent.verticalCenter
+                                                Layout.preferredWidth: 120
+                                                Layout.alignment: Qt.AlignVCenter
                                             }
 
                                             Rectangle {
-                                                width: parent.width - 120 - Theme.spacingL
+                                                Layout.fillWidth: true
                                                 radius: Theme.cornerRadius * 0.5
                                                 color: Theme.surfaceContainer
                                                 border.width: 1
@@ -548,7 +505,7 @@ DarkModal {
                                         color: Theme.surfaceText
                                     }
 
-                                    Row {
+                                    RowLayout {
                                         width: parent.width
                                         spacing: Theme.spacingL
 
@@ -556,16 +513,16 @@ DarkModal {
                                             text: "Method:"
                                             font.pixelSize: Theme.fontSizeMedium
                                             color: Theme.surfaceText
-                                            width: 120
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.preferredWidth: 120
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
                                         Rectangle {
-                                            width: 240
+                                            Layout.preferredWidth: 240
                                             height: 40
                                             radius: Theme.cornerRadius * 0.5
                                             color: Theme.surfaceContainer
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
 
                                             Row {
                                                 anchors.fill: parent
@@ -612,7 +569,7 @@ DarkModal {
                                         spacing: Theme.spacingM
                                         visible: root.currentIpv6Method === "manual"
 
-                                        Row {
+                                        RowLayout {
                                             width: parent.width
                                             spacing: Theme.spacingM
 
@@ -620,12 +577,12 @@ DarkModal {
                                                 text: "IPv6 Address:"
                                                 font.pixelSize: Theme.fontSizeMedium
                                                 color: Theme.surfaceText
-                                                width: 120
-                                                anchors.verticalCenter: parent.verticalCenter
+                                                Layout.preferredWidth: 120
+                                                Layout.alignment: Qt.AlignVCenter
                                             }
 
                                             Rectangle {
-                                                width: parent.width - 120 - Theme.spacingL
+                                                Layout.fillWidth: true
                                                 radius: Theme.cornerRadius * 0.5
                                                 color: Theme.surfaceContainer
                                                 border.width: 1
@@ -681,7 +638,7 @@ DarkModal {
                                             }
                                         }
 
-                                        Row {
+                                        RowLayout {
                                             width: parent.width
                                             spacing: Theme.spacingM
 
@@ -689,12 +646,12 @@ DarkModal {
                                                 text: "Gateway:"
                                                 font.pixelSize: Theme.fontSizeMedium
                                                 color: Theme.surfaceText
-                                                width: 120
-                                                anchors.verticalCenter: parent.verticalCenter
+                                                Layout.preferredWidth: 120
+                                                Layout.alignment: Qt.AlignVCenter
                                             }
 
                                             Rectangle {
-                                                width: parent.width - 120 - Theme.spacingL
+                                                Layout.fillWidth: true
                                                 radius: Theme.cornerRadius * 0.5
                                                 color: Theme.surfaceContainer
                                                 border.width: 1
@@ -774,7 +731,7 @@ DarkModal {
                                         color: Theme.surfaceText
                                     }
 
-                                    Row {
+                                    RowLayout {
                                         width: parent.width
                                         spacing: Theme.spacingM
 
@@ -782,12 +739,12 @@ DarkModal {
                                             text: "Primary DNS:"
                                             font.pixelSize: Theme.fontSizeMedium
                                             color: Theme.surfaceText
-                                            width: 120
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.preferredWidth: 120
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
                                         Rectangle {
-                                            width: parent.width - 120 - Theme.spacingL
+                                            Layout.fillWidth: true
                                             radius: Theme.cornerRadius * 0.5
                                             color: Theme.surfaceContainer
                                             border.width: 1
@@ -843,7 +800,7 @@ DarkModal {
                                         }
                                     }
 
-                                    Row {
+                                    RowLayout {
                                         width: parent.width
                                         spacing: Theme.spacingM
 
@@ -851,13 +808,13 @@ DarkModal {
                                             text: "Secondary DNS:"
                                             font.pixelSize: Theme.fontSizeMedium
                                             color: Theme.surfaceText
-                                            width: 120
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.preferredWidth: 120
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
-                                            Rectangle {
-                                                width: parent.width - 120 - Theme.spacingL
-                                                radius: Theme.cornerRadius * 0.5
+                                        Rectangle {
+                                            Layout.fillWidth: true
+                                            radius: Theme.cornerRadius * 0.5
                                                 color: Theme.surfaceContainer
                                                 border.width: 1
                                                 border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
@@ -909,7 +866,7 @@ DarkModal {
                                                         root.currentDnsSecondary = text
                                                     }
                                                 }
-                                            }
+                                        }
                                     }
                                 }
                             }
@@ -935,7 +892,7 @@ DarkModal {
                                         color: Theme.surfaceText
                                     }
 
-                                    Row {
+                                    RowLayout {
                                         width: parent.width
                                         spacing: Theme.spacingM
 
@@ -943,12 +900,12 @@ DarkModal {
                                             text: "MTU:"
                                             font.pixelSize: Theme.fontSizeMedium
                                             color: Theme.surfaceText
-                                            width: 120
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.preferredWidth: 120
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
                                         Rectangle {
-                                            width: 120
+                                            Layout.preferredWidth: 120
                                             radius: Theme.cornerRadius * 0.5
                                             color: Theme.surfaceContainer
                                             border.width: 1
@@ -1005,7 +962,7 @@ DarkModal {
                                         }
                                     }
 
-                                    Row {
+                                    RowLayout {
                                         width: parent.width
                                         spacing: Theme.spacingM
 
@@ -1013,12 +970,12 @@ DarkModal {
                                             text: "MAC Address:"
                                             font.pixelSize: Theme.fontSizeMedium
                                             color: Theme.surfaceText
-                                            width: 120
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.preferredWidth: 120
+                                            Layout.alignment: Qt.AlignVCenter
                                         }
 
                                         Rectangle {
-                                            width: parent.width - 120 - Theme.spacingL
+                                            Layout.fillWidth: true
                                             radius: Theme.cornerRadius * 0.5
                                             color: Theme.surfaceContainer
                                             border.width: 1
@@ -1085,22 +1042,26 @@ DarkModal {
                     color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
                 }
 
-                Row {
+                RowLayout {
                     width: parent.width
                     height: 50
-                    spacing: Theme.spacingL
+                    spacing: Theme.spacingM
 
-                    Item { width: parent.width - 275; height: parent.height }
+                    Item {
+                        Layout.fillWidth: true
+                    }
 
                     Rectangle {
-                        width: 110
+                        width: Math.max(80, cancelText.contentWidth + Theme.spacingM * 2)
                         height: 40
                         radius: Theme.cornerRadius * 0.5
                         color: cancelMouseArea.containsMouse ? Theme.surfaceVariant : Theme.surfaceContainer
                         border.width: 1
                         border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.2)
+                        Layout.alignment: Qt.AlignVCenter
 
                         StyledText {
+                            id: cancelText
                             anchors.centerIn: parent
                             text: "Cancel"
                             font.pixelSize: Theme.fontSizeMedium
@@ -1119,12 +1080,14 @@ DarkModal {
                     }
 
                     Rectangle {
-                        width: 110
+                        width: Math.max(80, saveText.contentWidth + Theme.spacingM * 2)
                         height: 40
                         radius: Theme.cornerRadius * 0.5
                         color: saveMouseArea.containsMouse ? Theme.primaryContainer : Theme.primary
+                        Layout.alignment: Qt.AlignVCenter
 
                         StyledText {
+                            id: saveText
                             anchors.centerIn: parent
                             text: "Save"
                             font.pixelSize: Theme.fontSizeMedium
@@ -1148,28 +1111,17 @@ DarkModal {
     }
 
     function loadConnectionSettings() {
-        console.log("[ConnectionEditModal] loadConnectionSettings() called")
-        try {
-            const connId = connectionUuid || connectionName
-            console.log("[ConnectionEditModal] Connection ID:", connId, "uuid:", connectionUuid, "name:", connectionName)
-            if (!connId) {
-                console.warn("[ConnectionEditModal] No connection ID provided, skipping load")
-                loading = false
-                return
-            }
-
-            const cmd = connectionUuid ? ["nmcli", "connection", "show", "uuid", connId] : 
-                                          ["nmcli", "connection", "show", "id", connId]
-            console.log("[ConnectionEditModal] Command:", cmd)
-            
-            loadSettingsProcess.command = lowPriorityCmd.concat(cmd)
-            console.log("[ConnectionEditModal] Full command:", loadSettingsProcess.command)
-            loadSettingsProcess.running = true
-            console.log("[ConnectionEditModal] Process started")
-        } catch (error) {
-            console.error("[ConnectionEditModal] Error in loadConnectionSettings():", error, error.stack)
+        const connId = connectionUuid || connectionName
+        if (!connId) {
             loading = false
+            return
         }
+
+        const cmd = connectionUuid ? ["nmcli", "connection", "show", "uuid", connId] :
+                                      ["nmcli", "connection", "show", "id", connId]
+
+        loadSettingsProcess.command = lowPriorityCmd.concat(cmd)
+        loadSettingsProcess.running = true
     }
 
     Process {
@@ -1179,20 +1131,18 @@ DarkModal {
 
         stdout: StdioCollector {
             onStreamFinished: {
-                console.log("[ConnectionEditModal] stdout received, length:", text.length)
                 try {
                     const lines = text.trim().split('\n')
-                    console.log("[ConnectionEditModal] Parsed", lines.length, "lines")
                     const settings = {}
-                    
+
                     lines.forEach(line => {
                         const trimmedLine = line.trim()
                         if (!trimmedLine) return
-                        
+
                         let key, value
                         const colonIndex = trimmedLine.indexOf(':')
                         const equalsIndex = trimmedLine.indexOf('=')
-                        
+
                         if (colonIndex >= 0 && (equalsIndex < 0 || colonIndex < equalsIndex)) {
                             key = trimmedLine.substring(0, colonIndex).trim()
                             value = trimmedLine.substring(colonIndex + 1).trim()
@@ -1202,21 +1152,13 @@ DarkModal {
                         } else {
                             return
                         }
-                        
+
                         if (key && value && value !== "--" && value !== "~") {
                             settings[key] = value
                         } else if (key && (value === "--" || value === "~")) {
                             settings[key] = ""
                         }
                     })
-
-                    console.log("[ConnectionEditModal] Parsed settings keys:", Object.keys(settings).length)
-                    const sampleKeys = Object.keys(settings).slice(0, 5)
-                    const sampleObj = {}
-                    for (let i = 0; i < sampleKeys.length; i++) {
-                        sampleObj[sampleKeys[i]] = settings[sampleKeys[i]]
-                    }
-                    console.log("[ConnectionEditModal] Sample settings:", JSON.stringify(sampleObj))
 
                     const ipv4Method = settings["ipv4.method"] || ""
                     root.currentIpv4Method = (ipv4Method === "manual" || settings["ipv4.addresses"] || settings["IP4.ADDRESS[1]"]) ? "manual" : "auto"
@@ -1236,115 +1178,76 @@ DarkModal {
                     root.currentMtu = settings["802-3-ethernet.mtu"] || settings["wireguard.mtu"] || settings["802-11-wireless.mtu"] || settings["GENERAL.MTU"] || ""
                     root.currentMacAddress = settings["802-3-ethernet.cloned-mac-address"] || settings["802-11-wireless.cloned-mac-address"] || ""
 
-                    console.log("[ConnectionEditModal] Settings loaded successfully")
-                    console.log("[ConnectionEditModal] IPv4:", root.currentIpv4Method, root.currentIpv4Address)
-                    console.log("[ConnectionEditModal] IPv6:", root.currentIpv6Method, root.currentIpv6Address)
-                    console.log("[ConnectionEditModal] Before setting loading=false, modalOpen:", root.modalOpen, "shouldBeVisible:", root.shouldBeVisible, "visible:", root.visible)
                     root.loading = false
-                    console.log("[ConnectionEditModal] After setting loading=false, modalOpen:", root.modalOpen, "shouldBeVisible:", root.shouldBeVisible, "visible:", root.visible)
                 } catch (error) {
-                    console.error("[ConnectionEditModal] Error parsing settings:", error, error.stack)
                     root.loading = false
                 }
             }
         }
 
         onExited: exitCode => {
-            console.log("[ConnectionEditModal] loadSettingsProcess exited with code:", exitCode)
             if (exitCode !== 0) {
-                console.error("[ConnectionEditModal] Failed to load connection settings, exit code:", exitCode)
                 ToastService.showError("Failed to load connection settings")
                 root.loading = false
-            }
-        }
-        
-        stderr: StdioCollector {
-            onStreamFinished: {
-                if (text.trim()) {
-                    console.error("[ConnectionEditModal] loadSettingsProcess stderr:", text)
-                }
             }
         }
     }
 
     function saveConnectionSettings() {
-        console.log("[ConnectionEditModal] saveConnectionSettings() called")
-        try {
-            const connId = connectionUuid || connectionName
-            console.log("[ConnectionEditModal] Connection ID for save:", connId)
-            if (!connId) {
-                console.error("[ConnectionEditModal] No connection specified for save")
-                ToastService.showError("No connection specified")
-                return
-            }
-
-            // First, rename the connection if the name changed
-            const newName = editedConnectionName && editedConnectionName.trim() ? editedConnectionName.trim() : null
-            if (newName && newName !== connectionName) {
-                console.log("[ConnectionEditModal] Renaming connection from", connectionName, "to", newName)
-                renameConnectionProcess.command = lowPriorityCmd.concat(["nmcli", "connection", "modify", connId, "connection.id", newName])
-                renameConnectionProcess.running = true
-                // The rename will trigger the rest of the save via onExited
-                return
-            }
-
-            // Continue with normal save
-            const finalConnId = newName || connId
-            let cmd = ["nmcli", "connection", "modify", finalConnId]
-            console.log("[ConnectionEditModal] Building command, checking TextFields...")
-
-            cmd.push("ipv4.method", root.currentIpv4Method)
-            if (root.currentIpv4Method === "manual") {
-                console.log("[ConnectionEditModal] Checking editIpv4Address:", typeof editIpv4Address)
-                if (editIpv4Address && editIpv4Address.text && editIpv4Address.text.trim()) {
-                    cmd.push("ipv4.addresses", editIpv4Address.text.trim())
-                }
-                console.log("[ConnectionEditModal] Checking editIpv4Gateway:", typeof editIpv4Gateway)
-                if (editIpv4Gateway && editIpv4Gateway.text && editIpv4Gateway.text.trim()) {
-                    cmd.push("ipv4.gateway", editIpv4Gateway.text.trim())
-                }
-            }
-
-            cmd.push("ipv6.method", root.currentIpv6Method)
-            if (root.currentIpv6Method === "manual") {
-                console.log("[ConnectionEditModal] Checking editIpv6Address:", typeof editIpv6Address)
-                if (editIpv6Address && editIpv6Address.text && editIpv6Address.text.trim()) {
-                    cmd.push("ipv6.addresses", editIpv6Address.text.trim())
-                }
-                console.log("[ConnectionEditModal] Checking editIpv6Gateway:", typeof editIpv6Gateway)
-                if (editIpv6Gateway && editIpv6Gateway.text && editIpv6Gateway.text.trim()) {
-                    cmd.push("ipv6.gateway", editIpv6Gateway.text.trim())
-                }
-            }
-
-            const dnsServers = []
-            console.log("[ConnectionEditModal] Checking editDnsPrimary:", typeof editDnsPrimary)
-            if (editDnsPrimary && editDnsPrimary.text && editDnsPrimary.text.trim()) {
-                dnsServers.push(editDnsPrimary.text.trim())
-            }
-            console.log("[ConnectionEditModal] Checking editDnsSecondary:", typeof editDnsSecondary)
-            if (editDnsSecondary && editDnsSecondary.text && editDnsSecondary.text.trim()) {
-                dnsServers.push(editDnsSecondary.text.trim())
-            }
-            cmd.push("ipv4.dns", dnsServers.join(" ") || "")
-
-            console.log("[ConnectionEditModal] Checking editMtu:", typeof editMtu)
-            if (editMtu && editMtu.text && editMtu.text.trim()) {
-                cmd.push("802-3-ethernet.mtu", editMtu.text.trim())
-            }
-            console.log("[ConnectionEditModal] Checking editMacAddress:", typeof editMacAddress)
-            if (editMacAddress && editMacAddress.text && editMacAddress.text.trim()) {
-                cmd.push("802-3-ethernet.cloned-mac-address", editMacAddress.text.trim())
-            }
-
-            console.log("[ConnectionEditModal] Final command:", cmd)
-            saveSettingsProcess.command = lowPriorityCmd.concat(cmd)
-            saveSettingsProcess.running = true
-            console.log("[ConnectionEditModal] Save process started")
-        } catch (error) {
-            console.error("[ConnectionEditModal] Error in saveConnectionSettings():", error, error.stack)
-            ToastService.showError("Error saving settings: " + error.toString())
+        const connId = connectionUuid || connectionName
+        if (!connId) {
+            ToastService.showError("No connection specified")
+            return
         }
+
+        const newName = editedConnectionName && editedConnectionName.trim() ? editedConnectionName.trim() : null
+        if (newName && newName !== connectionName) {
+            renameConnectionProcess.command = lowPriorityCmd.concat(["nmcli", "connection", "modify", connId, "connection.id", newName])
+            renameConnectionProcess.running = true
+            return
+        }
+
+        const finalConnId = newName || connId
+        let cmd = ["nmcli", "connection", "modify", finalConnId]
+
+        cmd.push("ipv4.method", root.currentIpv4Method)
+        if (root.currentIpv4Method === "manual") {
+            if (editIpv4Address && editIpv4Address.text && editIpv4Address.text.trim()) {
+                cmd.push("ipv4.addresses", editIpv4Address.text.trim())
+            }
+            if (editIpv4Gateway && editIpv4Gateway.text && editIpv4Gateway.text.trim()) {
+                cmd.push("ipv4.gateway", editIpv4Gateway.text.trim())
+            }
+        }
+
+        cmd.push("ipv6.method", root.currentIpv6Method)
+        if (root.currentIpv6Method === "manual") {
+            if (editIpv6Address && editIpv6Address.text && editIpv6Address.text.trim()) {
+                cmd.push("ipv6.addresses", editIpv6Address.text.trim())
+            }
+            if (editIpv6Gateway && editIpv6Gateway.text && editIpv6Gateway.text.trim()) {
+                cmd.push("ipv6.gateway", editIpv6Gateway.text.trim())
+            }
+        }
+
+        const dnsServers = []
+        if (editDnsPrimary && editDnsPrimary.text && editDnsPrimary.text.trim()) {
+            dnsServers.push(editDnsPrimary.text.trim())
+        }
+        if (editDnsSecondary && editDnsSecondary.text && editDnsSecondary.text.trim()) {
+            dnsServers.push(editDnsSecondary.text.trim())
+        }
+        cmd.push("ipv4.dns", dnsServers.join(" ") || "")
+
+        if (editMtu && editMtu.text && editMtu.text.trim()) {
+            cmd.push("802-3-ethernet.mtu", editMtu.text.trim())
+        }
+        if (editMacAddress && editMacAddress.text && editMacAddress.text.trim()) {
+            cmd.push("802-3-ethernet.cloned-mac-address", editMacAddress.text.trim())
+        }
+
+        saveSettingsProcess.command = lowPriorityCmd.concat(cmd)
+        saveSettingsProcess.running = true
     }
 
     Process {
@@ -1354,14 +1257,10 @@ DarkModal {
 
         onExited: exitCode => {
             if (exitCode === 0) {
-                console.log("[ConnectionEditModal] Connection renamed successfully")
-                // Update connectionName to the new name
                 connectionName = editedConnectionName.trim()
-                // Now continue with the rest of the save
                 const finalConnId = editedConnectionName.trim()
                 let cmd = ["nmcli", "connection", "modify", finalConnId]
-                console.log("[ConnectionEditModal] Building command after rename...")
-                
+
                 cmd.push("ipv4.method", root.currentIpv4Method)
                 if (root.currentIpv4Method === "manual") {
                     if (root.currentIpv4Address && root.currentIpv4Address.trim()) {
@@ -1398,20 +1297,10 @@ DarkModal {
                     cmd.push("802-3-ethernet.cloned-mac-address", root.currentMacAddress.trim())
                 }
 
-                console.log("[ConnectionEditModal] Final command after rename:", cmd)
                 saveSettingsProcess.command = lowPriorityCmd.concat(cmd)
                 saveSettingsProcess.running = true
             } else {
-                console.error("[ConnectionEditModal] Failed to rename connection, exit code:", exitCode)
                 ToastService.showError("Failed to rename connection")
-            }
-        }
-
-        stderr: StdioCollector {
-            onStreamFinished: {
-                if (text.trim()) {
-                    console.error("[ConnectionEditModal] renameConnectionProcess stderr:", text)
-                }
             }
         }
     }
@@ -1422,25 +1311,14 @@ DarkModal {
         command: []
 
         onExited: exitCode => {
-            console.log("[ConnectionEditModal] saveSettingsProcess exited with code:", exitCode)
             if (exitCode === 0) {
-                console.log("[ConnectionEditModal] Settings saved successfully")
                 ToastService.showInfo("Connection settings saved")
                 root.closeModal()
                 if (NetworkService) {
                     NetworkService.refreshNetworkState()
                 }
             } else {
-                console.error("[ConnectionEditModal] Failed to save settings, exit code:", exitCode)
                 ToastService.showError("Failed to save connection settings")
-            }
-        }
-        
-        stderr: StdioCollector {
-            onStreamFinished: {
-                if (text.trim()) {
-                    console.error("[ConnectionEditModal] saveSettingsProcess stderr:", text)
-                }
             }
         }
     }
