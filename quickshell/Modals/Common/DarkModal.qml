@@ -40,16 +40,20 @@ PanelWindow {
     signal backgroundClicked
 
     function open() {
+        console.log("[DarkModal] open() called, current shouldBeVisible:", shouldBeVisible)
         ModalManager.openModal(root)
         closeTimer.stop()
         shouldBeVisible = true
         visible = true
+        console.log("[DarkModal] After setting, shouldBeVisible:", shouldBeVisible, "visible:", visible)
         focusScope.forceActiveFocus()
     }
 
     function close() {
+        console.log("[DarkModal] close() called, current shouldBeVisible:", shouldBeVisible)
         shouldBeVisible = false
         closeTimer.restart()
+        console.log("[DarkModal] After setting, shouldBeVisible:", shouldBeVisible)
     }
 
     function toggle() {

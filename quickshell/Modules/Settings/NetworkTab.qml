@@ -911,7 +911,7 @@ Item {
                                                 visible: {
                                                     if (!VpnService || !modelData.uuid) return false
                                                     const details = VpnService.getConnectionDetails(modelData.uuid)
-                                                    return details && details.ipv4 && details.ipv4 !== ""
+                                                    return !!(details && details.ipv4 && details.ipv4 !== "")
                                                 }
 
                                                 StyledText {

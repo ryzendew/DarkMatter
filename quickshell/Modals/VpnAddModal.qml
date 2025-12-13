@@ -2466,6 +2466,7 @@ DarkModal {
         command: []
         property string tempPath: ""
         property string connectionName: ""
+        property string importedConnectionId: ""
         
         stderr: StdioCollector {
             onStreamFinished: {
@@ -2476,7 +2477,25 @@ DarkModal {
         }
         
         stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.trim()) {
+                    const lines = text.trim().split('\n')
+                    for (const line of lines) {
+                        const uuidMatch = line.match(/([a-f0-9-]{36})/i)
+                        const nameMatch = line.match(/Connection\s+['"]([^'"]+)['"]/i)
+                        if (uuidMatch) {
+                            importWireGuardFromTemp.importedConnectionId = uuidMatch[1]
+                            break
+                        } else if (nameMatch) {
+                            importWireGuardFromTemp.importedConnectionName = nameMatch[1]
+                            break
+                        }
+                    }
+                }
+            }
         }
+        
+        property string importedConnectionName: ""
         
         onExited: exitCode => {
             if (tempPath) {
@@ -2487,8 +2506,18 @@ DarkModal {
             cleanupTempFile2.running = true
             
             if (exitCode === 0) {
-                renameImportedWireGuard.connectionName = connectionName
-                renameImportedWireGuard.running = true
+                if (importedConnectionId) {
+                    renameImportedWireGuard.connectionName = connectionName
+                    renameImportedWireGuard.importedConnectionId = importedConnectionId
+                    renameImportedWireGuard.running = true
+                } else if (importedConnectionName) {
+                    renameImportedWireGuard.connectionName = connectionName
+                    renameImportedWireGuard.importedConnectionName = importedConnectionName
+                    renameImportedWireGuard.running = true
+                } else {
+                    renameImportedWireGuard.connectionName = connectionName
+                    renameImportedWireGuard.running = true
+                }
             } else {
                 console.error("[VpnAddModal] Failed to import WireGuard config, exit code:", exitCode)
                 root.importingFile = false
@@ -2502,6 +2531,8 @@ DarkModal {
         running: false
         command: []
         property string connectionName: ""
+        property string importedConnectionId: ""
+        property string importedConnectionName: ""
         
         stderr: StdioCollector {
             onStreamFinished: {
@@ -2513,15 +2544,18 @@ DarkModal {
         
         onStarted: {
             const escapedName = connectionName.replace(/'/g, "'\\''")
-            command = ["bash", "-c", `uuid=$(nmcli -t -f UUID,NAME,TYPE connection show | grep ':wireguard$' | grep '^wg0:' | head -1 | cut -d: -f1); if [ -n "$uuid" ]; then nmcli connection modify uuid "$uuid" connection.id '${escapedName}'; else name=$(nmcli -t -f NAME,TYPE connection show | grep ':wireguard$' | grep '^wg0' | head -1 | cut -d: -f1); if [ -n "$name" ]; then nmcli connection modify "$name" connection.id '${escapedName}'; else echo "Connection not found"; exit 1; fi; fi`]
-        }
-        
-        stdout: StdioCollector {
+            if (importedConnectionId) {
+                command = ["nmcli", "connection", "modify", "uuid", importedConnectionId, "connection.id", connectionName]
+            } else if (importedConnectionName) {
+                const escapedOldName = importedConnectionName.replace(/'/g, "'\\''")
+                command = ["bash", "-c", `nmcli connection modify '${escapedOldName}' connection.id '${escapedName}'`]
+            } else {
+                command = ["bash", "-c", `wg_connections=$(nmcli -t -f UUID,NAME,TYPE connection show | grep ':wireguard$' | grep -E '^[^:]+:(wg[0-9]+|wg0):wireguard$'); if [ -n "$wg_connections" ]; then most_recent=$(echo "$wg_connections" | tail -1); uuid=$(echo "$most_recent" | cut -d: -f1); nmcli connection modify uuid "$uuid" connection.id '${escapedName}'; else all_wg=$(nmcli -t -f UUID,NAME,TYPE connection show | grep ':wireguard$'); if [ -z "$all_wg" ]; then echo "Connection not found"; exit 1; fi; most_recent_uuid=$(echo "$all_wg" | tail -1 | cut -d: -f1); nmcli connection modify uuid "$most_recent_uuid" connection.id '${escapedName}'; fi`]
+            }
         }
         
         onExited: exitCode => {
             if (exitCode === 0) {
-                // Apply additional settings (DNS, MTU, etc.) if needed
                 applyWireGuardSettings.connectionName = connectionName
                 applyWireGuardSettings.running = true
             } else {
