@@ -13,11 +13,9 @@ DarkModal {
     id: root
 
     Component.onCompleted: {
-        console.log("[VpnAddModal] Component created")
     }
 
     Component.onDestruction: {
-        console.log("[VpnAddModal] Component destroyed")
     }
 
     property int selectedVpnType: 0
@@ -29,7 +27,6 @@ DarkModal {
     property string openvpnProtocol: "udp"
     property string openvpnUsername: ""
     property string openvpnPassword: ""
-    property string openvpnConfigFile: ""
     
     property string wireguardPrivateKey: ""
     property string wireguardPublicKey: ""
@@ -70,30 +67,24 @@ DarkModal {
     property string errorMessage: ""
     property string pendingImportFilePath: ""
     property bool waitingForConnectionName: false
-    property string pendingImportType: "" // "wireguard" or "openvpn"
+            property string pendingImportType: ""
 
     onVisibleChanged: {
-        console.log("[VpnAddModal] visible changed to:", visible)
     }
 
     onShouldBeVisibleChanged: {
-        console.log("[VpnAddModal] shouldBeVisible changed to:", shouldBeVisible)
     }
 
     function show() {
-        console.log("[VpnAddModal] show() called")
         try {
             reset()
-            console.log("[VpnAddModal] reset() completed, calling open()")
             open()
-            console.log("[VpnAddModal] open() completed")
         } catch (error) {
             console.error("[VpnAddModal] Error in show():", error, error.stack)
         }
     }
 
     function reset() {
-        console.log("[VpnAddModal] reset() called")
         try {
             selectedVpnType = 0
             connectionName = ""
@@ -102,7 +93,6 @@ DarkModal {
             openvpnProtocol = "udp"
             openvpnUsername = ""
             openvpnPassword = ""
-            openvpnConfigFile = ""
             wireguardPrivateKey = ""
             wireguardPublicKey = ""
             wireguardEndpoint = ""
@@ -137,20 +127,17 @@ DarkModal {
         pendingImportFilePath = ""
         waitingForConnectionName = false
         pendingImportType = ""
-            console.log("[VpnAddModal] reset() completed")
         } catch (error) {
             console.error("[VpnAddModal] Error in reset():", error, error.stack)
         }
     }
 
     function importOvpnFile(filePath, connectionName) {
-        console.log("[VpnAddModal] importOvpnFile() called with path:", filePath, "name:", connectionName)
         try {
             importingFile = true
             errorMessage = ""
             importProcess.pendingConnectionName = connectionName || ""
             importProcess.command = ["nmcli", "connection", "import", "type", "openvpn", "file", filePath]
-            console.log("[VpnAddModal] Starting import process with command:", importProcess.command)
             importProcess.running = true
         } catch (error) {
             console.error("[VpnAddModal] Error in importOvpnFile():", error, error.stack)
@@ -160,14 +147,12 @@ DarkModal {
     }
 
     function importWireGuardConf(filePath, connectionName) {
-        console.log("[VpnAddModal] importWireGuardConf() called with path:", filePath, "name:", connectionName)
         try {
             importingFile = true
             errorMessage = ""
             
             importProcess.pendingConnectionName = connectionName || ""
             importProcess.command = ["nmcli", "connection", "import", "type", "wireguard", "file", filePath]
-            console.log("[VpnAddModal] Starting WireGuard import process with command:", importProcess.command)
             importProcess.running = true
         } catch (error) {
             console.error("[VpnAddModal] Error in importWireGuardConf():", error, error.stack)
@@ -176,38 +161,14 @@ DarkModal {
         }
     }
     
-    function proceedWithImport() {
-        // This function is no longer used - we use saveConnection instead
-        // But keeping it for backward compatibility
-        if (!pendingImportFilePath) {
-            errorMessage = "No file selected"
-            return
-        }
-        if (!connectionName.trim()) {
-            errorMessage = "Connection name is required"
-            return
-        }
-        
-        waitingForConnectionName = false
-        if (pendingImportType === "wireguard") {
-            importWireGuardConf(pendingImportFilePath, connectionName.trim())
-        } else if (pendingImportType === "openvpn") {
-            importOvpnFile(pendingImportFilePath, connectionName.trim())
-        }
-        pendingImportFilePath = ""
-        pendingImportType = ""
-    }
     
     function cancelImport() {
         pendingImportFilePath = ""
         pendingImportType = ""
         waitingForConnectionName = false
-        // Optionally clear form fields, or leave them for user to edit
-        // connectionName = ""
     }
     
     function parseWireGuardConf(content) {
-        console.log("[VpnAddModal] Parsing WireGuard configuration")
         try {
             const lines = content.split('\n')
             let currentSection = ""
@@ -219,16 +180,13 @@ DarkModal {
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim()
                 
-                // Skip comments and empty lines
                 if (!line || line.startsWith('#')) {
                     continue
                 }
                 
-                // Check for section headers
                 if (line.startsWith('[') && line.endsWith(']')) {
                     const sectionName = line.slice(1, -1).toLowerCase()
                     
-                    // Handle [Connection name] section specially
                     if (sectionName === "connection name") {
                         nextLineIsConnectionName = true
                         currentSection = ""
@@ -240,14 +198,12 @@ DarkModal {
                     continue
                 }
                 
-                // Handle connection name value (on line after [Connection name])
                 if (nextLineIsConnectionName) {
                     connectionName = line
                     nextLineIsConnectionName = false
                     continue
                 }
                 
-                // Parse key-value pairs
                 const match = line.match(/^(\w+)\s*=\s*(.+)$/)
                 if (match) {
                     const key = match[1].trim().toLowerCase()
@@ -261,7 +217,6 @@ DarkModal {
                 }
             }
             
-            // Set connection name from [Connection name] section or filename
             if (connectionName) {
                 root.connectionName = connectionName
             } else if (!root.connectionName && root.pendingImportFilePath) {
@@ -269,16 +224,13 @@ DarkModal {
                 root.connectionName = fileName || "WireGuard Connection"
             }
             
-            // Populate form fields - preserve comma-separated values as-is
             if (interfaceData['privatekey']) {
                 root.wireguardPrivateKey = interfaceData['privatekey']
             }
             if (interfaceData['address']) {
-                // Address can have comma-separated IPv4 and IPv6 addresses
                 root.wireguardAddress = interfaceData['address']
             }
             if (interfaceData['dns']) {
-                // DNS can have comma-separated servers
                 root.wireguardDNS = interfaceData['dns']
             }
             if (interfaceData['mtu']) {
@@ -292,7 +244,6 @@ DarkModal {
                 root.wireguardEndpoint = peerData['endpoint']
             }
             if (peerData['allowedips']) {
-                // AllowedIPs can have comma-separated CIDR ranges
                 root.wireguardAllowedIPs = peerData['allowedips']
             }
             if (peerData['presharedkey']) {
@@ -302,10 +253,6 @@ DarkModal {
                 root.wireguardPersistentKeepalive = peerData['persistentkeepalive']
             }
             
-            console.log("[VpnAddModal] WireGuard configuration parsed successfully")
-            console.log("[VpnAddModal] Connection name:", root.connectionName)
-            console.log("[VpnAddModal] Interface data:", interfaceData)
-            console.log("[VpnAddModal] Peer data:", peerData)
             root.waitingForConnectionName = true
         } catch (error) {
             console.error("[VpnAddModal] Error parsing WireGuard conf:", error)
@@ -314,7 +261,6 @@ DarkModal {
     }
     
     function parseOpenVPNConf(content) {
-        console.log("[VpnAddModal] Parsing OpenVPN configuration")
         try {
             const lines = content.split('\n')
             let remoteLine = ""
@@ -327,12 +273,10 @@ DarkModal {
             for (let line of lines) {
                 line = line.trim()
                 
-                // Skip comments and empty lines
                 if (!line || line.startsWith('#')) {
                     continue
                 }
                 
-                // Parse remote directive
                 const remoteMatch = line.match(/^remote\s+(\S+)(?:\s+(\d+))?(?:\s+(\S+))?/i)
                 if (remoteMatch) {
                     remoteLine = remoteMatch[1]
@@ -409,7 +353,6 @@ DarkModal {
                 root.connectionName = fileName || "OpenVPN Connection"
             }
             
-            console.log("[VpnAddModal] OpenVPN configuration parsed successfully")
             root.waitingForConnectionName = true
         } catch (error) {
             console.error("[VpnAddModal] Error parsing OpenVPN conf:", error)
@@ -418,12 +361,10 @@ DarkModal {
     }
 
     function generateWireGuardKeys() {
-        console.log("[VpnAddModal] generateWireGuardKeys() called")
         try {
             generatingKeys = true
             errorMessage = ""
             generateKeysProcess.running = true
-            console.log("[VpnAddModal] WireGuard key generation process started")
         } catch (error) {
             console.error("[VpnAddModal] Error in generateWireGuardKeys():", error, error.stack)
             generatingKeys = false
@@ -432,15 +373,12 @@ DarkModal {
     }
 
     function addOpenVPNConnection() {
-        console.log("[VpnAddModal] addOpenVPNConnection() called")
         try {
             if (!connectionName.trim()) {
-                console.warn("[VpnAddModal] Connection name is missing")
                 errorMessage = "Connection name is required"
                 return
             }
             if (!openvpnServer.trim()) {
-                console.warn("[VpnAddModal] Server address is missing")
                 errorMessage = "Server address is required"
                 return
             }
@@ -460,7 +398,6 @@ DarkModal {
             }
             cmd.push("ipv4.method", "auto")
 
-            console.log("[VpnAddModal] OpenVPN command:", cmd)
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
@@ -470,25 +407,20 @@ DarkModal {
     }
 
     function addWireGuardConnection() {
-        console.log("[VpnAddModal] addWireGuardConnection() called")
         try {
             if (!connectionName.trim()) {
-                console.warn("[VpnAddModal] Connection name is missing")
                 errorMessage = "Connection name is required"
                 return
             }
             if (!wireguardPrivateKey.trim()) {
-                console.warn("[VpnAddModal] Private key is missing")
                 errorMessage = "Private key is required"
                 return
             }
             if (!wireguardEndpoint.trim()) {
-                console.warn("[VpnAddModal] Endpoint is missing")
                 errorMessage = "Endpoint is required"
                 return
             }
             if (!wireguardPublicKey.trim()) {
-                console.warn("[VpnAddModal] Server public key is missing")
                 errorMessage = "Server public key is required"
                 return
             }
@@ -496,7 +428,6 @@ DarkModal {
             errorMessage = ""
             importingFile = true
             
-            // Build WireGuard config file content
             let configContent = "[Interface]\n"
             configContent += "PrivateKey = " + wireguardPrivateKey.trim() + "\n"
             
@@ -522,25 +453,16 @@ DarkModal {
                 configContent += "PersistentKeepalive = " + wireguardPersistentKeepalive.trim() + "\n"
             }
             
-            // Create temporary config file with valid interface name (wg0.conf)
-            // Use a unique filename to avoid conflicts
             const tempConfigPath = "/tmp/quickshell_wg_" + Date.now() + ".conf"
             
-            console.log("[VpnAddModal] Creating WireGuard config, content length:", configContent.length)
-            console.log("[VpnAddModal] Config preview:", configContent.substring(0, 200))
-            
-            // Set properties and build command before starting
             createTempWireGuardConfig.configContent = configContent
             createTempWireGuardConfig.tempPath = tempConfigPath
             createTempWireGuardConfig.connectionName = connectionName.trim()
             
-            // Build command now (before setting running = true)
             const escapedPath = tempConfigPath.replace(/'/g, "'\\''")
             const escapedContent = configContent.replace(/'/g, "'\\''").replace(/\$/g, "\\$").replace(/`/g, "\\`").replace(/\\/g, "\\\\")
             createTempWireGuardConfig.command = ["bash", "-c", `printf '%s' '${escapedContent}' > '${escapedPath}'`]
             
-            console.log("[VpnAddModal] Starting createTempWireGuardConfig process")
-            console.log("[VpnAddModal] Command:", createTempWireGuardConfig.command)
             createTempWireGuardConfig.running = true
         } catch (error) {
             console.error("[VpnAddModal] Error in addWireGuardConnection():", error, error.stack)
@@ -549,15 +471,12 @@ DarkModal {
     }
 
     function addIKEv2Connection() {
-        console.log("[VpnAddModal] addIKEv2Connection() called")
         try {
             if (!connectionName.trim()) {
-                console.warn("[VpnAddModal] Connection name is missing")
                 errorMessage = "Connection name is required"
                 return
             }
             if (!ikev2Address.trim()) {
-                console.warn("[VpnAddModal] Server address is missing")
                 errorMessage = "Server address is required"
                 return
             }
@@ -576,7 +495,6 @@ DarkModal {
             }
             cmd.push("ipv4.method", "auto")
 
-            console.log("[VpnAddModal] IKEv2 command:", cmd)
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
@@ -586,15 +504,12 @@ DarkModal {
     }
 
     function addL2TPConnection() {
-        console.log("[VpnAddModal] addL2TPConnection() called")
         try {
             if (!connectionName.trim()) {
-                console.warn("[VpnAddModal] Connection name is missing")
                 errorMessage = "Connection name is required"
                 return
             }
             if (!l2tpAddress.trim()) {
-                console.warn("[VpnAddModal] Server address is missing")
                 errorMessage = "Server address is required"
                 return
             }
@@ -619,7 +534,6 @@ DarkModal {
             }
             cmd.push("ipv4.method", "auto")
 
-            console.log("[VpnAddModal] L2TP command:", cmd)
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
@@ -629,15 +543,12 @@ DarkModal {
     }
 
     function addPPTPConnection() {
-        console.log("[VpnAddModal] addPPTPConnection() called")
         try {
             if (!connectionName.trim()) {
-                console.warn("[VpnAddModal] Connection name is missing")
                 errorMessage = "Connection name is required"
                 return
             }
             if (!pptpAddress.trim()) {
-                console.warn("[VpnAddModal] Server address is missing")
                 errorMessage = "Server address is required"
                 return
             }
@@ -659,7 +570,6 @@ DarkModal {
             }
             cmd.push("ipv4.method", "auto")
 
-            console.log("[VpnAddModal] PPTP command:", cmd)
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
@@ -669,15 +579,12 @@ DarkModal {
     }
 
     function addStrongSwanConnection() {
-        console.log("[VpnAddModal] addStrongSwanConnection() called")
         try {
             if (!connectionName.trim()) {
-                console.warn("[VpnAddModal] Connection name is missing")
                 errorMessage = "Connection name is required"
                 return
             }
             if (!strongswanAddress.trim()) {
-                console.warn("[VpnAddModal] Server address is missing")
                 errorMessage = "Server address is required"
                 return
             }
@@ -702,7 +609,6 @@ DarkModal {
             }
             cmd.push("ipv4.method", "auto")
 
-            console.log("[VpnAddModal] StrongSwan command:", cmd)
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
@@ -712,15 +618,12 @@ DarkModal {
     }
 
     function addCiscoConnection() {
-        console.log("[VpnAddModal] addCiscoConnection() called")
         try {
             if (!connectionName.trim()) {
-                console.warn("[VpnAddModal] Connection name is missing")
                 errorMessage = "Connection name is required"
                 return
             }
             if (!ciscoAddress.trim()) {
-                console.warn("[VpnAddModal] Server address is missing")
                 errorMessage = "Server address is required"
                 return
             }
@@ -745,7 +648,6 @@ DarkModal {
             }
             cmd.push("ipv4.method", "auto")
 
-            console.log("[VpnAddModal] Cisco AnyConnect command:", cmd)
             addConnectionProcess.command = cmd
             addConnectionProcess.running = true
         } catch (error) {
@@ -755,7 +657,6 @@ DarkModal {
     }
 
     function saveConnection() {
-        console.log("[VpnAddModal] saveConnection() called, selectedVpnType:", selectedVpnType)
         try {
             errorMessage = ""
             
@@ -799,19 +700,10 @@ DarkModal {
     enableShadow: true
     allowStacking: true
 
-    onOpened: {
-        console.log("[VpnAddModal] Modal opened signal")
-    }
-
-    onDialogClosed: {
-        console.log("[VpnAddModal] Modal closed signal")
-    }
 
     Connections {
         function onCloseAllModalsExcept(excludedModal) {
-            console.log("[VpnAddModal] closeAllModalsExcept called, excludedModal:", excludedModal, "root:", root, "allowStacking:", allowStacking)
             if (excludedModal !== root && !allowStacking && shouldBeVisible) {
-                console.log("[VpnAddModal] Closing due to another modal opening")
                 root.close()
             }
         }
@@ -819,7 +711,6 @@ DarkModal {
     }
     
     onBackgroundClicked: () => {
-        console.log("[VpnAddModal] Background clicked")
         close()
     }
 
@@ -829,24 +720,8 @@ DarkModal {
             anchors.fill: parent
             focus: true
 
-            Component.onCompleted: {
-                console.log("[VpnAddModal] Content component created")
-                console.log("[VpnAddModal] Content scope focus:", focus)
-                console.log("[VpnAddModal] Parent modal visible:", root.visible)
-                console.log("[VpnAddModal] Parent modal shouldBeVisible:", root.shouldBeVisible)
-            }
-
-            Component.onDestruction: {
-                console.log("[VpnAddModal] Content component destroyed")
-                console.log("[VpnAddModal] Destruction stack trace:", new Error().stack)
-            }
-
-            onActiveFocusChanged: {
-                console.log("[VpnAddModal] Content scope activeFocus changed to:", activeFocus)
-            }
             
             Keys.onEscapePressed: event => {
-                console.log("[VpnAddModal] Escape key pressed")
                 root.close()
                 event.accepted = true
             }
@@ -893,7 +768,6 @@ DarkModal {
                         iconSize: Theme.iconSize - 4
                         iconColor: Theme.surfaceText
                         onClicked: () => {
-                            console.log("[VpnAddModal] Close button clicked")
                             root.close()
                         }
                     }
@@ -1481,7 +1355,6 @@ DarkModal {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                console.log("[VpnAddModal] Import WireGuard conf button clicked")
                                 root.openWireGuardFileBrowser()
                             }
                         }
@@ -2182,7 +2055,6 @@ DarkModal {
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
-                                console.log("[VpnAddModal] Cancel button clicked")
                                 root.close()
                             }
                         }
@@ -2245,11 +2117,8 @@ DarkModal {
         asynchronous: true
         
         onStatusChanged: {
-            console.log("[VpnAddModal] fileBrowserLoader status changed to:", status)
             if (status === Loader.Ready) {
-                console.log("[VpnAddModal] fileBrowserLoader is ready, item:", item)
                 if (pendingFileBrowserOpen && item && typeof item.open === 'function') {
-                    console.log("[VpnAddModal] Opening FileBrowserModal now that it's ready")
                     Qt.callLater(() => {
                         if (item && typeof item.open === 'function') {
                             item.open()
@@ -2264,9 +2133,7 @@ DarkModal {
         }
         
         onItemChanged: {
-            console.log("[VpnAddModal] fileBrowserLoader item changed:", item)
             if (item && fileBrowserLoader.status === Loader.Ready && pendingFileBrowserOpen) {
-                console.log("[VpnAddModal] FileBrowserLoader item is ready, opening now")
                 Qt.callLater(() => {
                     if (item && typeof item.open === 'function') {
                         item.open()
@@ -2278,10 +2145,6 @@ DarkModal {
         
         sourceComponent: Component {
             FileBrowserModal {
-                Component.onCompleted: {
-                    console.log("[VpnAddModal] FileBrowserModal component created")
-                }
-                
                 browserTitle: root.selectedVpnType === 1 ? "Select WireGuard Configuration File" : "Select OpenVPN Configuration File"
                 browserIcon: "vpn_key"
                 browserType: "generic"
@@ -2290,21 +2153,16 @@ DarkModal {
                 allowStacking: true
 
                 onFileSelected: path => {
-                    console.log("[VpnAddModal] File selected:", path, "for VPN type:", root.selectedVpnType)
                     try {
                         const cleanPath = path.replace(/^file:\/\//, '')
-                        console.log("[VpnAddModal] Cleaned path:", cleanPath)
                         root.pendingImportFilePath = cleanPath
                         root.pendingImportType = root.selectedVpnType === 1 ? "wireguard" : "openvpn"
                         root.connectionName = ""
                         
-                        // Load and parse the file
                         if (root.selectedVpnType === 1) {
-                            // WireGuard
                             wireguardConfFileView.path = ""
                             wireguardConfFileView.path = cleanPath
                         } else {
-                            // OpenVPN
                             openvpnConfFileView.path = ""
                             openvpnConfFileView.path = cleanPath
                         }
@@ -2321,25 +2179,20 @@ DarkModal {
     }
 
     function openFileBrowser() {
-        console.log("[VpnAddModal] openFileBrowser() called")
         try {
             pendingFileBrowserOpen = true
             
             if (!fileBrowserLoader.active) {
-                console.log("[VpnAddModal] Activating fileBrowserLoader")
                 fileBrowserLoader.active = true
             }
             
             if (fileBrowserLoader.status === Loader.Ready && fileBrowserLoader.item) {
-                console.log("[VpnAddModal] FileBrowserLoader already ready, opening immediately")
                 Qt.callLater(() => {
                     if (fileBrowserLoader.item && typeof fileBrowserLoader.item.open === 'function') {
                         fileBrowserLoader.item.open()
                         pendingFileBrowserOpen = false
                     }
                 })
-            } else {
-                console.log("[VpnAddModal] Waiting for FileBrowserLoader to be ready, status:", fileBrowserLoader.status)
             }
         } catch (error) {
             console.error("[VpnAddModal] Error in openFileBrowser():", error, error.stack)
@@ -2348,7 +2201,6 @@ DarkModal {
     }
 
     function openWireGuardFileBrowser() {
-        console.log("[VpnAddModal] openWireGuardFileBrowser() called")
         openFileBrowser()
     }
 
@@ -2360,7 +2212,6 @@ DarkModal {
         printErrors: true
         
         onLoaded: {
-            console.log("[VpnAddModal] WireGuard conf file loaded")
             try {
                 const content = text()
                 root.parseWireGuardConf(content)
@@ -2385,7 +2236,6 @@ DarkModal {
         printErrors: true
         
         onLoaded: {
-            console.log("[VpnAddModal] OpenVPN conf file loaded")
             try {
                 const content = text()
                 root.parseOpenVPNConf(content)
@@ -2410,13 +2260,9 @@ DarkModal {
 
         stdout: StdioCollector {
             onStreamFinished: {
-                console.log("[VpnAddModal] Import process stdout:", text)
-                // nmcli import usually outputs the connection name or UUID
-                // Try to extract it from the output
                 if (text.trim()) {
                     const lines = text.trim().split('\n')
                     for (const line of lines) {
-                        // nmcli import may output: "Connection 'name' (uuid) successfully imported."
                         const match = line.match(/Connection\s+['"]([^'"]+)['"]/i) || line.match(/([a-f0-9-]{36})/i)
                         if (match) {
                             importProcess.importedConnectionId = match[1]
@@ -2428,26 +2274,17 @@ DarkModal {
         }
         
         stderr: StdioCollector {
-            onStreamFinished: {
-                console.log("[VpnAddModal] Import process stderr:", text)
-            }
         }
         
         property string importedConnectionId: ""
 
         onStarted: {
-            console.log("[VpnAddModal] Import process started with command:", command)
             importedConnectionId = ""
         }
 
         onExited: exitCode => {
-            console.log("[VpnAddModal] Import process exited with code:", exitCode)
             if (exitCode === 0) {
-                console.log("[VpnAddModal] Import successful")
-                // If we have a pending connection name, rename the connection
                 if (pendingConnectionName && pendingConnectionName.trim()) {
-                    // Try to find the newly imported connection
-                    // Get the most recent connection of the appropriate type
                     findImportedConnection.running = true
                 } else {
                     root.importingFile = false
@@ -2476,7 +2313,6 @@ DarkModal {
         command: []
         
         onStarted: {
-            // Get all connections and find the most recent one of the correct type
             const vpnType = root.pendingImportType === "wireguard" ? "wireguard" : "vpn"
             command = ["bash", "-c", `nmcli -t -f NAME,UUID,TYPE connection show | grep ':${vpnType}$' | tail -1 | cut -d: -f2`]
         }
@@ -2485,11 +2321,9 @@ DarkModal {
             onStreamFinished: {
                 const uuid = text.trim()
                 if (uuid) {
-                    console.log("[VpnAddModal] Found imported connection UUID:", uuid)
                     renameConnectionProcess.command = ["nmcli", "connection", "modify", "uuid", uuid, "connection.id", importProcess.pendingConnectionName]
                     renameConnectionProcess.running = true
                 } else {
-                    console.warn("[VpnAddModal] Could not find imported connection UUID")
                     root.importingFile = false
                     ToastService.showInfo("VPN connection imported (could not rename)")
                     if (VpnService) {
@@ -2502,7 +2336,6 @@ DarkModal {
         
         onExited: exitCode => {
             if (exitCode !== 0) {
-                console.warn("[VpnAddModal] Failed to find imported connection")
                 root.importingFile = false
                 ToastService.showInfo("VPN connection imported (could not rename)")
                 if (VpnService) {
@@ -2521,14 +2354,12 @@ DarkModal {
         onExited: exitCode => {
             root.importingFile = false
             if (exitCode === 0) {
-                console.log("[VpnAddModal] Connection renamed successfully")
                 ToastService.showInfo("VPN connection imported and saved as '" + importProcess.pendingConnectionName + "'")
                 if (VpnService) {
                     VpnService.refreshAll()
                 }
                 root.close()
             } else {
-                console.warn("[VpnAddModal] Failed to rename connection, but import succeeded")
                 ToastService.showInfo("VPN connection imported (could not rename)")
                 if (VpnService) {
                     VpnService.refreshAll()
@@ -2543,17 +2374,12 @@ DarkModal {
         running: false
         command: ["wg", "genkey"]
 
-        onStarted: {
-            console.log("[VpnAddModal] Generate keys process started")
-        }
 
         stdout: StdioCollector {
             onStreamFinished: {
-                console.log("[VpnAddModal] Private key generated, length:", text.trim().length)
                 try {
                     root.wireguardPrivateKey = text.trim()
                     generatePubkeyProcess.command = ["sh", "-c", "echo '" + root.wireguardPrivateKey + "' | wg pubkey"]
-                    console.log("[VpnAddModal] Starting public key generation")
                     generatePubkeyProcess.running = true
                 } catch (error) {
                     console.error("[VpnAddModal] Error processing private key:", error, error.stack)
@@ -2563,7 +2389,6 @@ DarkModal {
             }
         }
         onExited: exitCode => {
-            console.log("[VpnAddModal] Generate keys process exited with code:", exitCode)
             if (exitCode !== 0) {
                 root.generatingKeys = false
                 root.errorMessage = "Failed to generate keys. Is WireGuard installed?"
@@ -2576,17 +2401,12 @@ DarkModal {
         running: false
         command: []
 
-        onStarted: {
-            console.log("[VpnAddModal] Generate public key process started")
-        }
 
         stdout: StdioCollector {
             onStreamFinished: {
-                console.log("[VpnAddModal] Public key generated, length:", text.trim().length)
                 try {
                     root.wireguardPublicKey = text.trim()
                     root.generatingKeys = false
-                    console.log("[VpnAddModal] Key generation completed successfully")
                 } catch (error) {
                     console.error("[VpnAddModal] Error processing public key:", error, error.stack)
                     root.generatingKeys = false
@@ -2595,7 +2415,6 @@ DarkModal {
             }
         }
         onExited: exitCode => {
-            console.log("[VpnAddModal] Generate public key process exited with code:", exitCode)
             root.generatingKeys = false
             if (exitCode !== 0) {
                 root.errorMessage = "Failed to generate public key"
@@ -2619,35 +2438,19 @@ DarkModal {
             }
         }
         
-        onStarted: {
-            console.log("[VpnAddModal] createTempWireGuardConfig process started")
-            console.log("[VpnAddModal] Creating temporary WireGuard config file at:", tempPath)
-            console.log("[VpnAddModal] Config content length:", configContent ? configContent.length : 0)
-        }
-        
         stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim()) {
-                    console.log("[VpnAddModal] createTempWireGuardConfig stdout:", text)
-                }
-            }
         }
         
         onExited: exitCode => {
-            console.log("[VpnAddModal] createTempWireGuardConfig exited with code:", exitCode)
             if (exitCode === 0) {
-                console.log("[VpnAddModal] Temp config file created, importing...")
-                // Set properties and build command before starting
                 importWireGuardFromTemp.tempPath = createTempWireGuardConfig.tempPath
                 importWireGuardFromTemp.connectionName = createTempWireGuardConfig.connectionName
                 
-                // Build command now
                 const wg0Path = "/tmp/wg0.conf"
                 const escapedTempPath = createTempWireGuardConfig.tempPath.replace(/'/g, "'\\''")
                 const escapedWg0Path = wg0Path.replace(/'/g, "'\\''")
                 importWireGuardFromTemp.command = ["bash", "-c", `cp '${escapedTempPath}' '${escapedWg0Path}' && nmcli connection import type wireguard file '${escapedWg0Path}'`]
                 
-                console.log("[VpnAddModal] Starting importWireGuardFromTemp process")
                 importWireGuardFromTemp.running = true
             } else {
                 console.error("[VpnAddModal] Failed to create temp config file, exit code:", exitCode)
@@ -2672,21 +2475,10 @@ DarkModal {
             }
         }
         
-        onStarted: {
-            console.log("[VpnAddModal] importWireGuardFromTemp process started")
-            console.log("[VpnAddModal] Command:", command)
-        }
-        
         stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim()) {
-                    console.log("[VpnAddModal] importWireGuardFromTemp stdout:", text)
-                }
-            }
         }
         
         onExited: exitCode => {
-            // Clean up temp files
             if (tempPath) {
                 cleanupTempFile.path = tempPath
                 cleanupTempFile.running = true
@@ -2695,8 +2487,6 @@ DarkModal {
             cleanupTempFile2.running = true
             
             if (exitCode === 0) {
-                console.log("[VpnAddModal] WireGuard config imported, renaming connection...")
-                // Find the imported connection (it will have interface name wg0)
                 renameImportedWireGuard.connectionName = connectionName
                 renameImportedWireGuard.running = true
             } else {
@@ -2722,29 +2512,19 @@ DarkModal {
         }
         
         onStarted: {
-            // Find the most recently created WireGuard connection (should be wg0 from our import)
-            // Import creates connection with name matching the interface name (wg0)
             const escapedName = connectionName.replace(/'/g, "'\\''")
             command = ["bash", "-c", `uuid=$(nmcli -t -f UUID,NAME,TYPE connection show | grep ':wireguard$' | grep '^wg0:' | head -1 | cut -d: -f1); if [ -n "$uuid" ]; then nmcli connection modify uuid "$uuid" connection.id '${escapedName}'; else name=$(nmcli -t -f NAME,TYPE connection show | grep ':wireguard$' | grep '^wg0' | head -1 | cut -d: -f1); if [ -n "$name" ]; then nmcli connection modify "$name" connection.id '${escapedName}'; else echo "Connection not found"; exit 1; fi; fi`]
-            console.log("[VpnAddModal] Renaming imported WireGuard connection to:", connectionName)
         }
         
         stdout: StdioCollector {
-            onStreamFinished: {
-                if (text.trim()) {
-                    console.log("[VpnAddModal] renameImportedWireGuard stdout:", text)
-                }
-            }
         }
         
         onExited: exitCode => {
             if (exitCode === 0) {
-                console.log("[VpnAddModal] Connection renamed successfully")
                 // Apply additional settings (DNS, MTU, etc.) if needed
                 applyWireGuardSettings.connectionName = connectionName
                 applyWireGuardSettings.running = true
             } else {
-                console.warn("[VpnAddModal] Could not rename connection, but import succeeded, exit code:", exitCode)
                 applyWireGuardSettings.connectionName = connectionName
                 applyWireGuardSettings.running = true
             }
@@ -2794,9 +2574,7 @@ DarkModal {
             
             if (hasChanges) {
                 command = cmd
-                console.log("[VpnAddModal] Applying additional WireGuard settings")
             } else {
-                // No additional settings, just complete
                 command = ["true"]
             }
         }
@@ -2804,7 +2582,6 @@ DarkModal {
         onExited: exitCode => {
             root.importingFile = false
             if (exitCode === 0) {
-                console.log("[VpnAddModal] WireGuard connection created successfully")
                 try {
                     ToastService.showInfo("VPN connection added successfully")
                     if (VpnService) {
@@ -2815,7 +2592,6 @@ DarkModal {
                     console.error("[VpnAddModal] Error after successful connection add:", error, error.stack)
                 }
             } else {
-                console.warn("[VpnAddModal] Some settings may not have been applied, exit code:", exitCode)
                 ToastService.showInfo("VPN connection added (some settings may need manual configuration)")
                 if (VpnService) {
                     VpnService.refreshAll()
@@ -2836,9 +2612,6 @@ DarkModal {
         }
         
         onExited: exitCode => {
-            if (exitCode === 0) {
-                console.log("[VpnAddModal] Temp file cleaned up:", path)
-            }
         }
     }
     
@@ -2853,9 +2626,6 @@ DarkModal {
         }
         
         onExited: exitCode => {
-            if (exitCode === 0) {
-                console.log("[VpnAddModal] Temp file cleaned up:", path)
-            }
         }
     }
 
@@ -2864,14 +2634,8 @@ DarkModal {
         running: false
         command: []
 
-        onStarted: {
-            console.log("[VpnAddModal] Add connection process started with command:", command)
-        }
-
         onExited: exitCode => {
-            console.log("[VpnAddModal] Add connection process exited with code:", exitCode)
             if (exitCode === 0) {
-                console.log("[VpnAddModal] Connection added successfully")
                 try {
                     ToastService.showInfo("VPN connection added successfully")
                     if (VpnService) {
