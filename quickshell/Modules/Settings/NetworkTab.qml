@@ -908,7 +908,11 @@ Item {
                                             Column {
                                                 width: parent.width
                                                 spacing: 2
-                                                visible: VpnService && modelData.uuid && VpnService.getConnectionDetails(modelData.uuid).ipv4
+                                                visible: {
+                                                    if (!VpnService || !modelData.uuid) return false
+                                                    const details = VpnService.getConnectionDetails(modelData.uuid)
+                                                    return details && details.ipv4 && details.ipv4 !== ""
+                                                }
 
                                                 StyledText {
                                                     text: "IP: " + (VpnService ? VpnService.getConnectionDetails(modelData.uuid).ipv4 : "")
@@ -954,7 +958,12 @@ Item {
                                                 anchors.rightMargin: Theme.spacingS
                                                 text: "Disconnect"
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                color: Theme.onError
+                                                // Use appropriate text color based on error background brightness
+                                                color: {
+                                                    const err = Theme.error
+                                                    const brightness = 0.299 * err.r + 0.587 * err.g + 0.114 * err.b
+                                                    return brightness > 0.5 ? "#000000" : "#FFFFFF"
+                                                }
                                                 horizontalAlignment: Text.AlignHCenter
                                             }
 
@@ -1102,13 +1111,14 @@ Item {
                                         }
 
                                         Rectangle {
+                                            id: vpnConnectButton
                                             property string buttonText: VpnService && VpnService.isActiveUuid(modelData.uuid) ? "Connected" : "Connect"
                                             
                                             // TextMetrics to calculate button size
                                             TextMetrics {
                                                 id: vpnConnectTextMetrics
                                                 font.pixelSize: Theme.fontSizeSmall
-                                                text: buttonText
+                                                text: vpnConnectButton.buttonText
                                             }
                                             
                                             implicitWidth: vpnConnectTextMetrics.width + Theme.spacingS * 2
@@ -1125,7 +1135,7 @@ Item {
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 anchors.leftMargin: Theme.spacingS
                                                 anchors.rightMargin: Theme.spacingS
-                                                text: buttonText
+                                                text: vpnConnectButton.buttonText
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 color: VpnService && VpnService.isActiveUuid(modelData.uuid) ? Theme.onPrimary : Theme.onPrimary
                                                 horizontalAlignment: Text.AlignHCenter
