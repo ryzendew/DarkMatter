@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
 import qs.Services
@@ -26,7 +27,7 @@ Column {
     height: implicitHeight
     spacing: Theme.spacingM
 
-    Row {
+    RowLayout {
         width: parent.width
         spacing: Theme.spacingM
 
@@ -34,7 +35,7 @@ Column {
             name: root.titleIcon
             size: Theme.iconSize
             color: Theme.primary
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
         }
 
         StyledText {
@@ -42,12 +43,11 @@ Column {
             font.pixelSize: Theme.fontSizeLarge
             font.weight: Font.Medium
             color: Theme.surfaceText
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
         }
 
         Item {
-            width: parent.width - 60
-            height: 1
+            Layout.fillWidth: true
         }
     }
 
@@ -132,7 +132,7 @@ Column {
                         }
                     }
 
-                    Row {
+                    RowLayout {
                         id: actionButtons
 
                         anchors.right: parent.right
@@ -254,7 +254,7 @@ Column {
                             }
                         }
 
-                        Row {
+                        RowLayout {
                             spacing: Theme.spacingXS
                             visible: modelData.id === "clock"
                                      || modelData.id === "music"
@@ -403,10 +403,10 @@ Column {
                             }
                         }
 
-                        Row {
+                        RowLayout {
                             visible: modelData.id === "spacer"
                             spacing: Theme.spacingXS
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
 
                             DarkActionButton {
                                 buttonSize: 24
@@ -650,7 +650,7 @@ Column {
                     radius: Theme.cornerRadius
                     color: bluetoothToggleArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
 
-                    Row {
+                    RowLayout {
                         anchors.left: parent.left
                         anchors.leftMargin: Theme.spacingS
                         anchors.verticalCenter: parent.verticalCenter
@@ -660,7 +660,7 @@ Column {
                             name: "bluetooth"
                             size: 16
                             color: Theme.surfaceText
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
@@ -668,7 +668,7 @@ Column {
                             font.pixelSize: Theme.fontSizeSmall
                             color: Theme.surfaceText
                             font.weight: Font.Normal
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
 
@@ -703,7 +703,7 @@ Column {
                     radius: Theme.cornerRadius
                     color: audioToggleArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
 
-                    Row {
+                    RowLayout {
                         anchors.left: parent.left
                         anchors.leftMargin: Theme.spacingS
                         anchors.verticalCenter: parent.verticalCenter
@@ -713,7 +713,7 @@ Column {
                             name: "volume_up"
                             size: 16
                             color: Theme.surfaceText
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
@@ -721,7 +721,7 @@ Column {
                             font.pixelSize: Theme.fontSizeSmall
                             color: Theme.surfaceText
                             font.weight: Font.Normal
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
 
@@ -756,7 +756,7 @@ Column {
                     radius: Theme.cornerRadius
                     color: micToggleArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
 
-                    Row {
+                    RowLayout {
                         anchors.left: parent.left
                         anchors.leftMargin: Theme.spacingS
                         anchors.verticalCenter: parent.verticalCenter
@@ -766,7 +766,7 @@ Column {
                             name: "mic"
                             size: 16
                             color: Theme.surfaceText
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
@@ -774,7 +774,7 @@ Column {
                             font.pixelSize: Theme.fontSizeSmall
                             color: Theme.surfaceText
                             font.weight: Font.Normal
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
                     }
 

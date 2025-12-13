@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.Common
@@ -232,7 +233,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -240,13 +241,13 @@ Item {
                             name: "apps"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Column {
-                            width: parent.width - Theme.iconSize - Theme.spacingM
+                            Layout.fillWidth: true
                             spacing: Theme.spacingXS
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
 
                             StyledText {
                                 text: "Default Applications"

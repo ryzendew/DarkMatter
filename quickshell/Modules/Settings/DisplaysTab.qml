@@ -94,7 +94,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -102,13 +102,13 @@ Item {
                             name: "monitor"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Column {
-                            width: parent.width - Theme.iconSize - Theme.spacingM
+                            Layout.fillWidth: true
                             spacing: Theme.spacingXS
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
 
                             StyledText {
                                 text: "Connected Displays"

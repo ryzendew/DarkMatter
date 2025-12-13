@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
 
@@ -136,12 +137,13 @@ Item {
                             font.weight: Font.Medium
                         }
 
-                        Row {
+                        RowLayout {
                                 width: parent.width
                                 spacing: Theme.spacingM
 
                                 Column {
-                                    width: (parent.width - Theme.spacingM) / 2
+                                    Layout.fillWidth: true
+                                    Layout.preferredWidth: (parent.width - Theme.spacingM) / 2
                                     spacing: Theme.spacingXS
 
                                     StyledText {
@@ -192,7 +194,8 @@ Item {
                                 }
 
                                 Column {
-                                    width: (parent.width - Theme.spacingM) / 2
+                                    Layout.fillWidth: true
+                                    Layout.preferredWidth: (parent.width - Theme.spacingM) / 2
                                     spacing: Theme.spacingXS
 
                                     StyledText {

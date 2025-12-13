@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import QtCore
 import Quickshell.Io
 import qs.Common
@@ -51,7 +52,6 @@ Rectangle {
             }
         }
 
-        onExited: function (exitCode) {}
     }
 
     property string currentFileName: ""
@@ -123,7 +123,7 @@ Rectangle {
         anchors.margins: Theme.spacingM
         spacing: Theme.spacingXS
 
-        Row {
+        RowLayout {
             width: parent.width
             spacing: Theme.spacingS
 
@@ -131,6 +131,7 @@ Rectangle {
                 name: "info"
                 size: Theme.iconSize
                 color: Theme.secondary
+                Layout.alignment: Qt.AlignVCenter
             }
 
             StyledText {
@@ -138,7 +139,11 @@ Rectangle {
                 font.pixelSize: Theme.fontSizeMedium
                 color: Theme.surfaceText
                 font.weight: Font.Medium
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.alignment: Qt.AlignVCenter
+            }
+
+            Item {
+                Layout.fillWidth: true
             }
         }
 

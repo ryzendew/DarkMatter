@@ -219,8 +219,10 @@ Singleton {
     property color errorHover: Qt.rgba(error.r, error.g, error.b, 0.12)
     property color errorPressed: Qt.rgba(error.r, error.g, error.b, 0.16)
 
+    property color shadowNone: Qt.rgba(0, 0, 0, 0)
+    property color shadowLight: Qt.rgba(0, 0, 0, 0.04)
     property color shadowMedium: Qt.rgba(0, 0, 0, 0.08)
-    property color shadowStrong: Qt.rgba(0, 0, 0, 0.3)
+    property color shadowStrong: Qt.rgba(0, 0, 0, 0.12)
 
     property int shorterDuration: 100
     property int shortDuration: 150
@@ -232,21 +234,31 @@ Singleton {
 
     property real cornerRadius: typeof SettingsData !== "undefined" ? SettingsData.cornerRadius : 12
 
+    readonly property real _baseSpacingXXS: 2
     readonly property real _baseSpacingXS: 4
-    readonly property real _baseSpacingS: 8
-    readonly property real _baseSpacingM: 12
+    readonly property real _baseSpacingS: 6
+    readonly property real _baseSpacingM: 10
     readonly property real _baseSpacingL: 16
-    readonly property real _baseSpacingXL: 24
+    readonly property real _baseSpacingXL: 26
+    readonly property real _baseSpacingXXL: 42
 
+    property real spacingXXS: _baseSpacingXXS * getControlScaleFactor()
     property real spacingXS: _baseSpacingXS * getControlScaleFactor()
     property real spacingS: _baseSpacingS * getControlScaleFactor()
     property real spacingM: _baseSpacingM * getControlScaleFactor()
     property real spacingL: _baseSpacingL * getControlScaleFactor()
     property real spacingXL: _baseSpacingXL * getControlScaleFactor()
-    property real fontSizeSmall: (typeof SettingsData !== "undefined" ? SettingsData.fontScale : 1.0) * 12
-    property real fontSizeMedium: (typeof SettingsData !== "undefined" ? SettingsData.fontScale : 1.0) * 14
-    property real fontSizeLarge: (typeof SettingsData !== "undefined" ? SettingsData.fontScale : 1.0) * 16
-    property real fontSizeXLarge: (typeof SettingsData !== "undefined" ? SettingsData.fontScale : 1.0) * 20
+    property real spacingXXL: _baseSpacingXXL * getControlScaleFactor()
+    property real fontScale: (typeof SettingsData !== "undefined" ? SettingsData.fontScale : 1.0)
+    
+    property real fontSizeXXS: Math.round(fontScale * 8)
+    property real fontSizeXS: Math.round(fontScale * 10)
+    property real fontSizeSmall: Math.round(fontScale * 12)
+    property real fontSizeMedium: Math.round(fontScale * 14)
+    property real fontSizeLarge: Math.round(fontScale * 16)
+    property real fontSizeXLarge: Math.round(fontScale * 20)
+    property real fontSizeXXL: Math.round(fontScale * 24)
+    property real fontSizeXXXL: Math.round(fontScale * 32)
 
     readonly property real _baseBarHeight: 48
     readonly property real _baseIconSize: 24
@@ -257,6 +269,24 @@ Singleton {
     property real iconSize: _baseIconSize * getIconScaleFactor()
     property real iconSizeSmall: _baseIconSizeSmall * getIconScaleFactor()
     property real iconSizeLarge: _baseIconSizeLarge * getIconScaleFactor()
+
+    readonly property real _baseButtonHeightSmall: 32
+    readonly property real _baseButtonHeightMedium: 40
+    readonly property real _baseButtonHeightLarge: 48
+
+    property real buttonHeightSmall: _baseButtonHeightSmall * getControlScaleFactor()
+    property real buttonHeightMedium: _baseButtonHeightMedium * getControlScaleFactor()
+    property real buttonHeightLarge: _baseButtonHeightLarge * getControlScaleFactor()
+    property real buttonHeight: buttonHeightMedium
+
+    readonly property real _baseInputHeightSmall: 36
+    readonly property real _baseInputHeightMedium: 44
+    readonly property real _baseInputHeightLarge: 52
+
+    property real inputHeightSmall: _baseInputHeightSmall * getControlScaleFactor()
+    property real inputHeightMedium: _baseInputHeightMedium * getControlScaleFactor()
+    property real inputHeightLarge: _baseInputHeightLarge * getControlScaleFactor()
+    property real inputHeight: inputHeightMedium
 
     function getScaleFactor() {
         var base = 1.0
@@ -1071,5 +1101,19 @@ Singleton {
         function getMode(): string {
             return root.isLightMode ? "light" : "dark"
         }
+    }
+
+    function snap(value, dpr) {
+        const s = dpr || 1;
+        return Math.round(value * s) / s;
+    }
+
+    function px(value, dpr) {
+        const s = dpr || 1;
+        return Math.round(value * s) / s;
+    }
+
+    function hairline(dpr) {
+        return 1 / (dpr || 1);
     }
 }

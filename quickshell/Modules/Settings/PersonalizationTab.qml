@@ -1,6 +1,7 @@
 import QtCore
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import qs.Common
@@ -87,7 +88,7 @@ Item {
         Column {
             id: mainColumn
             width: parent.width
-            spacing: 16
+            spacing: Theme.spacingL
 
             StyledRect {
                 width: parent.width
@@ -104,7 +105,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -112,13 +113,13 @@ Item {
                             name: "palette"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Column {
-                            width: parent.width - Theme.iconSize - Theme.spacingM - toggle.width - Theme.spacingM
                             spacing: Theme.spacingXS
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
 
                             StyledText {
                                 text: "Dynamic Theming"
@@ -176,7 +177,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -184,7 +185,7 @@ Item {
                             name: "monitor"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
@@ -192,7 +193,11 @@ Item {
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
                             color: Theme.surfaceText
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
                         }
                     }
 

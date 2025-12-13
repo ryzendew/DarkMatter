@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
@@ -523,7 +524,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -531,13 +532,13 @@ Item {
                             name: "keyboard"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Column {
-                            width: parent.width - Theme.iconSize - Theme.spacingM * 2
+                            Layout.fillWidth: true
                             spacing: Theme.spacingXS
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
 
                             StyledText {
                                 text: "Keybinds"
@@ -652,7 +653,7 @@ Item {
                         Rectangle {
                             width: allChipText.implicitWidth + Theme.spacingL
                             height: 32
-                            radius: 16
+                            radius: Theme.cornerRadius
                             color: !keybindsTab.selectedCategory ? Theme.primary : Theme.surfaceContainer
 
                             Behavior on color {
@@ -689,7 +690,7 @@ Item {
 
                                 width: catText.implicitWidth + Theme.spacingL
                                 height: 32
-                                radius: 16
+                                radius: Theme.cornerRadius
                                 color: keybindsTab.selectedCategory === modelData ? Theme.primary : Theme.surfaceContainer
 
                                 Behavior on color {

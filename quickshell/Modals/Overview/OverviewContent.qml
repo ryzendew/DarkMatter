@@ -231,14 +231,14 @@ Item {
                 color: Qt.rgba(Theme.surfaceContainer.r, Theme.surfaceContainer.g, Theme.surfaceContainer.b, 0.95)
                 border.width: 0
                 
-                Row {
+                RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: Theme.spacingXL
                     anchors.rightMargin: Theme.spacingXL
                     spacing: Theme.spacingM
                     
                     DarkIcon {
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.alignment: Qt.AlignVCenter
                         size: 24
                         name: "search"
                         color: Theme.surfaceText
@@ -247,7 +247,7 @@ Item {
                     TextField {
                         id: searchInput
                         Layout.fillWidth: true
-                        anchors.verticalCenter: parent.verticalCenter
+                        Layout.alignment: Qt.AlignVCenter
                         placeholderText: "Search applications..."
                         font.pixelSize: Theme.fontSizeLarge
                         color: Theme.surfaceText

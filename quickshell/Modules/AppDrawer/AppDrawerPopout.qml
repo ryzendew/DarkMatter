@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
@@ -85,8 +86,6 @@ DarkPopout {
             }
         }
         
-        onCancelled: {
-        }
     }
 
     function getAppDataFromId(appId) {
@@ -338,78 +337,78 @@ DarkPopout {
                                 spacing: Theme.spacingM
                                 clip: true // Ensure content is clipped to section bounds
 
-                    Row {
+                    RowLayout {
                         width: parent.width
-                                    height: 60
-                                    spacing: Theme.spacingM
+                        height: 60
+                        spacing: Theme.spacingM
 
-                                    Row {
-                                        spacing: Theme.spacingS
+                        Row {
+                            spacing: Theme.spacingS
 
-                                        Item {
-                                            width: 40
-                                            height: 40
+                            Item {
+                                width: 40
+                                height: 40
 
-                                            Rectangle {
-                                                id: profileImageContainer
-                                                anchors.fill: parent
-                                                radius: 20
-                                                color: "transparent"
-                                                clip: true
+                                Rectangle {
+                                    id: profileImageContainer
+                                    anchors.fill: parent
+                                    radius: Theme.cornerRadius
+                                    color: "transparent"
+                                    clip: true
 
-                                                Image {
-                                                    id: profileImage
-                                                    anchors.fill: parent
-                                                    source: {
-                                                        if (PortalService.profileImage === "")
-                                                            return ""
-                                                        
-                                                        if (PortalService.profileImage.startsWith("/"))
-                                                            return "file://" + PortalService.profileImage
-                                                        
-                                                        return PortalService.profileImage
-                                                    }
-                                                    smooth: true
-                                                    asynchronous: true
-                                                    mipmap: true
-                                                    cache: true
-                                                    visible: status === Image.Ready
-                                                    fillMode: Image.PreserveAspectCrop
-                                                }
-                                            }
-
-                                            Rectangle {
-                                                anchors.fill: parent
-                                                radius: 20
-                                                color: Theme.primary
-                                                visible: !profileImage.visible
-
-                        StyledText {
-                                                    anchors.centerIn: parent
-                                                    text: (UserInfoService.username.length > 0) ? UserInfoService.username.charAt(0).toUpperCase() : "U"
-                                                    font.pixelSize: 18
-                                                    color: "white"
-                                                    font.weight: Font.Bold
-                                                }
-                                            }
+                                    Image {
+                                        id: profileImage
+                                        anchors.fill: parent
+                                        source: {
+                                            if (PortalService.profileImage === "")
+                                                return ""
+                                            
+                                            if (PortalService.profileImage.startsWith("/"))
+                                                return "file://" + PortalService.profileImage
+                                            
+                                            return PortalService.profileImage
                                         }
-
-                                        Column {
-                                            spacing: 2
-
-                                            StyledText {
-                                                text: UserInfoService.fullName || UserInfoService.username || "User"
-                                                font.pixelSize: Theme.fontSizeMedium
-                                                color: Theme.surfaceText
-                                                font.weight: Font.Medium
-                                            }
-                                        }
+                                        smooth: true
+                                        asynchronous: true
+                                        mipmap: true
+                                        cache: true
+                                        visible: status === Image.Ready
+                                        fillMode: Image.PreserveAspectCrop
                                     }
+                                }
 
-                                    Item {
-                                        width: parent.width - 200 // Adjust as needed
-                                        height: 1
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: Theme.cornerRadius
+                                    color: Theme.primary
+                                    visible: !profileImage.visible
+
+                                    StyledText {
+                                        anchors.centerIn: parent
+                                        text: (UserInfoService.username.length > 0) ? UserInfoService.username.charAt(0).toUpperCase() : "U"
+                                        font.pixelSize: Theme.fontSizeMedium
+                                        color: "white"
+                                        font.weight: Font.Bold
                                     }
+                                }
+                            }
+
+                            Column {
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: Theme.spacingXXS
+
+                                StyledText {
+                                    text: UserInfoService.fullName || UserInfoService.username || "User"
+                                    font.pixelSize: Theme.fontSizeMedium
+                                    color: Theme.surfaceText
+                                    font.weight: Font.Medium
+                                }
+                            }
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
 
                                     Row {
                                         spacing: Theme.spacingS
@@ -423,7 +422,7 @@ DarkPopout {
                                             Rectangle {
                                                 width: 36
                                                 height: 36
-                                                radius: 6
+                                                radius: Theme.cornerRadius
                                                 color: sysArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
 
                                                 Text {
@@ -456,12 +455,12 @@ DarkPopout {
 
                                                 Rectangle {
                                                     anchors.bottom: parent.top
-                                                    anchors.bottomMargin: 8
+                                                    anchors.bottomMargin: Theme.spacingS
                                                     anchors.horizontalCenter: parent.horizontalCenter
-                                                    width: tooltipText.width + 12
-                                                    height: tooltipText.height + 8
+                                                    width: tooltipText.width + Theme.spacingM
+                                                    height: tooltipText.height + Theme.spacingS
                                                     color: Qt.rgba(0, 0, 0, 0.8)
-                                                    radius: 4
+                                                    radius: Theme.cornerRadius
                                                     visible: sysArea.containsMouse
 
                                                     Text {
@@ -486,13 +485,13 @@ DarkPopout {
 
                                 Row {
                                     width: parent.width
-                                    spacing: Theme.spacingS
+                                    spacing: Theme.spacingXS
 
                                     Rectangle {
                                         id: idleInhibitorButton
                                         width: 36
                                         height: 36
-                                        radius: 6
+                                        radius: Theme.cornerRadius
                                         property bool isInhibiting: false
                                         color: idleArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
                                         border.color: idleInhibitorButton.isInhibiting ? Theme.primary : (idleArea.containsMouse ? Theme.outline : "transparent")
@@ -541,7 +540,7 @@ DarkPopout {
                                         id: nightLightButton
                                         width: 36
                                         height: 36
-                                        radius: 6
+                                        radius: Theme.cornerRadius
                                         color: nightArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
                                         border.color: enabled ? Theme.primary : (nightArea.containsMouse ? Theme.outline : "transparent")
                                         border.width: enabled ? 2 : (nightArea.containsMouse ? 1 : 0)
@@ -592,7 +591,7 @@ DarkPopout {
                                         Rectangle {
                                             width: 36
                                             height: 36
-                                            radius: 6
+                                            radius: Theme.cornerRadius
                                             color: sysArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
 
                                             Text {
@@ -665,42 +664,6 @@ DarkPopout {
                             spacing: Theme.spacingL
                             clip: true // Ensure column content is clipped
 
-                            Row {
-                                width: parent.width
-                                height: 40
-
-                                StyledText {
-                                    text: "All Apps"
-                            font.pixelSize: Theme.fontSizeLarge + 4
-                            font.weight: Font.Bold
-                            color: Theme.surfaceText
-                                    anchors.verticalCenter: parent.verticalCenter
-                        }
-
-                        Item {
-                            width: parent.width - 200
-                            height: 1
-                        }
-
-                                Rectangle {
-                                    width: 36
-                                    height: 36
-                                    radius: 6
-                                    color: hamburgerArea.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.12) : "transparent"
-                            anchors.verticalCenter: parent.verticalCenter
-
-
-                                    MouseArea {
-                                        id: hamburgerArea
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        onClicked: {
-                                            appLauncher.setViewMode(appLauncher.viewMode === "grid" ? "list" : "grid")
-                                        }
-                                    }
-                                }
-                            }
-
                     DarkTextField {
                         id: searchField
 
@@ -764,51 +727,45 @@ DarkPopout {
                     }
 
 
-                            Rectangle {
-                                width: parent.width
-                                height: parent.height - 80 // Adjust based on header and search
-                                radius: Theme.cornerRadius
-                                color: Qt.rgba(Theme.surfaceVariant.r, Theme.surfaceVariant.g, Theme.surfaceVariant.b, 0.05)
-                                border.color: Qt.rgba(Theme.outline.r, Theme.outline.g, Theme.outline.b, 0.1)
-                                border.width: 1
-                                clip: true // Ensure content is clipped to container bounds
+                            DarkListView {
+                                id: appList
 
-                                DarkListView {
-                                    id: appList
+                                property int itemHeight: 60
+                                property int iconSize: 48
+                                property bool showDescription: false
+                                property int itemSpacing: Theme.spacingM
+                                property bool hoverUpdatesSelection: false
+                                property bool keyboardNavigationActive: appLauncher.keyboardNavigationActive
 
-                                    property int itemHeight: 60
-                                    property int iconSize: 48
-                                    property bool showDescription: false
-                                    property int itemSpacing: 2
-                                    property bool hoverUpdatesSelection: false
-                                    property bool keyboardNavigationActive: appLauncher.keyboardNavigationActive
+                                signal keyboardNavigationReset
+                                signal itemClicked(int index, var modelData)
+                                signal itemRightClicked(int index, var modelData, real mouseX, real mouseY)
 
-                                    signal keyboardNavigationReset
-                                    signal itemClicked(int index, var modelData)
-                                    signal itemRightClicked(int index, var modelData, real mouseX, real mouseY)
+                                function ensureVisible(index) {
+                                    if (index < 0 || index >= count)
+                                        return
 
-                                    function ensureVisible(index) {
-                                        if (index < 0 || index >= count)
-                                            return
+                                    var itemY = index * (itemHeight + itemSpacing)
+                                    var itemBottom = itemY + itemHeight
+                                    if (itemY < contentY)
+                                        contentY = itemY
+                                    else if (itemBottom > contentY + height)
+                                        contentY = itemBottom - height
+                                }
 
-                                        var itemY = index * (itemHeight + itemSpacing)
-                                        var itemBottom = itemY + itemHeight
-                                        if (itemY < contentY)
-                                            contentY = itemY
-                                        else if (itemBottom > contentY + height)
-                                            contentY = itemBottom - height
-                                    }
-
-                                    anchors.fill: parent
-                                    anchors.margins: Theme.spacingS
-                                    clip: true // Ensure list content is clipped to bounds
-                                    model: appLauncher.model
-                                    currentIndex: appLauncher.selectedIndex
-                                    spacing: itemSpacing
-                                    focus: true
-                                    interactive: true
-                                    cacheBuffer: Math.max(0, Math.min(height * 2, 1000))
-                                    reuseItems: true
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.topMargin: 48 + Theme.spacingL * 2
+                                anchors.bottom: parent.bottom
+                                clip: true
+                                model: appLauncher.model
+                                currentIndex: appLauncher.selectedIndex
+                                spacing: itemSpacing
+                                focus: true
+                                interactive: true
+                                cacheBuffer: Math.max(0, Math.min(height * 2, 1000))
+                                reuseItems: true
 
                             onCurrentIndexChanged: {
                                 if (keyboardNavigationActive)
@@ -825,23 +782,52 @@ DarkPopout {
                                 appLauncher.keyboardNavigationActive = false
                             }
 
-                            delegate: Rectangle {
-                                    width: ListView.view.width
-                                    height: appList.itemHeight
-                                radius: Theme.cornerRadius
+                            delegate: Item {
+                                width: ListView.view.width
+                                height: appList.itemHeight
+
+                                Rectangle {
+                                    id: appItemRect
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: -4
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    radius: Theme.cornerRadius
                                     color: ListView.isCurrentItem ? Theme.primaryPressed : listMouseArea.containsMouse ? Theme.primaryHoverLight : "transparent"
                                     border.color: ListView.isCurrentItem ? Theme.primarySelected : "transparent"
                                     border.width: ListView.isCurrentItem ? 2 : 0
 
-                                    Row {
-                                        anchors.fill: parent
-                                        anchors.margins: Theme.spacingM
+                                    TextMetrics {
+                                        id: nameMetrics
+                                        text: model.name || ""
+                                        font.pixelSize: Theme.fontSizeMedium
+                                        font.weight: Font.Medium
+                                    }
+
+                                    TextMetrics {
+                                        id: commentMetrics
+                                        text: model.comment || ""
+                                        font.pixelSize: Theme.fontSizeSmall
+                                        font.weight: Font.Normal
+                                    }
+
+                                    readonly property real viewWidth: ListView.view ? ListView.view.width : 0
+                                    readonly property real maxTextWidth: viewWidth > 0 ? viewWidth - appList.iconSize - Theme.spacingM - 4 - 4 : 500
+                                    readonly property real textWidth: Math.min(Math.max(nameMetrics.width, commentMetrics.width), maxTextWidth)
+                                    readonly property real contentHeight: Math.max(appList.iconSize, nameMetrics.height + (model.comment && model.comment.length > 0 ? commentMetrics.height + Theme.spacingXXS : 0)) + (2 + 4) * 2
+
+                                    height: contentHeight
+
+                                    RowLayout {
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 4
+                                        anchors.verticalCenter: parent.verticalCenter
                                         spacing: Theme.spacingM
 
                                         Item {
                                             width: appList.iconSize
                                             height: appList.iconSize
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
                                             layer.enabled: SettingsData.systemIconTinting
 
                                             Image {
@@ -882,55 +868,52 @@ DarkPopout {
                                         }
 
                                         Column {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            width: parent.width - appList.iconSize - Theme.spacingM
-                                            spacing: 2
+                                            Layout.alignment: Qt.AlignVCenter
+                                            Layout.fillWidth: true
+                                            spacing: Theme.spacingXXS
 
                                             StyledText {
-                                                width: parent.width
                                                 text: model.name || ""
                                                 font.pixelSize: Theme.fontSizeMedium
                                                 color: Theme.surfaceText
                                                 font.weight: Font.Medium
-                                                elide: Text.ElideRight
+                                                wrapMode: Text.Wrap
                                             }
 
                                             StyledText {
-                                                width: parent.width
                                                 text: model.comment || ""
                                                 font.pixelSize: Theme.fontSizeSmall
                                                 color: Theme.surfaceVariantText
                                                 font.weight: Font.Normal
-                                                elide: Text.ElideRight
                                                 visible: model.comment && model.comment.length > 0
+                                                wrapMode: Text.Wrap
                                             }
                                         }
                                     }
+                                }
 
                                 MouseArea {
-                                        id: listMouseArea
+                                    id: listMouseArea
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                                     z: 10
                                     onEntered: {
-                                            if (appList.hoverUpdatesSelection && !appList.keyboardNavigationActive)
-                                                appList.currentIndex = index
+                                        if (appList.hoverUpdatesSelection && !appList.keyboardNavigationActive)
+                                            appList.currentIndex = index
                                     }
                                     onPositionChanged: {
-                                            appList.keyboardNavigationReset()
+                                        appList.keyboardNavigationReset()
                                     }
                                     onClicked: mouse => {
-                                                   if (mouse.button === Qt.LeftButton) {
-                                                appList.itemClicked(index, model)
-                                                   } else if (mouse.button === Qt.RightButton) {
-                                                       var panelPos = mapToItem(contextMenu.parent, mouse.x, mouse.y)
-                                                appList.itemRightClicked(index, model, panelPos.x, panelPos.y)
-                                            }
+                                        if (mouse.button === Qt.LeftButton) {
+                                            appList.itemClicked(index, model)
+                                        } else if (mouse.button === Qt.RightButton) {
+                                            var panelPos = mapToItem(contextMenu.parent, mouse.x, mouse.y)
+                                            appList.itemRightClicked(index, model, panelPos.x, panelPos.y)
                                         }
-                                                   }
-                                               }
+                                    }
                                 }
                             }
                         }
@@ -938,6 +921,7 @@ DarkPopout {
                 }
             }
         }
+    }
     }
 
     Rectangle {
@@ -956,19 +940,19 @@ DarkPopout {
             const menuWidth = 180
             const menuHeight = menuColumn.implicitHeight + Theme.spacingS * 2
 
-            let finalX = x + 8
-            let finalY = y + 8
+            let finalX = x + Theme.spacingS
+            let finalY = y + Theme.spacingS
 
             if (finalX + menuWidth > appDrawerPopout.popupWidth) {
-                finalX = x - menuWidth - 8
+                finalX = x - menuWidth - Theme.spacingS
             }
 
             if (finalY + menuHeight > appDrawerPopout.popupHeight) {
-                finalY = y - menuHeight - 8
+                finalY = y - menuHeight - Theme.spacingS
             }
 
-            finalX = Math.max(8, Math.min(finalX, appDrawerPopout.popupWidth - menuWidth - 8))
-            finalY = Math.max(8, Math.min(finalY, appDrawerPopout.popupHeight - menuHeight - 8))
+            finalX = Math.max(Theme.spacingS, Math.min(finalX, appDrawerPopout.popupWidth - menuWidth - Theme.spacingS))
+            finalY = Math.max(Theme.spacingS, Math.min(finalY, appDrawerPopout.popupHeight - menuHeight - Theme.spacingS))
 
             contextMenu.x = finalX
             contextMenu.y = finalY
@@ -996,10 +980,10 @@ DarkPopout {
 
         Rectangle {
             anchors.fill: parent
-            anchors.topMargin: 4
-            anchors.leftMargin: 2
-            anchors.rightMargin: -2
-            anchors.bottomMargin: -4
+            anchors.topMargin: Theme.spacingXS
+            anchors.leftMargin: Theme.spacingXXS
+            anchors.rightMargin: -Theme.spacingXXS
+            anchors.bottomMargin: -Theme.spacingXS
             radius: parent.radius
             color: Qt.rgba(0, 0, 0, 0.15)
             z: parent.z - 1
@@ -1010,7 +994,7 @@ DarkPopout {
 
             anchors.fill: parent
             anchors.margins: Theme.spacingS
-            spacing: 1
+            spacing: Theme.spacingXXS
 
             Rectangle {
                 width: parent.width
@@ -1199,9 +1183,6 @@ DarkPopout {
             y: contextMenu.y
             width: contextMenu.width
             height: contextMenu.height
-            onClicked: {
-
-            }
         }
     }
 
@@ -1219,19 +1200,19 @@ DarkPopout {
             const menuWidth = 180
             const menuHeight = pinnedMenuColumn.implicitHeight + Theme.spacingS * 2
 
-            let finalX = x + 8
-            let finalY = y + 8
+            let finalX = x + Theme.spacingS
+            let finalY = y + Theme.spacingS
 
             if (finalX + menuWidth > appDrawerPopout.popupWidth) {
-                finalX = x - menuWidth - 8
+                finalX = x - menuWidth - Theme.spacingS
             }
 
             if (finalY + menuHeight > appDrawerPopout.popupHeight) {
-                finalY = y - menuHeight - 8
+                finalY = y - menuHeight - Theme.spacingS
             }
 
-            finalX = Math.max(8, Math.min(finalX, appDrawerPopout.popupWidth - menuWidth - 8))
-            finalY = Math.max(8, Math.min(finalY, appDrawerPopout.popupHeight - menuHeight - 8))
+            finalX = Math.max(Theme.spacingS, Math.min(finalX, appDrawerPopout.popupWidth - menuWidth - Theme.spacingS))
+            finalY = Math.max(Theme.spacingS, Math.min(finalY, appDrawerPopout.popupHeight - menuHeight - Theme.spacingS))
 
             pinnedContextMenu.x = finalX
             pinnedContextMenu.y = finalY
@@ -1269,7 +1250,7 @@ DarkPopout {
             id: pinnedMenuColumn
             anchors.fill: parent
             anchors.margins: Theme.spacingS
-            spacing: 2
+            spacing: Theme.spacingXXS
 
             Rectangle {
                 width: parent.width

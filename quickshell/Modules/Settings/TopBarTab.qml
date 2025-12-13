@@ -957,7 +957,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -965,7 +965,7 @@ Item {
                             name: "opacity"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         StyledText {
@@ -973,7 +973,11 @@ Item {
                             font.pixelSize: Theme.fontSizeLarge
                             font.weight: Font.Medium
                             color: Theme.surfaceText
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
                         }
                     }
 

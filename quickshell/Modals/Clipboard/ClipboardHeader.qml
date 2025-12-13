@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
 import qs.Modals.Clipboard
@@ -15,8 +16,9 @@ Item {
 
     height: ClipboardConstants.headerHeight
 
-    Row {
+    RowLayout {
         anchors.left: parent.left
+        anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.spacingM
 
@@ -24,7 +26,7 @@ Item {
             name: "content_paste"
             size: Theme.iconSize - 4
             color: Theme.primary
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
         }
 
         StyledText {
@@ -32,34 +34,39 @@ Item {
             font.pixelSize: Theme.fontSizeLarge
             color: Theme.surfaceText
             font.weight: Font.Medium
-            anchors.verticalCenter: parent.verticalCenter
-        }
-    }
-
-    Row {
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        spacing: Theme.spacingS
-
-        DarkActionButton {
-            iconName: "info"
-            iconSize: Theme.iconSize - 4
-            iconColor: showKeyboardHints ? Theme.primary : Theme.surfaceText
-            onClicked: keyboardHintsToggled()
+            Layout.alignment: Qt.AlignVCenter
         }
 
-        DarkActionButton {
-            iconName: "delete_sweep"
-            iconSize: Theme.iconSize - 4
-            iconColor: Theme.surfaceText
-            onClicked: clearAllClicked()
+        Item {
+            Layout.fillWidth: true
         }
 
-        DarkActionButton {
-            iconName: "close"
-            iconSize: Theme.iconSize - 4
-            iconColor: Theme.surfaceText
-            onClicked: closeClicked()
+        RowLayout {
+            spacing: Theme.spacingS
+
+            DarkActionButton {
+                iconName: "info"
+                iconSize: Theme.iconSize - 4
+                iconColor: showKeyboardHints ? Theme.primary : Theme.surfaceText
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: keyboardHintsToggled()
+            }
+
+            DarkActionButton {
+                iconName: "delete_sweep"
+                iconSize: Theme.iconSize - 4
+                iconColor: Theme.surfaceText
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: clearAllClicked()
+            }
+
+            DarkActionButton {
+                iconName: "close"
+                iconSize: Theme.iconSize - 4
+                iconColor: Theme.surfaceText
+                Layout.alignment: Qt.AlignVCenter
+                onClicked: closeClicked()
+            }
         }
     }
 }

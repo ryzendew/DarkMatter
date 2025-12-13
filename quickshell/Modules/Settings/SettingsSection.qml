@@ -50,7 +50,7 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.leftMargin: 16
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 10
+                spacing: Theme.spacingM
                 height: 20
 
                 DarkIcon {

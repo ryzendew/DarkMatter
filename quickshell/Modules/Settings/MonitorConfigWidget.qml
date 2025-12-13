@@ -58,7 +58,7 @@ StyledRect {
         anchors.margins: Theme.spacingM
         spacing: Theme.spacingXS
 
-        Row {
+        RowLayout {
             width: parent.width
             spacing: Theme.spacingM
 
@@ -66,13 +66,13 @@ StyledRect {
                 name: "monitor"
                 size: Theme.iconSize - 2
                 color: Theme.primary
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.alignment: Qt.AlignVCenter
             }
 
             Column {
-                width: parent.width - Theme.iconSize - Theme.spacingM
+                Layout.fillWidth: true
                 spacing: Theme.spacingXS
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.alignment: Qt.AlignVCenter
 
                 StyledText {
                     text: monitorData ? monitorData.name : "Unknown Monitor"

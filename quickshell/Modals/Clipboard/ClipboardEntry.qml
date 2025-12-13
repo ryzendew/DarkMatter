@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import QtQuick.Effects
 import Quickshell.Io
 import qs.Common
@@ -36,7 +37,7 @@ Rectangle {
     }
     border.width: isSelected ? 1.5 : 1
 
-    Row {
+    RowLayout {
         anchors.fill: parent
         anchors.margins: Theme.spacingM
         anchors.rightMargin: Theme.spacingS
@@ -45,9 +46,9 @@ Rectangle {
         Rectangle {
             width: 24
             height: 24
-            radius: 12
+            radius: Theme.cornerRadius
             color: Theme.primarySelected
-            anchors.verticalCenter: parent.verticalCenter
+            Layout.alignment: Qt.AlignVCenter
 
             StyledText {
                 anchors.centerIn: parent
@@ -58,15 +59,15 @@ Rectangle {
             }
         }
 
-        Row {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width - 68
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignVCenter
             spacing: Theme.spacingM
 
             ClipboardThumbnail {
                 width: entryType === "image" ? ClipboardConstants.thumbnailSize : Theme.iconSize
                 height: entryType === "image" ? ClipboardConstants.thumbnailSize : Theme.iconSize
-                anchors.verticalCenter: parent.verticalCenter
+                Layout.alignment: Qt.AlignVCenter
                 entryData: entry.entryData
                 entryType: entry.entryType
                 modal: entry.modal
@@ -75,8 +76,8 @@ Rectangle {
             }
 
             Column {
-                anchors.verticalCenter: parent.verticalCenter
-                width: parent.width - (entryType === "image" ? ClipboardConstants.thumbnailSize : Theme.iconSize) - Theme.spacingM
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
                 spacing: Theme.spacingXS
 
                 StyledText {

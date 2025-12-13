@@ -160,7 +160,7 @@ Item {
                             anchors.margins: Theme.spacingM
                             spacing: Theme.spacingS
 
-                            Row {
+                            RowLayout {
                                 width: parent.width
                                 spacing: Theme.spacingS
 
@@ -168,6 +168,7 @@ Item {
                                     text: "Connected to:"
                                     font.pixelSize: Theme.fontSizeSmall
                                     opacity: 0.7
+                                    Layout.alignment: Qt.AlignVCenter
                                 }
 
                                 StyledText {
@@ -175,11 +176,17 @@ Item {
                                     font.pixelSize: Theme.fontSizeSmall
                                     font.weight: Font.Medium
                                     color: Theme.primary
+                                    Layout.alignment: Qt.AlignVCenter
+                                }
+
+                                Item {
+                                    Layout.fillWidth: true
                                 }
 
                                 StyledText {
                                     text: "Signal: " + NetworkService.wifiSignalStrength + "%"
                                     font.pixelSize: Theme.fontSizeSmall
+                                    Layout.alignment: Qt.AlignVCenter
                                 }
                             }
 

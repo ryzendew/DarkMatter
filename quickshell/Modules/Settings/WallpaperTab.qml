@@ -79,7 +79,7 @@ Item {
                     anchors.margins: Theme.spacingL
                     spacing: Theme.spacingM
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -87,13 +87,13 @@ Item {
                             name: "wallpaper"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Column {
-                            width: parent.width - Theme.iconSize - Theme.spacingM
+                            Layout.fillWidth: true
                             spacing: Theme.spacingXS
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
 
                             StyledText {
                                 text: "Wallpaper"
@@ -312,7 +312,7 @@ Item {
                                     Rectangle {
                                         width: 40
                                         height: 40
-                                        radius: 20
+                                        radius: Theme.cornerRadius
                                         color: Qt.rgba(255, 255, 255, 0.9)
 
                                         DarkIcon {
@@ -338,7 +338,7 @@ Item {
                                     Rectangle {
                                         width: 40
                                         height: 40
-                                        radius: 20
+                                        radius: Theme.cornerRadius
                                         color: Qt.rgba(255, 255, 255, 0.9)
 
                                         DarkIcon {
@@ -360,7 +360,7 @@ Item {
                                     Rectangle {
                                         width: 40
                                         height: 40
-                                        radius: 20
+                                        radius: Theme.cornerRadius
                                         color: Qt.rgba(255, 255, 255, 0.9)
                                         visible: SessionData.wallpaperPath !== ""
 
@@ -622,7 +622,7 @@ Item {
                                         Rectangle {
                                             width: 40
                                             height: 40
-                                            radius: 20
+                                            radius: Theme.cornerRadius
                                             color: Qt.rgba(255, 255, 255, 0.9)
 
                                             DarkIcon {
@@ -648,7 +648,7 @@ Item {
                                         Rectangle {
                                             width: 40
                                             height: 40
-                                            radius: 20
+                                            radius: Theme.cornerRadius
                                             color: Qt.rgba(255, 255, 255, 0.9)
 
                                             DarkIcon {
@@ -670,7 +670,7 @@ Item {
                                         Rectangle {
                                             width: 40
                                             height: 40
-                                            radius: 20
+                                            radius: Theme.cornerRadius
                                             color: Qt.rgba(255, 255, 255, 0.9)
                                             visible: {
                                                 var wp = parent.parent.parent.parent.currentWallpaper

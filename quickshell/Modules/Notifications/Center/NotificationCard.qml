@@ -326,7 +326,7 @@ Rectangle {
 
         Column {
             width: parent.width
-            spacing: 16
+            spacing: Theme.spacingL
 
             Repeater {
                 model: notificationGroup?.notifications?.slice(0, 10) || []
@@ -374,8 +374,8 @@ Rectangle {
 
                     Item {
                         anchors.fill: parent
-                        anchors.margins: 12
-                        anchors.bottomMargin: 8
+                        anchors.margins: Theme.spacingM
+                        anchors.bottomMargin: Theme.spacingS
 
                         DarkCircularImage {
                             id: messageIcon

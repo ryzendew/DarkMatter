@@ -172,7 +172,7 @@ Item {
                     anchors.margins: Theme.spacingXL
                     spacing: Theme.spacingXL
 
-                    Row {
+                    RowLayout {
                         width: parent.width
                         spacing: Theme.spacingM
 
@@ -180,12 +180,13 @@ Item {
                             name: "palette"
                             size: Theme.iconSize
                             color: Theme.primary
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.alignment: Qt.AlignVCenter
                         }
 
                         Column {
                             spacing: 4
-                            anchors.verticalCenter: parent.verticalCenter
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
 
                             StyledText {
                                 text: "Theme Color"
